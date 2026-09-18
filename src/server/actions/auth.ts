@@ -46,9 +46,6 @@ export async function girisYap(
   formData: FormData,
 ): Promise<EylemDurumu> {
   const ip = istemciIp(await headers());
-  if (girisDenemesiSay(ip).engellendi) {
-    return { ok: false, mesaj: HIZ_SINIRI_MESAJI };
-  }
 
   const cozum = girisSemasi.safeParse({
     telefon: formData.get("telefon"),
@@ -64,6 +61,11 @@ export async function girisYap(
   const telefon = telefonNormalize(cozum.data.telefon);
   if (!telefon) return { ok: false, mesaj: HATALI_GIRIS_MESAJI };
 
+  // Sayaç IP+telefon: depo tek NAT IP'sinden gelir, biri diğerini kilitlemesin.
+  if (girisDenemesiSay(ip, telefon).engellendi) {
+    return { ok: false, mesaj: HIZ_SINIRI_MESAJI };
+  }
+
   try {
     // `redirect: false` — yönlendirmeyi biz yapıyoruz ki `geri` parametresi
     // doğrulanmış hâliyle kullanılsın (Auth.js'in callbackUrl'ine güvenmeyiz).
@@ -77,7 +79,7 @@ export async function girisYap(
 
   // Doğru parolayı giren kullanıcı önceki hatalı denemeler yüzünden
   // bekletilmesin.
-  girisSayaciTemizle(ip);
+  girisSayaciTemizle(ip, telefon);
 
   // `redirect` NEXT_REDIRECT fırlatır; try bloğunun DIŞINDA olmalı ki
   // yukarıdaki catch onu bir giriş hatası sanmasın.

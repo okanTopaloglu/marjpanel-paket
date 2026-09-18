@@ -86,3 +86,12 @@ describe("istemci IP tespiti", () => {
     expect(istemciIp(new Headers())).toBe("bilinmeyen");
   });
 });
+
+describe("girisDenemesiSay IP+telefon", () => {
+  it("aynı IP'den farklı telefon engellenmez, aynı telefon engellenir", () => {
+    _sifirla();
+    for (let i = 0; i <= DENEME_SINIRI; i++) girisDenemesiSay("9.9.9.9", "5551111111");
+    expect(girisDenemesiSay("9.9.9.9", "5551111111").engellendi).toBe(true);
+    expect(girisDenemesiSay("9.9.9.9", "5552222222").engellendi).toBe(false);
+  });
+});

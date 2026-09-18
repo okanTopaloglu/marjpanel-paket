@@ -22,8 +22,14 @@
  * Fonksiyonlar SENKRONDUR (bellek erişimi; G/Ç yok).
  */
 
-/** Pencere başına izin verilen giriş denemesi. */
+/**
+ * Pencere başına izin verilen giriş denemesi — IP + TELEFON anahtarıyla.
+ * Depo çalışanlarının hepsi tek NAT IP'sinden gelir; yalnız IP'ye sayılsaydı
+ * bir kişinin hataları bütün depoyu kilitlerdi.
+ */
 export const DENEME_SINIRI = 10;
+/** Aynı IP'den TÜM hesaplara toplam deneme tavanı (dağıtık parola denemesi). */
+export const IP_TAVANI = 100;
 /** Sayaç penceresi (ms) — 15 dakika. */
 export const PENCERE_MS = 15 * 60 * 1000;
 
@@ -105,17 +111,19 @@ export function istemciIp(basliklar: Headers): string {
   return basliklar.get("x-real-ip")?.trim() || "bilinmeyen";
 }
 
-/** Giriş denemesini sayar (IP başına). */
-export function girisDenemesiSay(ip: string): HizSiniriSonuc {
-  return { engellendi: say(anahtar("giris", ip), DENEME_SINIRI, PENCERE_MS) };
+/** Giriş denemesini sayar: IP+telefon başına DENEME_SINIRI, IP başına IP_TAVANI. */
+export function girisDenemesiSay(ip: string, telefon = ""): HizSiniriSonuc {
+  const ipTavan = say(anahtar("giris-ip", ip), IP_TAVANI, PENCERE_MS);
+  const hesap = say(anahtar("giris", `${ip}|${telefon}`), DENEME_SINIRI, PENCERE_MS);
+  return { engellendi: ipTavan || hesap };
 }
 
 /**
  * Başarılı girişten sonra sayacı temizler — doğru parolayı giren kullanıcı,
  * daha önceki hatalı denemeleri yüzünden beklemek zorunda kalmasın.
  */
-export function girisSayaciTemizle(ip: string): void {
-  sayaclar.delete(anahtar("giris", ip));
+export function girisSayaciTemizle(ip: string, telefon = ""): void {
+  sayaclar.delete(anahtar("giris", `${ip}|${telefon}`));
 }
 
 /**
