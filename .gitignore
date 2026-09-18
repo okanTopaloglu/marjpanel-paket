@@ -35,8 +35,6 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
-# vercel / turbo
-.vercel
 .turbo
 
 # vitest
