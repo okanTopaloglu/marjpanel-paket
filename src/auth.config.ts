@@ -98,11 +98,26 @@ export const authConfig = {
       return token;
     },
 
+    /**
+     * Jeton alanları TİP KONTROLÜYLE okunur. `JWT` arayüzü `Record<string,
+     * unknown>` tabanlıdır (Auth.js çekirdeği) — yani derleyici burada bize
+     * hiçbir garanti vermez. Eski bir jeton, elle kurcalanmış bir çerez ya da
+     * sürüm geçişi beklenmedik bir şey taşıyorsa alan sessizce boş kalır,
+     * oturum uydurulmuş bir rolle dolmaz.
+     */
     session({ session, token }) {
-      if (token.kullaniciId) session.user.id = token.kullaniciId;
-      if (token.sirketId) session.user.sirketId = token.sirketId;
-      if (token.rol) session.user.rol = token.rol;
-      session.user.ad = token.name ?? "";
+      const kid = token.kullaniciId;
+      if (typeof kid === "string") session.user.id = kid;
+
+      const sid = token.sirketId;
+      if (typeof sid === "string") session.user.sirketId = sid;
+
+      const rol = token.rol;
+      if (rol === "super_admin" || rol === "admin" || rol === "calisan") {
+        session.user.rol = rol;
+      }
+
+      session.user.ad = typeof token.name === "string" ? token.name : "";
       return session;
     },
   },

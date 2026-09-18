@@ -27,6 +27,13 @@ declare module "next-auth" {
   }
 }
 
+/**
+ * NOT: `next-auth/jwt` bu sürümde yalnız `@auth/core/jwt`yi yeniden dışa
+ * aktarır ve `@auth/core` pnpm'in strict düzeninde kökten çözülemez; bu yüzden
+ * aşağıdaki genişletme DERLEYİCİYE ULAŞMAYABİLİR. Sözleşme yine de burada
+ * yazılıdır (tek okunabilir kaynak) ama `auth.config.ts` jetondan okurken
+ * ona GÜVENMEZ, alanları `typeof` ile süzer.
+ */
 declare module "next-auth/jwt" {
   interface JWT {
     kullaniciId?: string;

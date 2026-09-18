@@ -88,6 +88,7 @@
 
     /* Vurgu parlak: ikon, aktif çubuk, odak halkası. */
     --vurgu-parlak: 160 80% 36%; /* #12A874 */
+    --vurgu-acik: 158 47% 93%; /* #E4F5EE - soluk nane zemin (ikon rozeti, seçili satır) */
 
     /**
      * KÜÇÜK METİN İÇİN KOYULAŞTIRILMIŞ VURGU.
