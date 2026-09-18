@@ -97,18 +97,29 @@ export async function okutmaSatiriEkle(
   entegrasyonAdi: string | null,
 ): Promise<{ mukerrer: boolean }> {
   try {
-    await islem.insert(paketOkutmalari).values({
-      sirketId: k.sirketId,
-      kullaniciId: k.kullaniciId,
-      barkod,
-      // Denormalize ad: kullanıcı silinse de listede kim okuttuğu kalır.
-      okutanAd: k.ad,
-      kaynak: bilgi.kaynak,
-      kargoFirmasi: bilgi.kargoFirmasi,
-      entegrasyonAdi,
-    });
-    return { mukerrer: false };
+    /* `onConflictDoNothing` BİLEREK: çakışma bir HATA olarak dönseydi içinde
+       bulunduğumuz işlem Postgres tarafından iptal edilir ve aynı işlemdeki
+       diğer yazımlar (toplama modunda siparişin hazır damgası) geri alınırdı.
+       Böylece mükerrer, akışı bozmayan sıradan bir sonuç olur. */
+    const eklenen = await islem
+      .insert(paketOkutmalari)
+      .values({
+        sirketId: k.sirketId,
+        kullaniciId: k.kullaniciId,
+        barkod,
+        // Denormalize ad: kullanıcı silinse de listede kim okuttuğu kalır.
+        okutanAd: k.ad,
+        kaynak: bilgi.kaynak,
+        kargoFirmasi: bilgi.kargoFirmasi,
+        entegrasyonAdi,
+      })
+      .onConflictDoNothing({
+        target: [paketOkutmalari.sirketId, paketOkutmalari.barkod],
+      })
+      .returning({ id: paketOkutmalari.id });
+    return { mukerrer: eklenen.length === 0 };
   } catch (hata) {
+    // Emniyet kemeri: çakışma başka bir kısıttan gelirse de mükerrer sayılır.
     if (benzersizIhlaliMi(hata)) return { mukerrer: true };
     throw hata;
   }
