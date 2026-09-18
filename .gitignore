@@ -1,0 +1,59 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# testing
+/coverage
+
+# env
+.env
+.env*.local
+
+# docker / db volumes
+/pgdata
+/.uploads
+
+# misc
+.DS_Store
+*.pem
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# vercel / turbo
+.vercel
+.turbo
+
+# vitest
+/coverage
+
+# build init bundles (Docker build stage üretir)
+/dist
+
+# db yedekleri
+/yedekler
+
+# Android (mobil) — derleme çıktıları ve İMZA SIRLARI git dışı.
+# DİKKAT: mobile/android/keystore klasörünü ayrıca yedekleyin — kaybolursa
+# yeni APK'lar mevcut kurulumların üzerine güncelleme olarak kurulamaz.
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/local.properties
+mobile/android/keystore.properties
+mobile/android/keystore/

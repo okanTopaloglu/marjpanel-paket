@@ -1,0 +1,23 @@
+# MarjPanel Paket - yerel geliştirme için PostgreSQL.
+#   docker compose up -d postgres
+# Üretim dağıtımı Coolify üzerinden yapılır (docs/DEPLOY-COOLIFY.md).
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-paket}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-paket}
+      POSTGRES_DB: ${POSTGRES_DB:-paket}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5443}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-paket} -d ${POSTGRES_DB:-paket}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

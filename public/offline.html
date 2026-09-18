@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Bağlantı yok - MarjPanel Paket</title>
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBF7F1" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#15100C" />
+    <style>
+      :root {
+        --bg: #fbf7f1;
+        --fg: #241a12;
+        --muted: #7a6a5c;
+        --card: #fffdfa;
+        --line: #e8ded1;
+        --accent: #d2690f;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #15100c;
+          --fg: #f2e9dd;
+          --muted: #a99a8c;
+          --card: #1f1813;
+          --line: #3a3129;
+          --accent: #f59331;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+        background: var(--bg);
+        color: var(--fg);
+        font: 400 0.9375rem/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Segoe UI", Roboto, system-ui, sans-serif;
+        background-image:
+          radial-gradient(40rem 30rem at 90% -10%, rgba(240, 150, 60, 0.14), transparent 60%),
+          radial-gradient(34rem 26rem at -5% 5%, rgba(215, 105, 70, 0.11), transparent 58%);
+      }
+      .kart {
+        width: 100%;
+        max-width: 24rem;
+        padding: 2rem 1.75rem;
+        text-align: center;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 1.5rem;
+        box-shadow: 0 2px 4px rgba(40, 25, 12, 0.04),
+          0 20px 44px -16px rgba(40, 25, 12, 0.16);
+      }
+      .ikon {
+        width: 3.25rem;
+        height: 3.25rem;
+        margin: 0 auto 1.25rem;
+        display: grid;
+        place-items: center;
+        border-radius: 1rem;
+        color: #fff;
+        background: linear-gradient(140deg, #f0912f, #c9541f);
+        box-shadow: 0 6px 18px -6px rgba(201, 84, 31, 0.5);
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.3125rem;
+        line-height: 1.22;
+        letter-spacing: -0.017em;
+        font-weight: 650;
+      }
+      p { margin: 0; color: var(--muted); font-size: 0.875rem; }
+      button {
+        margin-top: 1.5rem;
+        width: 100%;
+        min-height: 44px;
+        padding: 0 1.25rem;
+        border: 0;
+        border-radius: 0.875rem;
+        background: var(--accent);
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      button:active { transform: scale(0.97); }
+    </style>
+  </head>
+  <body>
+    <main class="kart">
+      <div class="ikon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 2l20 20" />
+          <path d="M8.5 16.5a5 5 0 0 1 7 0" />
+          <path d="M5 12.86a10 10 0 0 1 5.17-2.69" />
+          <path d="M16.85 11.25a10 10 0 0 1 2.22 1.61" />
+          <path d="M2 8.82a15 15 0 0 1 4.17-2.65" />
+          <path d="M10.66 5.09A15 15 0 0 1 22 8.82" />
+          <path d="M12 20h.01" />
+        </svg>
+      </div>
+      <h1>Bağlantı yok</h1>
+      <p>
+        MarjPanel Paket canlı veriyle çalışır - paket, stok ve sipariş
+        bilgileri çevrimdışı gösterilmez. Bağlantı geri geldiğinde kaldığınız
+        yerden devam edin.
+      </p>
+      <button type="button" onclick="location.reload()">Tekrar dene</button>
+    </main>
+    <script>
+      addEventListener("online", () => location.reload());
+    </script>
+  </body>
+</html>

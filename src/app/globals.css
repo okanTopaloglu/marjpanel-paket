@@ -1,0 +1,800 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   MarjPanel Paket - "Mürekkep & Nane" tasarım sistemi
+   --------------------------------------------------------------------------
+   MarjPanel'in panel tasarım sisteminin depo paket okutma uygulamasına
+   uyarlanmış kopyası. Operate modu: kullanıcı bir işin içinde, paket
+   okutuyor, sipariş karşılıyor. Arayüz işin önüne geçmez.
+
+   Dil: sakin finans/defter hissi. Nötr zemin, tek vurgu rengi (nane),
+   mürekkep menü. Sayı burada kanıttır; tasarım sayıyı okunur kılar.
+
+   TEK AÇIK TEMA. Koyu tema kaldırıldı, kullanım sahnesi gündüz ofis/depo
+   ışığı, beyaz kâğıt ve pazaryeri panelleriyle yan yana.
+
+   Ayrıntı: /DESIGN.md
+   Bu dosya PANELİN katmanıdır; herkese açık/pazarlama katmanı bu projede
+   yok, panel sistemi tek katmandır.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    /* --- Zemin & metin ------------------------------------------------
+       HSL olarak yazılır çünkü Tailwind token'ları `hsl(var(--x) / <alpha>)`
+       biçimini kullanır ve panelin her yerinde opaklık varyantları var. */
+
+    --background: 160 9% 96%; /* #F5F7F6 — düz zemin, gradyan/grain YOK */
+    --foreground: 216 51% 12%; /* #0F1B2D — mürekkep */
+
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 216 51% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 216 51% 12%;
+
+    /* --- Vurgu (nane) --------------------------------------------------
+       `--primary` DOLGU rengidir: #0F8A5F üstünde beyaz metin 4,86:1 ile AA
+       geçer. Küçük metinde `--vurgu-metin` kullanılır (aşağıda). */
+    --primary: 160 82% 30%; /* #0F8A5F */
+    --primary-foreground: 0 0% 100%;
+
+    /* Mürekkep dolgu — menü, `ink` buton varyantı. */
+    --secondary: 216 51% 12%; /* #0F1B2D */
+    --secondary-foreground: 210 40% 94%; /* #EAF0F6 */
+
+    /* `--cta` KALDIRILMADI ama artık ayrı bir renk DEĞİL: tek vurgu kuralı
+       gereği vurguya düşer. Sekiz dosyada `bg-cta/5`, `border-cta` gibi
+       kullanımlar var; token'ı silmek onları kırardı, ikinci bir marka rengi
+       tutmak ise sistemi bozardı. Alias olarak kalır. */
+    --cta: 160 82% 30%;
+    --cta-foreground: 0 0% 100%;
+
+    /* --- Durum ---------------------------------------------------------- */
+    --destructive: 3 57% 50%; /* #C63D36 */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 160 82% 30%; /* #0F8A5F */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 91% 38%; /* #B8740A */
+    --warning-foreground: 0 0% 100%;
+
+    --info: 208 56% 42%; /* #2F6FA8 */
+    --info-foreground: 0 0% 100%;
+
+    /* Durumların SOLUK ZEMİNLERİ — rozet ve uyarı kutuları opaklık
+       varyantı yerine bunları kullanır: opaklık zemine göre kayar, adı
+       konmuş bir ton kaymaz. */
+    --success-soft: 156 47% 92%; /* #E1F4EB */
+    --warning-soft: 42 79% 92%; /* #FCF1DA */
+    --destructive-soft: 6 74% 94%; /* #FBE6E4 */
+    --info-soft: 210 62% 93%; /* #E4EEF8 */
+    --unknown: 213 14% 41%; /* #5C6878 — "bilinmiyor" nötr */
+    --unknown-soft: 200 12% 94%; /* #EEF1F3 */
+
+    /* --- Nötrler --------------------------------------------------------- */
+    --muted: 200 12% 94%; /* #EEF1F3 */
+    --muted-foreground: 213 14% 41%; /* #5C6878 — ikincil metin, 5,4:1 */
+
+    --accent: 158 47% 93%; /* #E4F5EE — vurgu açık zemin */
+    --accent-foreground: 160 82% 24%; /* #0B6E4B */
+
+    --border: 200 14% 89%; /* #DFE4E8 */
+    --input: 207 15% 83%; /* #CBD3DA — giriş kenarı, çizgiden bir kademe koyu */
+    --ring: 160 80% 36%; /* #12A874 — vurgu parlak */
+
+    /* Vurgu parlak: ikon, aktif çubuk, odak halkası. */
+    --vurgu-parlak: 160 80% 36%; /* #12A874 */
+
+    /**
+     * KÜÇÜK METİN İÇİN KOYULAŞTIRILMIŞ VURGU.
+     *
+     * `--primary` (#0F8A5F) beyaz zeminde 4,10:1 verir — WCAG AA küçük metin
+     * için 4,5:1 ister. Aynı hue, daha koyu açıklık (#0B6E4B, 6,0:1): göz
+     * aynı yeşili görür, eşik geçilir.
+     *
+     * `--primary` DEĞİŞTİRİLMEZ — dolgu olarak doğru renk odur.
+     */
+    --vurgu-metin: 160 82% 24%; /* #0B6E4B */
+
+    /* --- Mürekkep menü ---------------------------------------------------- */
+    --menu: 216 51% 12%; /* #0F1B2D */
+    --menu-aktif: 216 44% 19%; /* #1B2B44 */
+    --menu-foreground: 210 40% 94%; /* #EAF0F6 */
+
+    /* --- Geometri: TEK ÖLÇEK ---------------------------------------------
+       Kart 12px · buton/giriş 9px · çip/rozet 999px · sheet 16px.
+       Tailwind `borderRadius` bunları okur (bkz. tailwind.config.ts). */
+    --radius: 0.75rem; /* 12px — kart */
+    --radius-kontrol: 0.5625rem; /* 9px — buton, giriş */
+    --radius-sheet: 1rem; /* 16px */
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    /* --- Yükselti: TEK KADEME --------------------------------------------
+       Kaldırılan ya da etkileşimli yüzeyde; zemine yapışık öğe gölge almaz.
+       Gölge mürekkepten türer, nötr griden değil — zeminle aynı sıcaklıkta. */
+    --shadow: 0 1px 2px rgb(15 27 45 / 0.06), 0 4px 12px -4px rgb(15 27 45 / 0.08);
+    --shadow-xs: 0 1px 2px rgb(15 27 45 / 0.05);
+    /* Eski üç kademe TEK gölgeye düşer — `.shadow-soft*` tüketicileri
+       (18 dosya) kırılmasın diye adları korunur, değerleri aynıdır. */
+    --shadow-sm: var(--shadow);
+    --shadow-md: var(--shadow);
+    --shadow-lg: var(--shadow);
+    --shadow-xl: var(--shadow);
+    --shadow-glow: var(--shadow);
+    --shadow-inset: inset 0 1px 2px rgb(15 27 45 / 0.05);
+
+    /* --- "Gradyanlar" ------------------------------------------------------
+       Gradyan YOK. Token'lar DÜZ dolguya düşer; `.bg-grad-*` tüketicileri
+       (8 dosya) kırılmasın diye adları korunur. */
+    --grad-primary: hsl(var(--primary));
+    --grad-cta: hsl(var(--primary));
+    --grad-surface: hsl(var(--card));
+
+    /* --- Malzeme -----------------------------------------------------------
+       Cam efekti KALDIRILDI (craft-floor: blur dekorasyon değil, belirli bir
+       efekt olmalı; burada mobil kare maliyeti karşılığında hiçbir şey
+       kazandırmıyordu). `.material*` sınıfları artık OPAK yüzeydir; adları
+       36 tüketici yüzünden korunur. */
+    --material: hsl(var(--card));
+    --material-edge: hsl(var(--border));
+    --scrim: rgb(15 27 45 / 0.4);
+
+    /* --- Hareket -------------------------------------------------------- */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --dur-1: 120ms; /* dokunma geri bildirimi */
+    --dur-2: 200ms; /* UI geçişi */
+    --dur-3: 320ms; /* sheet / yüzey */
+
+    /* --- Kontrol geometrisi (filtre çipleri, segment yuvaları) ------------ */
+    --kontrol-h: 2.25rem; /* 36px */
+    --kontrol-r: var(--radius-kontrol);
+    --kontrol-r-ic: 999px; /* çip: hap köşesi */
+    --kontrol-px: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: none;
+    /* Tek tema — tarayıcı kroması da açık kalsın (form kontrolleri,
+       kaydırma çubuğu varsayılanları). */
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Manrope ince görünür: gövde 500 ağırlıkta oturur. */
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Rakamlar HER YERDE hizalı — para sütunu zıplamaz. */
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Dokunmatik: gri parlama yok, 300ms tıklama gecikmesi yok */
+  a,
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  label {
+    -webkit-tap-highlight-color: transparent;
+  }
+  a,
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* Odak halkası: her yerde aynı, nane */
+  :focus-visible {
+    outline: 2px solid hsl(var(--vurgu-parlak));
+    outline-offset: 2px;
+    border-radius: var(--radius-kontrol);
+  }
+
+  ::selection {
+    background: hsl(var(--vurgu-parlak) / 0.2);
+    color: hsl(var(--foreground));
+  }
+
+  /* Metin imleci de paletten — tarayıcı varsayılanı hiçbir sisteme ait
+     değil (craft-floor: "çizmediğin yüzeyler de tasarımı taşır"). */
+  input,
+  textarea,
+  [contenteditable] {
+    caret-color: hsl(var(--vurgu-parlak));
+  }
+
+  /* İnce kaydırma çubuğu (Firefox + WebKit) */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--foreground) / 0.18) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--foreground) / 0.16);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--foreground) / 0.28);
+    background-clip: padding-box;
+  }
+}
+
+/* ==========================================================================
+   Tipografi ölçeği — Manrope
+   --------------------------------------------------------------------------
+   Ürün arayüzünde kullanıcı sabit DPI'da bakar: ölçek sabit rem. Akışkan
+   clamp yalnız iki büyük adımda (display, title-1) — onlar sayfa başlığı ve
+   nadir "büyük sayı" anı, dar ekranda sıkışmaları gerekir.
+
+   Adım oranı ~1.14: üründe çok tip öğesi var, abartılı kontrast gürültüdür.
+   ========================================================================== */
+@layer components {
+  .text-display {
+    font-size: clamp(1.875rem, 1.4rem + 2vw, 2.75rem);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+  }
+  .text-title-1 {
+    font-size: clamp(1.375rem, 1.15rem + 1vw, 1.875rem);
+    line-height: 1.16;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .text-title-2 {
+    font-size: 1.25rem;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .text-title-3 {
+    font-size: 1.0625rem;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+  }
+  .text-headline {
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    letter-spacing: -0.008em;
+    font-weight: 600;
+  }
+  .text-body {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .text-callout {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .text-footnote {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    letter-spacing: 0.004em;
+    font-weight: 500;
+  }
+  .text-caption {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    letter-spacing: 0.008em;
+    font-weight: 500;
+  }
+  .text-overline {
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* Sayfa başlığı bloğu — `SayfaBasligi` bileşeni bunları kullanır. */
+  .page-title {
+    font-size: clamp(1.375rem, 1.15rem + 1vw, 1.875rem);
+    line-height: 1.16;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    text-wrap: balance;
+  }
+  .page-subtitle {
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    font-weight: 500;
+    color: hsl(var(--muted-foreground));
+    text-wrap: pretty;
+  }
+}
+
+/* ==========================================================================
+   Yüzeyler ve yükselti
+   --------------------------------------------------------------------------
+   CAM EFEKTİ KALDIRILDI. `.glass` / `.material*` adları KORUNUR (36 tüketici)
+   ama artık opak beyaz yüzey + ince çizgidir. Gerekçe: blur, arkasında
+   okunacak bir şey olduğunda anlamlıdır; panelde altından akan içerik zaten
+   kaydırılıp gidiyordu ve her karede tüm şeridin yeniden bulanıklaştırılması
+   telefonda ölçülebilir kare kaybıydı.
+   ========================================================================== */
+@layer components {
+  .material,
+  .glass,
+  .material-thin,
+  .material-thick {
+    background: var(--material);
+  }
+
+  /* Malzemenin kenarı — eskiden içe ışık, şimdi çizgi. */
+  .material-edge {
+    box-shadow: inset 0 1px 0 0 var(--material-edge);
+  }
+
+  /* Yapışkan şeridin alt kenarı: yumuşak geçiş yerine NET çizgi. Defter
+     hissi keskin hat ister; yumuşak geçiş içeriği "eritiyordu". */
+  .scroll-edge::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    height: 1px;
+    pointer-events: none;
+    background: hsl(var(--border));
+  }
+
+  /* Kart yükseltisi — imleçte kalkar, basınca çöker. Hover YALNIZ gerçek
+     imleçte: dokunmatikte basılı tutunca takılı kalıyordu. */
+  .lift {
+    transition:
+      transform var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out),
+      border-color var(--dur-2) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .lift:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+      border-color: hsl(var(--vurgu-parlak) / 0.35);
+    }
+  }
+  .lift:active {
+    transform: translateY(0) scale(0.995);
+    transition-duration: var(--dur-1);
+  }
+
+  /* Basınca anında geri bildirim — tepki basıldığı anda, bırakmada değil. */
+  .press {
+    transition: transform var(--dur-1) var(--ease-out);
+  }
+  .press:active {
+    transform: scale(0.97);
+  }
+
+  /* ------------------------------------------------------------------
+     FİLTRE KONTROL GRUBU — panelin TEK çip yuvası.
+     Yuva `--kontrol-h` ile aynı yüksekliğe oturur: yanındaki <select> ve
+     arama kutusuyla optik hizalanır.
+  */
+  .kontrol-yuva {
+    display: inline-flex;
+    align-items: center;
+    height: var(--kontrol-h);
+    padding: 0.1875rem;
+    border-radius: var(--radius-kontrol);
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card));
+  }
+  /* Sarmalanan (çok satırlı) yuva: sabit yükseklik satırları kırpardı. */
+  .kontrol-yuva-sarmal {
+    height: auto;
+    min-height: var(--kontrol-h);
+    flex-wrap: wrap;
+  }
+
+  .kontrol-hap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    white-space: nowrap;
+    border-radius: var(--kontrol-r-ic);
+    padding: 0.3125rem var(--kontrol-px);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: hsl(var(--muted-foreground));
+    /* `all` YOK — yalnız boyanan iki özellik + basış ölçeği. */
+    transition:
+      background-color var(--dur-2) var(--ease-out),
+      color var(--dur-2) var(--ease-out),
+      transform var(--dur-1) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .kontrol-hap:hover {
+      background: hsl(var(--muted));
+      color: hsl(var(--foreground));
+    }
+  }
+  .kontrol-hap:active {
+    transform: scale(0.97);
+  }
+  .kontrol-hap[aria-pressed="true"],
+  .kontrol-hap[aria-current="page"],
+  .kontrol-hap[data-secili="true"] {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+  .kontrol-hap:disabled {
+    pointer-events: none;
+    opacity: 0.45;
+  }
+
+  /* Yuvanın YANINDAKİ tekil kontroller (select, tekil aç/kapa düğmesi) —
+     aynı yükseklik ve köşe, böylece çubuk tek hat üzerinde durur. */
+  .kontrol-alan {
+    height: var(--kontrol-h);
+    border-radius: var(--radius-kontrol);
+    border: 1px solid hsl(var(--input));
+    background: hsl(var(--card));
+    padding-inline: 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: hsl(var(--foreground));
+  }
+
+  /* ------------------------------------------------------------------
+     ROZET — satır içi durum etiketi (Set, Pasif, İlansız, tür rozeti…).
+     65 kullanım; tek boy, tek köşe (999px).
+  */
+  .rozet {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+    border-radius: 999px;
+    padding: 0.0625rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0.004em;
+  }
+
+  /**
+   * Küçük ölçekli vurgu — `text-primary`nin KÜÇÜK METİN karşılığı.
+   * Büyük başlıkta ve dolgu olarak `text-primary`/`bg-primary` kalır;
+   * 11-14px metinde bu sınıf kullanılır.
+   */
+  .vurgu {
+    color: hsl(var(--vurgu-metin));
+  }
+
+  /**
+   * `.grad-text` — GRADYAN METİN KALDIRILDI (craft-floor'da ban).
+   * Ad korunur (1 tüketici: not-found.tsx); değeri düz vurgu rengidir.
+   * Vurgu artık ağırlık ve boyutla kurulur, renk geçişiyle değil.
+   */
+  .grad-text {
+    color: hsl(var(--vurgu-metin));
+  }
+
+  /* İskelet (yükleniyor) — üzerinden ışık geçer. Dönen çark değil iskelet:
+     gelecek içeriğin şekli gösterilir, yerleşim zıplamaz. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-kontrol);
+    background: hsl(var(--foreground) / 0.07);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(0 0% 100% / 0.75),
+      transparent
+    );
+    animation: shimmer 1.6s var(--ease-in-out) infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      animation: none;
+    }
+  }
+
+  /* Segment kontrolü zemini — içe basılmış yuva, üstünde yüzen seçili hap. */
+  .segment {
+    background: hsl(var(--muted));
+    border-radius: 999px;
+    padding: 0.1875rem;
+  }
+}
+
+/* ==========================================================================
+   Yardımcı sınıflar
+   ========================================================================== */
+@layer utilities {
+  /* Üç kademe de TEK gölgeye düşer — adlar 18 tüketici için korunur. */
+  .shadow-soft,
+  .shadow-soft-lg,
+  .shadow-soft-xl {
+    box-shadow: var(--shadow);
+  }
+
+  /* Gradyan dolgular DÜZ renge düşer — adlar 8 tüketici için korunur. */
+  .bg-grad-primary,
+  .bg-grad-cta {
+    background-image: none;
+    background-color: hsl(var(--primary));
+  }
+  .bg-grad-surface {
+    background-image: none;
+    background-color: hsl(var(--card));
+  }
+
+  /* Sayısal hizalama — para/oran sütunları zıplamasın. Gövdede zaten açık;
+     bu sınıf niyeti açıkça yazar ve `font-feature-settings` ile pekiştirir. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Güvenli alan (çentik / ana ekran çizgisi) */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pl-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  .pr-safe {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .px-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .inset-safe-b {
+    bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Yatay kaydırma alanları: parmakla kaydırırken sayfa kilitlenmesin */
+  .snap-x-strip {
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Kompozitör dostu: hareketi bekleyen katmanlar */
+  .will-move {
+    will-change: transform, opacity;
+  }
+
+  /**
+   * KLAVYE TETİKLİ HAREKET YOK.
+   *
+   * Fare basışı fiziksel bir jest, animasyon onu takip eder; klavye ise
+   * anlıktır — Enter'a basınca düğmenin "çökmesi" gecikmeli ve yapay
+   * hisseder. `:focus-visible` yalnız klavyeyle odaklanıldığında geldiği
+   * için basış ölçeğini tam orada söndürmek doğru ayrımı verir.
+   */
+  :focus-visible:active {
+    transform: none !important;
+  }
+
+  /**
+   * `.stagger` — liste girişi kademesi (yeni ad, `--i` değişkeniyle).
+   *
+   * Kullanım: kapsayıcıya `.stagger`, çocuklara `style={{ "--i": i }}`.
+   * En fazla 8 öğe kademelenir; sonrası aynı anda gelir — dokuzuncu satırı
+   * bekletmek yükleniyor hissi değil, gecikme hissi verir.
+   */
+  .stagger > * {
+    animation: fade-in-up var(--dur-2) var(--ease-out) both;
+    animation-delay: calc(min(var(--i, 0), 8) * 40ms);
+  }
+
+  /* `.kademe` — eski ad, `--i` yazmayan tüketiciler için nth-child ile. */
+  .kademe > * {
+    animation: fade-in-up var(--dur-2) var(--ease-out) both;
+  }
+  .kademe > *:nth-child(1) { animation-delay: 0ms; }
+  .kademe > *:nth-child(2) { animation-delay: 40ms; }
+  .kademe > *:nth-child(3) { animation-delay: 80ms; }
+  .kademe > *:nth-child(4) { animation-delay: 120ms; }
+  .kademe > *:nth-child(5) { animation-delay: 160ms; }
+  .kademe > *:nth-child(6) { animation-delay: 200ms; }
+  .kademe > *:nth-child(7) { animation-delay: 240ms; }
+  .kademe > *:nth-child(n + 8) { animation-delay: 280ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stagger > *,
+    .kademe > * {
+      animation: none;
+    }
+  }
+}
+
+/* ==========================================================================
+   Hareket — giriş/çıkış
+   --------------------------------------------------------------------------
+   Yalnız `transform` ve `opacity`. Süreler 120 / 200 / 320ms. Çıkış girişten
+   hızlı. Giriş asla `scale(0)`'dan değil — öğe zaten oradaydı, yalnız
+   kendini toparlıyor.
+   ========================================================================== */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Kaynağından açılan yüzeyler (popover/menü) — `transform-origin` çağıranda.
+   Taşmalı yay YOK: taşma bir JESTİN ivmesini taşıyan yüzeye aittir;
+   tıklamayla açılan menüde "zıplama" olarak okunur. */
+@keyframes materialize {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-in {
+  animation: fade-in-up var(--dur-2) var(--ease-out) both;
+}
+.animate-fade {
+  animation: fade-in var(--dur-2) var(--ease-out) both;
+}
+.animate-materialize {
+  animation: materialize var(--dur-2) var(--ease-out) both;
+}
+.animate-sheet {
+  animation: sheet-up var(--dur-3) var(--ease-out) both;
+}
+
+/* Kanal düzeltme paneli: mobilde alttan, masaüstünde sağdan gelir. Yön
+   değişimi `sm`de yapılır çünkü dar ekranda yandan giren yüzey ekranın
+   tamamını kaplar ve "nereden geldi" bilgisi kaybolur. */
+@keyframes kanal-panel-alt {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
+}
+@keyframes kanal-panel-sag {
+  from {
+    opacity: 0;
+    transform: translate3d(100%, 0, 0);
+  }
+}
+.kanal-panel {
+  animation: kanal-panel-alt var(--dur-3) var(--ease-out) both;
+}
+@media (min-width: 640px) {
+  .kanal-panel {
+    animation-name: kanal-panel-sag;
+  }
+}
+
+/* ==========================================================================
+   Erişilebilirlik tercihleri
+   ========================================================================== */
+
+/* Azaltılmış hareket: hareket kalkar, OPAKLIK kalır — öğenin belirmesi
+   bilgidir, kayması süstür. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .animate-in,
+  .animate-materialize,
+  .animate-sheet,
+  .kanal-panel {
+    animation: fade-in 160ms linear both !important;
+  }
+  .lift:hover,
+  .lift:active,
+  .press:active {
+    transform: none;
+  }
+}
+
+/* Yüksek kontrast: çizgiler koyulaşır, ikincil metin gövdeye yaklaşır. */
+@media (prefers-contrast: more) {
+  :root {
+    --border: 207 18% 70%;
+    --input: 210 20% 55%;
+    --muted-foreground: 215 30% 28%;
+  }
+}
+
+/* Yazdırma: kroma ve dekor gitsin, içerik kalsın */
+@media print {
+  body::before,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+  }
+}
