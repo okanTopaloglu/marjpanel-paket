@@ -6,7 +6,7 @@ import type { BarkodBilgisi } from "@/lib/barkod/coz";
 import { okutmaEngeli } from "@/lib/siparis/durum";
 import { ISTANBUL_TZ } from "@/lib/siparis/sabitler";
 import { gunAnahtari } from "@/lib/format/tarih";
-import type { OkutmaSonucu } from "@/lib/okut/sonuc";
+import type { OkutmaSonucu, OkutmaUyarisi } from "@/lib/okut/sonuc";
 import type { PaketFiltreleri } from "@/lib/paket/filtreler";
 import { barkodCoz } from "@/lib/db/repos/barkod-kurallari";
 import {
@@ -187,7 +187,7 @@ export async function okutmaKaydet(
       /* Uyarı kararı: kargo çözülemediyse her şeyin önünde o söylenir.
          Trendyol barkodu olup siparişi bulunamayan paket, aktif entegrasyon
          varsa "senkron gecikmiş olabilir" uyarısı alır - ama kaydedilir. */
-      let uyari: OkutmaSonucu extends { uyari?: infer U } ? U : never;
+      let uyari: OkutmaUyarisi | undefined;
       if (bilgi.bilinmiyor) {
         uyari = "bilinmeyen_kargo";
       } else if (
