@@ -75,8 +75,8 @@ describe("siparisEsle", () => {
       { id: 1, orderDate: "2026-03-01T09:00:00" },
       { ...SECENEK, saatOfseti: 3 },
     );
-    const bekleneni = new Date("2026-03-01T09:00:00").getTime() - 3 * 3_600_000;
-    expect(isaretsiz?.siparisTarihi?.getTime()).toBe(bekleneni);
+    // 09:00 Türkiye = 06:00Z; süreç saat diliminden bağımsız.
+    expect(isaretsiz?.siparisTarihi?.toISOString()).toBe("2026-03-01T06:00:00.000Z");
   });
 
   it("tarih yoksa null, bozuksa null", () => {

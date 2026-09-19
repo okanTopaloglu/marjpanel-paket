@@ -3,6 +3,8 @@ import type { FetchImpl } from "./http";
 import { PAZARYERLERI } from "./kayit";
 import type { Kimlik } from "./kimlik";
 import type { PazaryeriSaglayici, Platform } from "./tipler";
+import { hepsiburadaSaglayicisi } from "./hepsiburada/saglayici";
+import { n11Saglayicisi } from "./n11/saglayici";
 import { trendyolSaglayicisi } from "./trendyol/saglayici";
 
 /**
@@ -34,6 +36,10 @@ export function saglayiciKur(
   switch (platform) {
     case "trendyol":
       return trendyolSaglayicisi(kimlik, { ayarlar: sec.ayarlar, fetchImpl: sec.fetchImpl });
+    case "n11":
+      return n11Saglayicisi(kimlik, { ayarlar: sec.ayarlar, fetchImpl: sec.fetchImpl });
+    case "hepsiburada":
+      return hepsiburadaSaglayicisi(kimlik, { ayarlar: sec.ayarlar, fetchImpl: sec.fetchImpl });
     default:
       throw new SaglayiciYok(platform);
   }

@@ -93,20 +93,35 @@ const HEPSIBURADA: PazaryeriTanimi = {
       etiket: "Merchant ID",
       tip: "metin",
       zorunlu: true,
-      ipucu: "Hepsiburada satıcı panelindeki mağaza kimliği (UUID).",
+      ipucu: "Satıcı panelindeki mağaza kimliği (UUID). API kullanıcı adı olarak da bu kullanılır.",
+      ornek: "b2910839-83b9-4d45-adb6-86bad457edcb",
+      desen: "^[0-9a-fA-F-]{32,36}$",
+      desenMesaji: "Merchant ID bir UUID olmalı.",
     },
     { ad: "serviceKey", etiket: "Servis anahtarı", tip: "gizli", zorunlu: true },
+    {
+      ad: "entegratorAdi",
+      etiket: "Entegratör adı",
+      tip: "metin",
+      zorunlu: true,
+      ipucu:
+        "Hepsiburada'ya bildirdiğiniz entegratör adı, BİREBİR (User-Agent olarak gider; farklı yazılırsa 401).",
+      ornek: "MamaAuraPaket",
+    },
   ],
   yetenekler: {
     urun: true,
-    etiket: true,
-    azamiPencereGun: null,
-    sayfaArasiMs: 500,
+    // Ortak barkod ucu (labels) var ama yanıt biçimi doğrulanmadı; v1 dışı.
+    etiket: false,
+    // /packages sayfası 10 kayıt: 3 günlük pencere × 100 sayfa = 1000 paket.
+    azamiPencereGun: 3,
+    sayfaArasiMs: 300,
     ilkSenkronGun: 30,
   },
-  kaynakEtiketleri: ["Hepsiburada"],
-  anahtarNereden: "Satıcı Paneli → Entegrasyon → API Anahtarları.",
-  hazir: false,
+  kaynakEtiketleri: ["Hepsiburada", "HepsiJet", "Hepsijet"],
+  anahtarNereden:
+    "Satıcı Paneli → Entegrasyon → API bilgileri. Yalnız PAKETLENMİŞ siparişler çekilir (paketleme HB panelinde ya da otomatik).",
+  hazir: true,
 };
 
 const N11: PazaryeriTanimi = {
@@ -115,19 +130,27 @@ const N11: PazaryeriTanimi = {
   renk: "#7B3FA0",
   hesapKimligiAlani: "appKey",
   alanlar: [
-    { ad: "appKey", etiket: "App Key", tip: "metin", zorunlu: true },
+    {
+      ad: "appKey",
+      etiket: "App Key",
+      tip: "metin",
+      zorunlu: true,
+      ipucu: "n11 Mağaza Yönetimi → Hesabım → API Erişimi sayfasındaki anahtar.",
+    },
     { ad: "appSecret", etiket: "App Secret", tip: "gizli", zorunlu: true },
   ],
   yetenekler: {
     urun: true,
     etiket: false,
-    azamiPencereGun: null,
-    sayfaArasiMs: 500,
+    // Belgede azami aralık yok; Trendyol gibi 14 gün güvenli taraf.
+    azamiPencereGun: 14,
+    // Dakikada 1000 istek sınırı geniş; 200 ms nezaket payı.
+    sayfaArasiMs: 200,
     ilkSenkronGun: 30,
   },
-  kaynakEtiketleri: ["N11"],
+  kaynakEtiketleri: ["N11", "n11"],
   anahtarNereden: "n11 Mağaza Yönetimi → Hesabım → API Erişimi.",
-  hazir: false,
+  hazir: true,
 };
 
 const PAZARAMA: PazaryeriTanimi = {

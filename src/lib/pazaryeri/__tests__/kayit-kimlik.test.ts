@@ -19,8 +19,8 @@ describe("kayit", () => {
     }
   });
 
-  it("yalnız Trendyol hazır (M6-A)", () => {
-    expect(PLATFORMLAR_HAZIR_MI()).toEqual({ trendyol: true });
+  it("hazır platformlar: Trendyol, Hepsiburada, N11 (M6-B)", () => {
+    expect(PLATFORMLAR_HAZIR_MI()).toEqual({ trendyol: true, hepsiburada: true, n11: true });
   });
 
   it("platformMi / pazaryeriAdi", () => {

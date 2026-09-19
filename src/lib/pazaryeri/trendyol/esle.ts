@@ -24,6 +24,7 @@ import {
 } from "@/lib/siparis/ham-veri";
 import { kanonikDurum } from "../durum";
 import { normaldenSatir, type EslenenSiparis } from "../normal-veri";
+import { SAAT_DILIMI_ISARETI, dilimsizMetniCoz } from "../tarih";
 import type { NormalSiparis, NormalUrun } from "../tipler";
 
 export interface EsleSecenekleri {
@@ -40,9 +41,6 @@ function metin(v: unknown): string | null {
   return s.length ? s : null;
 }
 
-/** Saat dilimi işareti taşıyan ISO metni ("…Z", "…+03:00") MUTLAK zamandır. */
-const SAAT_DILIMI_ISARETI = /(?:Z|[+-]\d{2}:?\d{2})$/i;
-
 /**
  * Tarih çözümü ve SAAT OFSETİ KARARI (belgelenmiş karar).
  *
@@ -53,9 +51,11 @@ const SAAT_DILIMI_ISARETI = /(?:Z|[+-]\d{2}:?\d{2})$/i;
  *
  * Bu yüzden `TRENDYOL_SIPARIS_SAAT_OFSETI` (.env: 3) YALNIZCA saat dilimi
  * BELİRTİLMEYEN metin tarihlere uygulanır ("2026-03-01T10:00:00" gibi; bazı
- * uçlar böyle döner ve bu metin Türkiye yerel saatidir). Node böyle bir metni
- * KONTEYNERİN saat dilimiyle okur (üretimde UTC); ofset saatleri çıkarılarak
- * değer gerçek ana taşınır. Epoch sayıları ve işaretli ISO metinleri ASLA
+ * uçlar böyle döner ve bu metin Türkiye yerel saatidir). Metin SÜREÇ SAAT
+ * DİLİMİNDEN BAĞIMSIZ çözülür (`lib/pazaryeri/tarih`): bileşenler UTC olarak
+ * kurulur, ofset saatleri çıkarılır. Eskiden `new Date(metin)` konteynerin
+ * yerel saatini kullanıyordu; UTC sunucuda doğru, İstanbul makinesinde 3 saat
+ * kayık sonuç veriyordu. Epoch sayıları ve işaretli ISO metinleri ASLA
  * kaydırılmaz.
  */
 export function tarihCoz(deger: unknown, saatOfseti: number): Date | null {
@@ -75,10 +75,11 @@ export function tarihCoz(deger: unknown, saatOfseti: number): Date | null {
     return Number.isNaN(d.getTime()) ? null : d;
   }
 
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return null;
-  if (SAAT_DILIMI_ISARETI.test(s) || !saatOfseti) return d;
-  return new Date(d.getTime() - saatOfseti * 3_600_000);
+  if (SAAT_DILIMI_ISARETI.test(s)) {
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  return dilimsizMetniCoz(s, saatOfseti);
 }
 
 /**

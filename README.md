@@ -69,7 +69,8 @@ repo katmanını gerçek veritabanına karşı dener.
   arayüzde "Yakında"). Kimlik tek şifreli JSON sütununda
   (`entegrasyonlar.kimlik_sifreli`). Sağlayıcının normalize ettiği müşteri/
   adres/kalemler `ham_veri._normal` zarfında; etiket ve okutma oradan okur.
-  Şu an hazır: Trendyol. Sırada: Hepsiburada, N11, Pazarama, idefix, Amazon.
+  Hazır: Trendyol, Hepsiburada, N11 (`docs/pazaryeri/*.md`). Sırada: Pazarama,
+  idefix, Amazon.
 - **Senkron**: `senkron_isleri` tablosu kuyruk + kilit (kısmi tekil indeks) +
   nabız (`son_nabiz`; 5 dk nabızsız iş bayat sayılır) + ilerleme + geçmiş.
   429 alan entegrasyon `Retry-After` kadar, 401 alan bir saat ertelenir;
