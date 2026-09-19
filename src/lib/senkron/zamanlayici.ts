@@ -78,11 +78,19 @@ export async function tik(): Promise<void> {
   try {
     await bayatlariSerbestBirak();
 
-    // 1) Kuyruktaki manuel iş.
+    // 1) Kuyruktaki manuel işler: önce sipariş, sonra ürün. Ürün işi de
+    //    kuyruktan alınmazsa (yalnız oto tur açılsaydı) /urunler'deki
+    //    "Trendyol'dan çek" düğmesi sonsuza dek "bekliyor"da kalırdı.
     const bekleyen = await bekleyenAl("siparis");
     if (bekleyen) {
       console.log(`[senkron] kuyruktan iş alındı (${bekleyen.tetik}).`);
       await siparisSenkronunuYurut(bekleyen);
+      return;
+    }
+    const bekleyenUrun = await bekleyenAl("urun");
+    if (bekleyenUrun) {
+      console.log(`[senkron] kuyruktan ürün işi alındı (${bekleyenUrun.tetik}).`);
+      await urunSenkronunuYurut(bekleyenUrun);
       return;
     }
 

@@ -158,9 +158,22 @@ export interface UrunGirdisi {
   stokKodu?: string | null;
 }
 
-/** Boş/yalnız boşluk olan değeri boş metne indirger (SQL'de `nullif` ile yok sayılır). */
+/** Kırpılmış metin. */
 function metin(v: string | null | undefined): string {
   return (v ?? "").trim();
+}
+
+/**
+ * Boş değeri NULL'a çevirir.
+ *
+ * NEDEN "" DEĞİL NULL: güncellemede `nullif(excluded.x, '')` boşu zaten yok
+ * sayar, ama İLK EKLEMEDE boş metin olduğu gibi yazılırdı. O satır
+ * `urun_adi = ''` olurdu ve `urunAdi ?? "-"` yazan her ekran (liste, okutma
+ * kalemi) boş hücre gösterirdi - "adı yok" ile "adı boş metin" aynı şey
+ * değil, ikincisi arayüzde yalnız kafa karıştırır.
+ */
+function bosNull(v: string | null | undefined): string | null {
+  return metin(v) || null;
 }
 
 /** Tek satırı `(sirket_id, barkod)` üzerinde upsert eder. */
@@ -185,11 +198,11 @@ export async function topluKaydet(
   const temiz = satirlar
     .map((s) => ({
       barkod: metin(s.barkod),
-      urunAdi: metin(s.urunAdi),
-      gorselUrl: metin(s.gorselUrl),
-      marka: metin(s.marka),
-      kategori: metin(s.kategori),
-      stokKodu: metin(s.stokKodu),
+      urunAdi: bosNull(s.urunAdi),
+      gorselUrl: bosNull(s.gorselUrl),
+      marka: bosNull(s.marka),
+      kategori: bosNull(s.kategori),
+      stokKodu: bosNull(s.stokKodu),
     }))
     .filter((s) => s.barkod.length > 0);
   if (temiz.length === 0) return 0;
