@@ -40,12 +40,13 @@ export class PazaryeriHizSiniri extends PazaryeriHatasi {
 }
 
 export class PazaryeriKimlikHatasi extends PazaryeriHatasi {
-  constructor(platform: Platform, durumKodu: number, govde = "") {
+  constructor(platform: Platform, durumKodu: number, govde = "", mesaj?: string) {
     super(
       platform,
       durumKodu,
       govde,
-      `API anahtarı veya kimlik bilgileri hatalı (${durumKodu}). Entegrasyon bilgilerini kontrol edin.`,
+      mesaj ??
+        `API anahtarı veya kimlik bilgileri hatalı (${durumKodu}). Entegrasyon bilgilerini kontrol edin.`,
     );
     this.name = "PazaryeriKimlikHatasi";
   }

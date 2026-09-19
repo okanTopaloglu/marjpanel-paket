@@ -80,12 +80,26 @@ const PAZARAMA: DurumTablosu = {
   "5": "Shipped", // Siparişiniz Kargoya Verildi
 };
 
+/** Amazon Orders v0 `OrderStatus` (docs/pazaryeri/amazon.md). */
+const AMAZON: DurumTablosu = {
+  Pending: "Created",
+  PendingAvailability: "Created",
+  Unshipped: "Picking",
+  PartiallyShipped: "Picking",
+  InvoiceUnconfirmed: "Picking",
+  Shipped: "Shipped",
+  Canceled: "Cancelled",
+  Cancelled: "Cancelled",
+  Unfulfillable: "UnSupplied",
+};
+
 export const DURUM_TABLOLARI: Partial<Record<Platform, DurumTablosu>> = {
   trendyol: TRENDYOL,
   n11: N11,
   hepsiburada: HEPSIBURADA,
   idefix: IDEFIX,
   pazarama: PAZARAMA,
+  amazon: AMAZON,
 };
 
 const uyarilan = new Set<string>();

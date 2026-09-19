@@ -243,8 +243,9 @@ const AMAZON: PazaryeriTanimi = {
     ilkSenkronGun: 7,
   },
   kaynakEtiketleri: ["Amazon", "Amazon FBA", "Amazon MFN"],
-  anahtarNereden: "Seller Central → Uygulamalar ve Hizmetler → Uygulamayı yetkilendir.",
-  hazir: false,
+  anahtarNereden:
+    "Seller Central → Uygulamalar ve Hizmetler → Uygulamayı yetkilendir (refresh token). Sunucuda AMAZON_LWA_CLIENT_ID/SECRET tanımlı olmalı; adres için PII rolü onayı gerekir.",
+  hazir: true,
 };
 
 export const PAZARYERLERI: Record<Platform, PazaryeriTanimi> = {

@@ -19,13 +19,14 @@ describe("kayit", () => {
     }
   });
 
-  it("hazır platformlar: Amazon dışında hepsi (M6-C)", () => {
+  it("hazır platformlar: hepsi (M6-D)", () => {
     expect(PLATFORMLAR_HAZIR_MI()).toEqual({
       trendyol: true,
       hepsiburada: true,
       n11: true,
       pazarama: true,
       idefix: true,
+      amazon: true,
     });
   });
 

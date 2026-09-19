@@ -55,6 +55,7 @@ Public port açmanıza gerek yok.
 | `KAYIT_ACIK` | `0` (şirketler kendi kendine kayıt olamasın; siz açarsınız) |
 | `TRENDYOL_API_BASE` | `https://apigw.trendyol.com` |
 | `TRENDYOL_SIPARIS_SAAT_OFSETI` | `3` |
+| `AMAZON_LWA_CLIENT_ID` / `AMAZON_LWA_CLIENT_SECRET` | Amazon kullanılacaksa; uygulamanın LWA kimliği (docs/pazaryeri/amazon.md) |
 | `NODE_ENV` | `production` |
 
 > `AUTH_SECRET` ve `APP_ENCRYPTION_KEY` sonradan değişirse oturumlar düşer ve

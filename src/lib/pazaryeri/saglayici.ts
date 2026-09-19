@@ -1,4 +1,5 @@
 import type { SenkronEntegrasyonu } from "@/lib/db/repos/entegrasyonlar";
+import { amazonSaglayicisi } from "./amazon/saglayici";
 import type { FetchImpl } from "./http";
 import { PAZARYERLERI } from "./kayit";
 import type { Kimlik } from "./kimlik";
@@ -46,6 +47,8 @@ export function saglayiciKur(
       return idefixSaglayicisi(kimlik, { ayarlar: sec.ayarlar, fetchImpl: sec.fetchImpl });
     case "pazarama":
       return pazaramaSaglayicisi(kimlik, { ayarlar: sec.ayarlar, fetchImpl: sec.fetchImpl });
+    case "amazon":
+      return amazonSaglayicisi(kimlik, { ayarlar: sec.ayarlar, fetchImpl: sec.fetchImpl });
     default:
       throw new SaglayiciYok(platform);
   }
