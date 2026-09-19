@@ -61,6 +61,15 @@ repo katmanını gerçek veritabanına karşı dener.
   adı olan şirketin kullanıcısı YALNIZ kendi adresinden girer (`auth.ts`
   adres kapısı, `lib/kiraci/kural.ts`); süper yönetici her adresten. Logo
   süper yönetici (Şirketler) ya da şirket yöneticisi (Ayarlar) yükler.
+- **Depo operasyonu (Faz B)**: `mal_kabuller` fişleri stoğu artırır (iade/
+  düzeltme eksiltir); STOK = fiş toplamı − okutulan paketlerin sipariş kalemleri
+  (`repos/stok`, tek SQL, `ham_veri._normal.kalemler`). Tükenme/devir hızı
+  `lib/depo/stok-hesap`. Sipariş eşleşmeyen paket stoğu düşürmez (bilinçli).
+- **Finans (Faz B)**: şirket başına tarihli tarife (kademeli — toplam ya da
+  dilimli — + ek hizmet kalemleri + KDV), aylık hesap kesimi (dönem paket sayısı
+  × tarife; taslak → kesildi → ödendi), ödemeler ve bakiye. Para kuruş tam
+  sayısıyla hesaplanır (`lib/finans/hesap`). Süper yönetici `/hesap-kesimi`,
+  kiracı `/hesabim`.
 - **Kiracı izolasyonu**: her sunucu işlemi `Kapsam` (`lib/auth/kapsam.ts`) alır;
   `sirketId` yalnız oturumdan türetilir, istemciden asla okunmaz. Yetki kapıları
   (`lib/auth/yetki.ts`) her istekte DB'den taze rol okur; JWT'deki role güvenilmez.

@@ -18,6 +18,7 @@ import {
   boolean,
   integer,
   numeric,
+  date,
   timestamp,
   jsonb,
   uniqueIndex,
@@ -386,6 +387,175 @@ export const senkronIsleri = pgTable(
 /* ------------------------------------------------------------------ */
 /* İlişkiler                                                           */
 /* ------------------------------------------------------------------ */
+/* ==================================================================== */
+/* DEPO OPERASYONU (Faz B) — mal kabul ve stok                          */
+/* ==================================================================== */
+
+/** kabul: şirket mal yolladı (+) · iade: şirkete geri gönderildi (−) · duzeltme: sayım farkı (±) */
+export const malKabulTuruEnum = pgEnum("mal_kabul_turu", ["kabul", "iade", "duzeltme"]);
+export type MalKabulTuru = (typeof malKabulTuruEnum.enumValues)[number];
+
+/**
+ * Mal kabul fişi — kiracının depoya yolladığı (ya da geri aldığı) mal.
+ * STOK = fiş kalemlerinin işaretli toplamı − okutulan paketlerin kalemleri
+ * (repos/stok). Çıkış ayrı yazılmaz; okutma zaten var.
+ */
+export const malKabuller = pgTable(
+  "mal_kabuller",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sirketId: uuid("sirket_id")
+      .notNull()
+      .references(() => sirketler.id, { onDelete: "cascade" }),
+    tur: malKabulTuruEnum("tur").notNull().default("kabul"),
+    tarih: timestamp("tarih", { withTimezone: true }).notNull().defaultNow(),
+    irsaliyeNo: text("irsaliye_no"),
+    not: text("not"),
+    kaydedenId: uuid("kaydeden_id").references(() => kullanicilar.id, { onDelete: "set null" }),
+    /** Denormalize: kullanıcı silinse de fişte kim kaydettiği kalır. */
+    kaydedenAd: text("kaydeden_ad").notNull(),
+    kalemSayisi: integer("kalem_sayisi").notNull().default(0),
+    /** Kalemlerin işaretli toplamı (iade/düzeltme eksi olabilir). */
+    toplamAdet: integer("toplam_adet").notNull().default(0),
+    ...timestamps,
+  },
+  (t) => [index("mal_kabuller_sirket_tarih_idx").on(t.sirketId, t.tarih.desc())],
+);
+
+export const malKabulKalemleri = pgTable(
+  "mal_kabul_kalemleri",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    malKabulId: uuid("mal_kabul_id")
+      .notNull()
+      .references(() => malKabuller.id, { onDelete: "cascade" }),
+    /** Denormalize: stok toplamı fişe join etmeden barkod bazında alınır. */
+    sirketId: uuid("sirket_id")
+      .notNull()
+      .references(() => sirketler.id, { onDelete: "cascade" }),
+    barkod: text("barkod").notNull(),
+    /** STOK ETKİSİ, işaretli: kabul +, iade −, düzeltme ±. */
+    adet: integer("adet").notNull(),
+    /** Kayıt anındaki ürün adı (katalogdan); ürün sonradan silinse de fiş okunur. */
+    urunAdi: text("urun_adi"),
+  },
+  (t) => [
+    index("mal_kabul_kalemleri_sirket_barkod_idx").on(t.sirketId, t.barkod),
+    index("mal_kabul_kalemleri_fis_idx").on(t.malKabulId),
+  ],
+);
+
+export type MalKabul = typeof malKabuller.$inferSelect;
+export type MalKabulKalemi = typeof malKabulKalemleri.$inferSelect;
+
+/* ==================================================================== */
+/* FİNANS (Faz B) — tarife, hesap kesimi, ödeme                          */
+/* ==================================================================== */
+
+/**
+ * Tarife — şirket başına, geçerlilik tarihli. Kesim, dönemin ilk günü
+ * itibarıyla geçerli en son tarifeyi kullanır; eski kesimler değişmez (tutar
+ * kesim anında kalemlere yazılır).
+ *
+ * `kademeler`: [{ ustSinir: 500, birimFiyat: 15 }, { ustSinir: null, birimFiyat: 12 }]
+ * `kademeTipi`: "toplam" → aylık adedin düştüğü kademenin fiyatı TÜM paketlere;
+ *               "dilimli" → her dilim kendi fiyatıyla (vergi dilimi gibi).
+ * `ekHizmetler`: [{ kod: "patpat", ad: "Patpat sarma", birimFiyat: 2 }]
+ */
+export const tarifeler = pgTable(
+  "tarifeler",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sirketId: uuid("sirket_id")
+      .notNull()
+      .references(() => sirketler.id, { onDelete: "cascade" }),
+    gecerlilikBaslangic: date("gecerlilik_baslangic").notNull(),
+    kademeTipi: text("kademe_tipi").notNull().default("toplam"),
+    kademeler: jsonb("kademeler").notNull().default(sql`'[]'::jsonb`),
+    ekHizmetler: jsonb("ek_hizmetler").notNull().default(sql`'[]'::jsonb`),
+    kdvOrani: numeric("kdv_orani", { precision: 5, scale: 2 }).notNull().default("20"),
+    not: text("not"),
+    kaydedenAd: text("kaydeden_ad").notNull(),
+    ...timestamps,
+  },
+  (t) => [index("tarifeler_sirket_gecerlilik_idx").on(t.sirketId, t.gecerlilikBaslangic.desc())],
+);
+
+export const kesimDurumuEnum = pgEnum("kesim_durumu", ["taslak", "kesildi", "odendi", "iptal"]);
+export type KesimDurumu = (typeof kesimDurumuEnum.enumValues)[number];
+
+/** Aylık hesap kesimi — şirket + dönem (YYYY-MM) tekil. Tutarlar kuruş hassasiyetinde. */
+export const hesapKesimleri = pgTable(
+  "hesap_kesimleri",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sirketId: uuid("sirket_id")
+      .notNull()
+      .references(() => sirketler.id, { onDelete: "cascade" }),
+    donem: text("donem").notNull(),
+    durum: kesimDurumuEnum("durum").notNull().default("taslak"),
+    paketSayisi: integer("paket_sayisi").notNull().default(0),
+    araToplam: numeric("ara_toplam", { precision: 12, scale: 2 }).notNull().default("0"),
+    kdvOrani: numeric("kdv_orani", { precision: 5, scale: 2 }).notNull().default("20"),
+    kdvTutari: numeric("kdv_tutari", { precision: 12, scale: 2 }).notNull().default("0"),
+    genelToplam: numeric("genel_toplam", { precision: 12, scale: 2 }).notNull().default("0"),
+    faturaNo: text("fatura_no"),
+    kesimTarihi: timestamp("kesim_tarihi", { withTimezone: true }),
+    vadeTarihi: date("vade_tarihi"),
+    not: text("not"),
+    kaydedenAd: text("kaydeden_ad").notNull(),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex("hesap_kesimleri_sirket_donem_uq").on(t.sirketId, t.donem),
+    index("hesap_kesimleri_durum_idx").on(t.durum),
+  ],
+);
+
+export const kesimKalemiTuruEnum = pgEnum("kesim_kalemi_turu", ["paket", "ek_hizmet", "diger"]);
+
+export const hesapKesimKalemleri = pgTable(
+  "hesap_kesim_kalemleri",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    kesimId: uuid("kesim_id")
+      .notNull()
+      .references(() => hesapKesimleri.id, { onDelete: "cascade" }),
+    sira: integer("sira").notNull().default(0),
+    tur: kesimKalemiTuruEnum("tur").notNull(),
+    aciklama: text("aciklama").notNull(),
+    adet: numeric("adet", { precision: 12, scale: 2 }).notNull(),
+    birimFiyat: numeric("birim_fiyat", { precision: 12, scale: 2 }).notNull(),
+    tutar: numeric("tutar", { precision: 12, scale: 2 }).notNull(),
+  },
+  (t) => [index("hesap_kesim_kalemleri_kesim_idx").on(t.kesimId)],
+);
+
+/** Ödeme — kesime bağlı ya da serbest (avans). Bakiye = kesilen − ödenen. */
+export const odemeler = pgTable(
+  "odemeler",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sirketId: uuid("sirket_id")
+      .notNull()
+      .references(() => sirketler.id, { onDelete: "cascade" }),
+    kesimId: uuid("kesim_id").references(() => hesapKesimleri.id, { onDelete: "set null" }),
+    tarih: date("tarih").notNull(),
+    tutar: numeric("tutar", { precision: 12, scale: 2 }).notNull(),
+    /** havale | nakit | kredi_karti | diger */
+    yontem: text("yontem").notNull().default("havale"),
+    not: text("not"),
+    kaydedenAd: text("kaydeden_ad").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("odemeler_sirket_tarih_idx").on(t.sirketId, t.tarih.desc())],
+);
+
+export type Tarife = typeof tarifeler.$inferSelect;
+export type HesapKesimi = typeof hesapKesimleri.$inferSelect;
+export type HesapKesimKalemi = typeof hesapKesimKalemleri.$inferSelect;
+export type Odeme = typeof odemeler.$inferSelect;
+
 export const sirketlerRelations = relations(sirketler, ({ many }) => ({
   kullanicilar: many(kullanicilar),
   paketOkutmalari: many(paketOkutmalari),

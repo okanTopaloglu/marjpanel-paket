@@ -12,6 +12,10 @@ import {
   Users,
   Truck,
   Building2,
+  Boxes,
+  PackagePlus,
+  Receipt,
+  Wallet,
   Share2,
   FileText,
   Mail,
@@ -76,6 +80,22 @@ function gruplariOlustur(ozet: OturumOzeti): NavGrup[] {
       yonetimItems.push({ href: "/sirketler", label: "Şirketler", icon: Building2 });
     }
     gruplar.push({ baslik: "Yönetim", items: yonetimItems });
+
+    // DEPO: süper yönetici malı kabul eder ve tüm stokları görür; şirket
+    // yöneticisi yalnız kendi stoğunu (Faz B).
+    gruplar.push({
+      baslik: "Depo",
+      items: super_
+        ? [
+            { href: "/mal-kabul", label: "Mal Kabul", icon: PackagePlus, match: "/mal-kabul" },
+            { href: "/stok", label: "Stoklar", icon: Boxes, match: "/stok" },
+            { href: "/hesap-kesimi", label: "Hesap Kesimi", icon: Receipt, match: "/hesap-kesimi" },
+          ]
+        : [
+            { href: "/stok", label: "Stokum", icon: Boxes, match: "/stok" },
+            { href: "/hesabim", label: "Hesabım", icon: Wallet, match: "/hesabim" },
+          ],
+    });
   }
 
   const uygulamaItems: NavItem[] = [];
