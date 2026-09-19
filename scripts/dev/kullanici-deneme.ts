@@ -80,27 +80,14 @@ async function main() {
     }
     beklenen(kendiniSilmeReddedildi, "kendi hesabını silme isteği reddedildi");
 
-    // BULGU: seed şirketinde tek yönetici seed'in super_admin'i — 'admin'
-    // rolünde KİMSE yok. Deneme kullanıcısını 'admin'e yükseltmek onu o
-    // şirketin TEK aktif admin'i yapıyor; "son admin" koruması bu yüzden
-    // silmeyi (ve rolden düşürmeyi) de reddediyor — beklenen davranış,
-    // bkz. `sonAdminKorumasiIhlaliMi`. Bu yüzden temizlik `sil()` (kural
-    // uygulanan repo fonksiyonu) yerine aşağıda DOĞRUDAN DB silmesiyle
-    // yapılır: burada test edilen kural değil, test fikstürünün temizliği.
-    let sonAdminKorumasiCalisiyorMu = false;
-    try {
-      await sil(kapsam, deneme.id);
-    } catch (hata) {
-      sonAdminKorumasiCalisiyorMu =
-        hata instanceof KullaniciIslemHatasi && hata.kod === "son-admin";
-      if (!sonAdminKorumasiCalisiyorMu) throw hata;
-    }
-    beklenen(
-      sonAdminKorumasiCalisiyorMu,
-      "şirketin tek admin'i olduğu için silme de reddedildi (son admin koruması)",
-    );
+    // Seed şirketinde süper yönetici var; süper yönetici de yönetim yetkisi
+    // taşıdığı için deneme kullanıcısı (admin) şirketin SON yöneticisi
+    // değildir — silme kurala takılmaz. Kural `kullanici-kurallari.test.ts`te
+    // saf olarak test edilir.
+    await sil(kapsam, deneme.id);
+    beklenen(true, "başka yönetici (super_admin) varken admin silinebildi");
   } finally {
-    // Temizlik: kuralı ATLAYIP doğrudan DB'den siliyoruz (yukarıdaki bulgu).
+    // Temizlik: sil() başarısız olduysa artık kalan satırı doğrudan kaldır.
     await db.delete(kullanicilar).where(eq(kullanicilar.id, deneme.id));
     const [kaldiMi] = await db
       .select({ id: kullanicilar.id })

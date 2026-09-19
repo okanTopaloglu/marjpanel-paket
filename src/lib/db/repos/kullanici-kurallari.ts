@@ -1,5 +1,10 @@
 import type { KullaniciRolu } from "@/lib/db/schema";
 
+/** Yönetim yetkisi taşıyan roller: şirketi admin de super_admin de yönetebilir. */
+export function yoneticiRoluMu(rol: KullaniciRolu): boolean {
+  return rol === "admin" || rol === "super_admin";
+}
+
 /**
  * KULLANICI İŞ KURALLARI — SAF MODÜL (DB bağlantısı YOK).
  *
@@ -34,20 +39,16 @@ export class KullaniciIslemHatasi extends Error {
 }
 
 /**
- * SON AKTİF ADMİN KORUMASI — saf fonksiyon.
+ * SON AKTİF YÖNETİCİ KORUMASI — saf fonksiyon.
  *
- * Bir şirketin admin rolündeki TEK aktif kullanıcısı ne rolden düşürülebilir
- * ne pasifleştirilebilir ne de silinebilir — yoksa şirket yönetimsiz kalır.
- * `digerAktifAdminSayisi`, HEDEF kullanıcı hariç aynı şirketteki aktif admin
- * sayısıdır; çağıran bunu tek bir `count(*)` ile hesaplar.
+ * Bir şirketin yönetici rolündeki (admin VEYA super_admin) TEK aktif
+ * kullanıcısı ne çalışana düşürülebilir ne pasifleştirilebilir ne de
+ * silinebilir — yoksa şirket yönetimsiz kalır. `digerAktifAdminSayisi`,
+ * HEDEF hariç aynı şirketteki aktif yönetici sayısıdır; çağıran bunu tek bir
+ * `count(*)` ile hesaplar.
  *
- * Silme işlemi `yeniAktif: false` (kullanıcı artık "aktif admin" değil) ile
- * modellenir — ayrı bir kod yolu gerekmez.
- *
- * `yeniRol`, `"admin"` DIŞINDA herhangi bir değere değişiyorsa (çalışana
- * düşürülse de `super_admin`e yükseltilse de) koruma aynı şekilde işler:
- * kural "rol admin olarak KALSIN" der, "rol düşürülmesin" değil — süper
- * yöneticiye yükseltme de şirketi rol='admin' satırı olmadan bırakır.
+ * Silme işlemi `yeniAktif: false` ile modellenir — ayrı kod yolu gerekmez.
+ * admin ↔ super_admin geçişi yönetim yetkisini korur, koruma devreye girmez.
  */
 export function sonAdminKorumasiIhlaliMi(girdi: {
   /** Hedef, DEĞİŞİKLİKTEN ÖNCE şirketin aktif bir admin'i miydi? */
@@ -60,7 +61,7 @@ export function sonAdminKorumasiIhlaliMi(girdi: {
   yeniAktif?: boolean;
 }): boolean {
   if (!girdi.hedefSuAnAktifAdminMi) return false;
-  const rolDusuyor = girdi.yeniRol !== undefined && girdi.yeniRol !== "admin";
+  const rolDusuyor = girdi.yeniRol !== undefined && !yoneticiRoluMu(girdi.yeniRol);
   const pasifOluyor = girdi.yeniAktif === false;
   if (!rolDusuyor && !pasifOluyor) return false;
   return girdi.digerAktifAdminSayisi <= 0;

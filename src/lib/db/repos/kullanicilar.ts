@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   kullanicilar,
@@ -9,7 +9,11 @@ import {
 } from "@/lib/db/schema";
 import type { Kapsam } from "@/lib/auth/kapsam";
 import { CakismaHatasi } from "@/lib/db/repos/sirketler";
-import { KullaniciIslemHatasi, sonAdminKorumasiIhlaliMi } from "@/lib/db/repos/kullanici-kurallari";
+import {
+  KullaniciIslemHatasi,
+  sonAdminKorumasiIhlaliMi,
+  yoneticiRoluMu,
+} from "@/lib/db/repos/kullanici-kurallari";
 
 export { KullaniciIslemHatasi, sonAdminKorumasiIhlaliMi } from "@/lib/db/repos/kullanici-kurallari";
 export type { KullaniciHataKodu } from "@/lib/db/repos/kullanici-kurallari";
@@ -165,7 +169,7 @@ function telefonCakismasiMi(hata: unknown): boolean {
   return false;
 }
 
-/** Aynı şirkette, `haric` dışında, kaç aktif admin var. */
+/** Aynı şirkette, `haric` dışında, kaç aktif yönetici (admin/super_admin) var. */
 async function digerAktifAdminSayisi(sirketId: string, haric: string): Promise<number> {
   const [satir] = await db
     .select({ adet: sql<number>`count(*)::int` })
@@ -173,7 +177,7 @@ async function digerAktifAdminSayisi(sirketId: string, haric: string): Promise<n
     .where(
       and(
         eq(kullanicilar.sirketId, sirketId),
-        eq(kullanicilar.rol, "admin"),
+        inArray(kullanicilar.rol, ["admin", "super_admin"]),
         eq(kullanicilar.aktif, true),
         ne(kullanicilar.id, haric),
       ),
@@ -300,7 +304,7 @@ export async function guncelle(
     throw new KullaniciIslemHatasi("yetkisiz-rol", "Bu rolü atama yetkiniz yok.");
   }
 
-  const hedefAktifAdminMi = hedef.rol === "admin" && hedef.aktif;
+  const hedefAktifAdminMi = yoneticiRoluMu(hedef.rol) && hedef.aktif;
   if (hedefAktifAdminMi && (girdi.rol !== undefined || girdi.aktif !== undefined)) {
     const digerSayi = await digerAktifAdminSayisi(hedef.sirketId, id);
     if (
@@ -352,7 +356,7 @@ export async function sil(k: Kapsam, id: string): Promise<void> {
     throw new KullaniciIslemHatasi("yetkisiz", "Bu kullanıcıyı silme yetkiniz yok.");
   }
 
-  const hedefAktifAdminMi = hedef.rol === "admin" && hedef.aktif;
+  const hedefAktifAdminMi = yoneticiRoluMu(hedef.rol) && hedef.aktif;
   if (hedefAktifAdminMi) {
     const digerSayi = await digerAktifAdminSayisi(hedef.sirketId, id);
     if (

@@ -73,12 +73,22 @@ describe("sonAdminKorumasiIhlaliMi", () => {
     ).toBe(false);
   });
 
-  it("son admin super_admin'e yükseltilirken de aynı korumaya tabidir (rol artık 'admin' değil)", () => {
+  it("son yönetici super_admin'e yükseltilirken koruma devreye girmez (yönetim yetkisi korunur)", () => {
     expect(
       sonAdminKorumasiIhlaliMi({
         hedefSuAnAktifAdminMi: true,
         digerAktifAdminSayisi: 0,
         yeniRol: "super_admin",
+      }),
+    ).toBe(false);
+  });
+
+  it("son yönetici çalışana düşürülemez", () => {
+    expect(
+      sonAdminKorumasiIhlaliMi({
+        hedefSuAnAktifAdminMi: true,
+        digerAktifAdminSayisi: 0,
+        yeniRol: "calisan",
       }),
     ).toBe(true);
   });
