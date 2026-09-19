@@ -1,6 +1,7 @@
 import {
   bayatlariSerbestBirak,
   bekleyenAl,
+  eskiIsleriSil,
   otoIsAc,
 } from "@/lib/db/repos/senkron-isleri";
 import {
@@ -98,10 +99,14 @@ export async function tik(): Promise<void> {
       return;
     }
 
-    // 3) Ürün senkronu: yarım saatte bir yoklanır.
+    // 3) Ürün senkronu: yarım saatte bir yoklanır. Aynı turda senkron
+    //    geçmişi de budanır (14 günden eski işler); tablo sınırsız büyümesin.
     const simdi = Date.now();
     if (simdi - d.sonUrunKontrolu < URUN_KONTROL_ARALIGI_MS) return;
     d.sonUrunKontrolu = simdi;
+
+    const silinen = await eskiIsleriSil(14);
+    if (silinen > 0) console.log(`[senkron] ${silinen} eski iş kaydı silindi.`);
 
     const urunVadesi = await urunSenkronuVadesiGelenler();
     if (urunVadesi.length === 0) return;
