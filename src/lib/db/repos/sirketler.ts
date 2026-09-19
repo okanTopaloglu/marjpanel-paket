@@ -52,6 +52,33 @@ function kisitAlani(kisit: string): CakismaAlani | null {
   return null;
 }
 
+/** Host (normalize) → şirket; kiracı çözümü (lib/kiraci/coz). */
+export async function alanAdiIleGetir(alanAdi: string): Promise<Sirket | null> {
+  if (!alanAdi) return null;
+  const [satir] = await db.select().from(sirketler).where(eq(sirketler.alanAdi, alanAdi)).limit(1);
+  return satir ?? null;
+}
+
+/**
+ * Logo dosyasını ayarlar (null = kaldır); ESKİ dosya adını döner ki çağıran
+ * diskten silsin. Kayıt önce, silme sonra: silme başarısız olsa bile veri
+ * doğru kalır (sahipsiz dosya sonradan temizlenebilir).
+ */
+export async function logoAyarla(
+  id: string,
+  tur: "acik" | "koyu",
+  dosyaAdi: string | null,
+): Promise<string | null> {
+  const sutun = tur === "acik" ? sirketler.logoDosya : sirketler.logoKoyuDosya;
+  const [mevcut] = await db.select({ eski: sutun }).from(sirketler).where(eq(sirketler.id, id)).limit(1);
+  if (!mevcut) throw new Error("Şirket bulunamadı.");
+  await db
+    .update(sirketler)
+    .set(tur === "acik" ? { logoDosya: dosyaAdi, updatedAt: new Date() } : { logoKoyuDosya: dosyaAdi, updatedAt: new Date() })
+    .where(eq(sirketler.id, id));
+  return mevcut.eski ?? null;
+}
+
 export async function adIleGetir(ad: string): Promise<Sirket | null> {
   const [satir] = await db
     .select()
@@ -150,6 +177,9 @@ export async function listeleSayimlarla(): Promise<SirketSayimli[]> {
       id: sirketler.id,
       ad: sirketler.ad,
       alanAdi: sirketler.alanAdi,
+      markaAdi: sirketler.markaAdi,
+      logoDosya: sirketler.logoDosya,
+      logoKoyuDosya: sirketler.logoKoyuDosya,
       azamiEntegrasyon: sirketler.azamiEntegrasyon,
       faturaPaylasAcik: sirketler.faturaPaylasAcik,
       faturaKesimAcik: sirketler.faturaKesimAcik,
@@ -177,6 +207,7 @@ export async function guncelle(
   girdi: {
     ad?: string;
     alanAdi?: string | null;
+    markaAdi?: string | null;
     azamiEntegrasyon?: number | null;
     faturaPaylasAcik?: boolean;
     faturaKesimAcik?: boolean;
@@ -186,6 +217,7 @@ export async function guncelle(
   const set: Partial<typeof sirketler.$inferInsert> = { updatedAt: new Date() };
   if (girdi.ad !== undefined) set.ad = girdi.ad;
   if (girdi.alanAdi !== undefined) set.alanAdi = girdi.alanAdi;
+  if (girdi.markaAdi !== undefined) set.markaAdi = girdi.markaAdi;
   if (girdi.azamiEntegrasyon !== undefined) set.azamiEntegrasyon = girdi.azamiEntegrasyon;
   if (girdi.faturaPaylasAcik !== undefined) set.faturaPaylasAcik = girdi.faturaPaylasAcik;
   if (girdi.faturaKesimAcik !== undefined) set.faturaKesimAcik = girdi.faturaKesimAcik;

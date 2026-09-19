@@ -4,43 +4,34 @@ import { mkdirSync } from "node:fs";
 mkdirSync("public/icons", { recursive: true });
 
 /*
- * MAMA AURA uygulama simgesi — ters üçgen.
+ * MarjPanel marka işareti — "Marj basamakları" (Mürekkep & Nane).
  *
- * tr.mamaaura.com'un favicon'u kırmızı (#D81040), aşağı bakan, neredeyse
- * kare kutuya oturan bir üçgendir (ölçüldü: 31x32 px, tepe tam ortada).
- * Logodaki "AURA"nın A harfi de aynı biçimdir; marka bu üçgenle anılır.
+ * Nane yuvarlak kare + mürekkep renkli, sağa yükselen üç basamak. Uygulama
+ * içindeki logo (src/components/marka/logo.tsx) ile AYNI yol ve AYNI iki
+ * renk: telefondaki simge ile paneldeki işaret farklı görünmesin. Gradyan,
+ * ışık yakalaması ve iç kenar çizgisi bilinçli olarak yok; tasarım sistemi
+ * düz yüzey tanır.
  *
- * Ana ekran simgesi: kırmızı yuvarlak kare + BEYAZ üçgen. Saydam zeminli
- * favicon Android'de siyah kutuya düşer, beyaz zemin ise diğer simgelerin
- * arasında kaybolur; dolu kırmızı kare hem markayı taşır hem okunur.
- * Tarayıcı sekmesi (favicon-32) ise sitedekiyle birebir: saydam zemin,
- * kırmızı üçgen.
- *
- * Uygulama içindeki işaret (src/components/marka/mama-aura.tsx) AYNI yolu
- * ve AYNI rengi kullanır; telefondaki simge ile paneldeki işaret ayrı
- * çizilmez. Gradyan, ışık, iç kenar yok — tasarım sistemi düz yüzey tanır.
- *
- *   kırmızı  #D81040   beyaz  #FFFFFF
+ * Renkler globals.css token'larıyla aynı:
+ *   nane  #12A874  (--vurgu-parlak)      mürekkep  #0F1B2D  (--ink)
  */
-const KIRMIZI = "#D81040";
-const BEYAZ = "#FFFFFF";
-/** Üçgen — 512 ızgarasında, dikey merkezde (66..446 → orta 256), 368 genişlik. */
-const UCGEN = "M72 66 H440 L256 446 Z";
+const NANE = "#12A874";
+const MUREKKEP = "#0F1B2D";
+const BASAMAK = "M104 408 V312 H200 V216 H296 V120 H408 V408 Z";
 
 /**
- * @param rx     köşe yarıçapı (512 ızgarasında)
- * @param olcek  üçgenin ölçeği (1 = mama-aura.tsx ile birebir)
- * @param zemin  arka plan; null = saydam (favicon)
- * @param dolgu  üçgen rengi
+ * @param rx       köşe yarıçapı (512 ızgarasında)
+ * @param olcek    basamak grubunun ölçeği (1 = logo.tsx ile birebir)
+ * @param kalinlik stroke genişliği: küçük boyutta köşeler daha yumuşak dursun
  */
-function svg({ rx, olcek = 1, zemin = KIRMIZI, dolgu = BEYAZ, kalinlik = 24 }) {
+function svg({ rx, olcek = 1, kalinlik = 28 }) {
   const s = 512;
+  // Ölçekleme merkez etrafında: basamaklar güvenli bölgede kalır.
   const merkez = s / 2;
   const t = `translate(${merkez} ${merkez}) scale(${olcek}) translate(${-merkez} ${-merkez})`;
-  const arka = zemin ? `<rect width="${s}" height="${s}" rx="${rx}" fill="${zemin}"/>` : "";
   return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">
-  ${arka}
-  <path d="${UCGEN}" transform="${t}" fill="${dolgu}" stroke="${dolgu}" stroke-width="${kalinlik}" stroke-linejoin="round"/>
+  <rect width="${s}" height="${s}" rx="${rx}" fill="${NANE}"/>
+  <path d="${BASAMAK}" transform="${t}" fill="${MUREKKEP}" stroke="${MUREKKEP}" stroke-width="${kalinlik}" stroke-linejoin="round"/>
 </svg>`;
 }
 
@@ -49,19 +40,18 @@ async function png(svgStr, size, out) {
   console.log("✓", out);
 }
 
-// Normal: köşe 112/512 ≈ %22 (paneldeki kart yarıçapının ölçeği); üçgen
-// biraz küçültülür ki köşe yuvarlağıyla çarpışmasın.
-const normal = svg({ rx: 112, olcek: 0.8 });
+// Normal: köşe 112/512 ≈ %22 (paneldeki kart yarıçapının ölçeği).
+const normal = svg({ rx: 112 });
 await png(normal, 192, "public/icons/icon-192.png");
 await png(normal, 512, "public/icons/icon-512.png");
 await png(normal, 180, "public/apple-touch-icon.png");
 
-// Favicon 32px: sitedekiyle aynı — saydam zemin, kırmızı üçgen, kutuyu doldurur.
-const favicon = svg({ rx: 0, olcek: 1.28, zemin: null, dolgu: KIRMIZI, kalinlik: 8 });
+// Favicon 32px: basamaklar biraz büyür, köşeler daha yumuşak.
+const favicon = svg({ rx: 96, olcek: 1.08, kalinlik: 36 });
 await png(favicon, 32, "public/favicon-32.png");
 
-// Maskable (Android kırpar): tam kare zemin, üçgen güvenli bölgede (~%66).
-const maskable = svg({ rx: 0, olcek: 0.66 });
+// Maskable (Android kırpar): tam kare zemin, basamaklar güvenli bölgede (~%70).
+const maskable = svg({ rx: 0, olcek: 0.72 });
 await png(maskable, 512, "public/icons/icon-maskable-512.png");
 
 console.log("İkonlar hazır.");

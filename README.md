@@ -55,6 +55,12 @@ repo katmanını gerçek veritabanına karşı dener.
 
 ## Mimari notlar
 
+- **Kiracı kimliği (white-label)**: `Host` → `sirketler.alan_adi` → marka
+  (`lib/kiraci`). Kiracı adresinde şirketin logosu/adı birincil, MarjPanel
+  "altyapı" notu her ekranda; platform adresinde (`APP_URL`) MarjPanel. Alan
+  adı olan şirketin kullanıcısı YALNIZ kendi adresinden girer (`auth.ts`
+  adres kapısı, `lib/kiraci/kural.ts`); süper yönetici her adresten. Logo
+  süper yönetici (Şirketler) ya da şirket yöneticisi (Ayarlar) yükler.
 - **Kiracı izolasyonu**: her sunucu işlemi `Kapsam` (`lib/auth/kapsam.ts`) alır;
   `sirketId` yalnız oturumdan türetilir, istemciden asla okunmaz. Yetki kapıları
   (`lib/auth/yetki.ts`) her istekte DB'den taze rol okur; JWT'deki role güvenilmez.
@@ -91,6 +97,6 @@ Adım adım: [`docs/DEPLOY-COOLIFY.md`](docs/DEPLOY-COOLIFY.md).
 [`DESIGN.md`](DESIGN.md): tek vurgu rengi (nane), mürekkep menü, tabular rakamlar,
 44 px dokunma hedefi, hareket yalnız transform/opacity.
 
-Bu kurulum **MAMA AURA** için markalanmıştır (giriş, menü, simge, OG kartı);
-MarjPanel altyapı notu olarak kalır. Kaynak logo `scripts/marka/`, türevler
-`pnpm ikon:uret` (bkz. DESIGN.md "Müşteri markası").
+Kiracı markası veritabanından gelir (bkz. DESIGN.md "Kiracı markası");
+platform simgeleri ve OG kartı `pnpm ikon:uret` ile üretilir. MAMA AURA'nın
+logosu `scripts/marka/`ta seed kaynağı olarak durur.

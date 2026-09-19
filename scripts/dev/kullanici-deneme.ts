@@ -51,6 +51,10 @@ async function main() {
     okutmaModu: superAdmin.okutmaModu,
     sirket: {
       ad: "",
+      alanAdi: null,
+      markaAdi: null,
+      logoDosya: null,
+      logoKoyuDosya: null,
       varsayilanOkutmaModu: "hizli",
       ozellikler: { faturaPaylas: false, faturaKesim: false, mail: false },
     },

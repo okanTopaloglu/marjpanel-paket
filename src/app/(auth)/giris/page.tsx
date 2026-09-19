@@ -4,9 +4,9 @@ import { guvenliGeriYolu } from "@/lib/auth/geri-yolu";
 import { GirisForm } from "./giris-form";
 
 export const metadata: Metadata = {
-  // Kök şablon "%s | MAMA AURA Paket" ekler; marka burada tekrar yazılmaz.
+  // Kök şablon markayı ekler; burada yalnız sayfa adı.
   title: "Giriş",
-  description: "MAMA AURA paket paneline giriş yapın.",
+  description: "Paket paneline giriş yapın.",
 };
 
 /**

@@ -43,7 +43,7 @@ Public port açmanıza gerek yok.
 | `DATABASE_URL` | Adım 2'deki iç URL |
 | `AUTH_SECRET` | `openssl rand -base64 32` |
 | `AUTH_TRUST_HOST` | `true` |
-| `APP_URL` | `https://paket.alanadiniz.com` |
+| `APP_URL` | `https://paket.marjpanel.com` (PLATFORM adresi; kiracılar `sirket.marjpanel.com`dan girer) |
 | `APP_ENCRYPTION_KEY` | `openssl rand -base64 32` (Trendyol anahtarlarını şifreler; SABİT KALMALI) |
 | `CRON_SECRET` | `openssl rand -hex 24` (boşsa `/api/cron/senkron` 401 döner) |
 | `SENKRON_ZAMANLAYICI` | `1` |
@@ -52,6 +52,7 @@ Public port açmanıza gerek yok.
 | `SEED_ADMIN_TELEFON` | `05XXXXXXXXX` (süper yönetici girişi) |
 | `SEED_ADMIN_PAROLA` | Güçlü parola (ilk girişten sonra değiştirin) |
 | `SEED_ADMIN_AD` | Adınız |
+| `SEED_SIRKET_ALAN_ADI` / `SEED_SIRKET_MARKA_ADI` / `SEED_SIRKET_LOGO` / `SEED_SIRKET_LOGO_KOYU` | İlk şirketin giriş adresi, marka adı ve logo dosya yolları (isteğe bağlı; yalnız boş alanları doldurur) |
 | `KAYIT_ACIK` | `0` (şirketler kendi kendine kayıt olamasın; siz açarsınız) |
 | `TRENDYOL_API_BASE` | `https://apigw.trendyol.com` |
 | `TRENDYOL_SIPARIS_SAAT_OFSETI` | `3` |
@@ -66,9 +67,17 @@ Public port açmanıza gerek yok.
 App → **Storages** → **+ Add** → Source `/app/uploads`, Destination `/app/uploads`.
 Eklenmezse her deploy'da yüklenen profil görselleri silinir.
 
-### Domain
+### Domain — çok kiracılı
 
-App → **Domains** → `https://paket.alanadiniz.com`. `APP_URL` ile aynı olsun.
+App → **Domains**: platform adresi (`https://paket.marjpanel.com`, `APP_URL`
+ile aynı) + HER KİRACININ giriş adresi (`https://sirket.marjpanel.com`,
+virgülle). DNS'te `*.marjpanel.com` wildcard A kaydı sunucuya bakar; Let's
+Encrypt sertifikası Coolify'a eklenen her domain için ayrı alınır. Yeni şirket
+açıp alan adı verdiğinizde domaini buraya da ekleyin (yoksa sertifika yok).
+
+Uygulama `Host` başlığından kiracıyı bulur (`sirketler.alan_adi`): şirketin
+logosu ve adı görünür, MarjPanel "altyapı" notu kalır. Tanınmayan host
+platform kimliğiyle açılır.
 
 ### Health check
 

@@ -12,7 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { MamaAuraYazi } from "@/components/marka/mama-aura";
+import { AltyapiNotu, KiraciLogo } from "@/components/marka/kiraci-markasi";
 import { SidebarNav } from "./sidebar-nav";
 import {
   HizIzleyici,
@@ -339,7 +339,7 @@ export function MobilMenuSaglayici({ children }: { children: React.ReactNode }) 
             >
               <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 pb-3 pt-safe">
                 <div className="flex items-center pt-3">
-                  <MamaAuraYazi zemin="koyu" yukseklik={17} altAd="Paket" />
+                  <KiraciLogo zemin="koyu" yukseklik={18} altAd="Paket" />
                 </div>
                 <button
                   type="button"
@@ -355,6 +355,9 @@ export function MobilMenuSaglayici({ children }: { children: React.ReactNode }) 
                 <SidebarNav onGit={kapat} />
               </div>
 
+              <div className="shrink-0 px-4 pb-2">
+                <AltyapiNotu zemin="koyu" />
+              </div>
               <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/10 px-4 py-3 pb-safe">
                 <span className="text-caption text-ink-foreground/60">
                   Kapatmak için sola sürükleyin

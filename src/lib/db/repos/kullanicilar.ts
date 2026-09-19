@@ -117,6 +117,10 @@ export async function kapsamIcinGetir(
       profilGorsel: kullanicilar.profilGorsel,
       aktif: kullanicilar.aktif,
       sirketAd: sirketler.ad,
+      sirketAlanAdi: sirketler.alanAdi,
+      sirketMarkaAdi: sirketler.markaAdi,
+      sirketLogoDosya: sirketler.logoDosya,
+      sirketLogoKoyuDosya: sirketler.logoKoyuDosya,
       varsayilanOkutmaModu: sirketler.varsayilanOkutmaModu,
       faturaPaylas: sirketler.faturaPaylasAcik,
       faturaKesim: sirketler.faturaKesimAcik,
@@ -141,6 +145,10 @@ export async function kapsamIcinGetir(
       okutmaModu: satir.okutmaModu,
       sirket: {
         ad: satir.sirketAd,
+        alanAdi: satir.sirketAlanAdi,
+        markaAdi: satir.sirketMarkaAdi,
+        logoDosya: satir.sirketLogoDosya,
+        logoKoyuDosya: satir.sirketLogoKoyuDosya,
         varsayilanOkutmaModu: satir.varsayilanOkutmaModu,
         ozellikler: {
           faturaPaylas: satir.faturaPaylas,

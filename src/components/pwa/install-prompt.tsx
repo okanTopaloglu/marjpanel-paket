@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Download, X, Share, SquarePlus } from "lucide-react";
-import { MamaAuraIsaret } from "@/components/marka/mama-aura";
+import { KiraciIsaret, useMarka } from "@/components/marka/kiraci-markasi";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -26,6 +26,7 @@ export function InstallPrompt() {
   const [olay, setOlay] = useState<BeforeInstallPromptEvent | null>(null);
   const [iosGoster, setIosGoster] = useState(false);
   const [gorunur, setGorunur] = useState(false);
+  const marka = useMarka();
 
   useEffect(() => {
     const standalone =
@@ -128,11 +129,11 @@ export function InstallPrompt() {
       </button>
 
       <div className="flex items-start gap-3.5 p-4 pr-11">
-        <MamaAuraIsaret boyut={44} />
+        <KiraciIsaret boyut={44} />
 
         <div className="min-w-0 flex-1">
           <div className="text-headline text-foreground">
-            MAMA AURA Paket&apos;i ana ekrana ekle
+            {marka.tur === "kiraci" ? `${marka.ad} Paket` : "MarjPanel Paket"}&apos;i ana ekrana ekle
           </div>
 
           {iosGoster ? (

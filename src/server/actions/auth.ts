@@ -72,6 +72,15 @@ export async function girisYap(
     await signIn("credentials", { telefon, parola: cozum.data.parola, redirect: false });
   } catch (hata) {
     if (hata instanceof AuthError) {
+      // Parola doğru ama adres yanlış: kullanıcıya doğru adresi söyle.
+      const kod = (hata as { code?: unknown }).code;
+      if (typeof kod === "string" && kod.startsWith("alan_adi|")) {
+        const adres = kod.slice("alan_adi|".length);
+        return {
+          ok: false,
+          mesaj: `Bu hesap bu adrese ait değil. Giriş adresiniz: ${adres}`,
+        };
+      }
       return { ok: false, mesaj: HATALI_GIRIS_MESAJI };
     }
     throw hata;

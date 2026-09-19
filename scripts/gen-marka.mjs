@@ -4,7 +4,9 @@ import { mkdirSync } from "node:fs";
 mkdirSync("public/marka", { recursive: true });
 
 /*
- * MAMA AURA kelime işareti — iki zemin için iki PNG.
+ * MAMA AURA kelime işareti — iki zemin için iki PNG. SEED KAYNAĞI: kod
+ * artık MAMA AURA bilmez; bu dosyalar `SEED_SIRKET_LOGO`/`SEED_SIRKET_LOGO_KOYU`
+ * ile ilk şirketin logosu olarak veritabanına yüklenir (lib/db/seed.ts).
  *
  * Kaynak: tr.mamaaura.com'daki resmi logo (scripts/marka/mamaaura-logo.png,
  * 721x137, "MAMA" siyah + "AURA" kırmızı #D81040, saydam zemin). Tuvalde

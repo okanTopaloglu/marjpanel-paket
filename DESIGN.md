@@ -88,26 +88,28 @@ Pazaryeri adı ve rengi tek kaynaktan gelir: `src/lib/pazaryeri/kayit.ts`
 (`PazaryeriRozeti` oradan okur). idefix turkuazı öneridir; gerçek marka
 rengi doğrulanmalı.
 
-### Müşteri markası: MAMA AURA
+### Kiracı markası (white-label)
 
-Bu kurulum MAMA AURA'nın depo ekibi için ayakta; panel onların paneli gibi
-okunmalı. Kimlik `src/components/marka/mama-aura.tsx` içinde toplanır:
+Panel iki kimlikle açılır ve kimlik `Host`tan gelir (`lib/kiraci`,
+`components/marka/kiraci-markasi.tsx`):
 
-| Öğe | Nerede | Biçim |
+| Adres | Kimlik |
+|---|---|
+| `paket.marjpanel.com` (platform) | MarjPanel işareti + kelime işareti, nane vurgusu |
+| `sirket.marjpanel.com` (kiracı) | Şirketin yüklediği logo (yoksa adı, kalın metin); MarjPanel **altyapı notu** her ekranda |
+
+| Öğe | Nerede | Kural |
 |---|---|---|
-| Kelime işareti (açık) | Giriş kartı üstü, mobil üst çubuk, çevrimdışı sayfa, OG kartı | `public/marka/mamaaura.png` - resmi logo, kırpılmış |
-| Kelime işareti (koyu) | Mürekkep menü, mobil çekmece | `mamaaura-koyu.png` - harfler `#EAF0F6`, kırmızı aynı |
-| İşaret (ters üçgen) | Dar menü, "ana ekrana ekle", uygulama simgesi, favicon | Satır içi SVG; `scripts/gen-icons.mjs` aynı yolu kullanır |
-| Filigran | Her panel sayfasının altı (`PanelAltBilgi`), boş durumlar, panel hata kartı | Kelime işareti gri tonda %40 — kırmızı yok, içerikle yarışmaz |
+| Logo (açık) | Giriş kartı üstü, mobil üst çubuk, filigranlar | Şirket yükler; saydam PNG, ≤1 MB, yükseklik sabit genişlik orantılı |
+| Logo (koyu) | Mürekkep menü, mobil çekmece | Yüklenmezse açık logo beyaz plakada |
+| İşaret | Dar menü, "ana ekrana ekle", PWA simgesi | Logo beyaz kare içinde; logo yoksa baş harf |
+| Altyapı notu | Giriş kartı altı (belirgin kilit), menünün dibi, sayfa alt bilgisi | MarjPanel işareti + "MarjPanel Paket altyapısı" — kiracıda hiçbir yerden kalkmaz |
+| Filigran | Boş durum, hata kartı, sayfa altı | Gri tonda %40; kiracı logosu ya da MarjPanel kelime işareti |
 
-Marka kırmızısı `#D81040` **yalnız işaretin ve kelime işaretinin içinde**
-yaşar; "Paket" hapı onun soluk tonunu alır. Buton, seçili satır, odak halkası,
-durum rengi nane kalır. Pazaryeri rozetleriyle aynı ilke: kimlik rengi taşır,
-dolgu almaz. MarjPanel altyapı olarak giriş alt bilgisinde ve OG kartının
-köşesinde küçük bir notla anılır; iki marka aynı ağırlıkta yan yana durmaz.
-
-Kaynak logo `scripts/marka/mamaaura-logo.png`; türevler `pnpm ikon:uret` ile
-üretilir (`gen-marka.mjs` → `gen-icons.mjs` → `gen-og.mjs`).
+Kiracının rengi ne olursa olsun **yalnız logonun içinde** yaşar; buton, seçili
+satır, odak halkası, durum rengi nane kalır. Pazaryeri rozetleriyle aynı ilke:
+kimlik rengi taşır, dolgu almaz. İki marka aynı ağırlıkta yan yana durmaz:
+kiracı sahnede, MarjPanel imzada.
 
 ### Yasaklar
 

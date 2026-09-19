@@ -1,5 +1,5 @@
 /*
- * MAMA AURA Paket service worker.
+ * MarjPanel Paket service worker.
  *
  * Bilinçli olarak dar kapsamlı: sayfa ve veri istekleri HER ZAMAN ağdan gelir
  * (oturum/veri bayatlamasın); yalnız ikon/manifest ve çevrimdışı yedek sayfa
@@ -7,7 +7,7 @@
  * bildirim gerektirmiyor.
  */
 
-const CACHE = "mamaaura-paket-v3";
+const CACHE = "marjpanel-paket-v4";
 const CEVRIMDISI = "/offline.html";
 const ASSETS = [
   CEVRIMDISI,
@@ -17,8 +17,6 @@ const ASSETS = [
   "/icons/icon-maskable-512.png",
   "/apple-touch-icon.png",
   "/favicon-32.png",
-  // Çevrimdışı sayfa kelime işaretini gösterir; önbellekte olmazsa kırık resim.
-  "/marka/mamaaura.png",
 ];
 
 /**

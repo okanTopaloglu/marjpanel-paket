@@ -78,7 +78,18 @@ export const sirketler = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     ad: text("ad").notNull().unique(),
+    /**
+     * Kiracının giriş adresi (host, küçük harf, port yok: "mamaaura.marjpanel.com").
+     * Middleware/layout `Host` başlığıyla buradan kiracıyı çözer; NULL ise
+     * şirket platform adresinden (paket.marjpanel.com) girer.
+     */
     alanAdi: text("alan_adi").unique(),
+    /** Arayüzde görünen kısa marka adı; NULL ise `ad`. */
+    markaAdi: text("marka_adi"),
+    /** Açık zemin logosu (`/g/<dosya>`); NULL ise ad metin olarak yazılır. */
+    logoDosya: text("logo_dosya"),
+    /** Mürekkep menü için açık renkli logo; NULL ise açık logo beyaz plakada. */
+    logoKoyuDosya: text("logo_koyu_dosya"),
     /** NULL = sınırsız entegrasyon. */
     azamiEntegrasyon: integer("azami_entegrasyon"),
     faturaPaylasAcik: boolean("fatura_paylas_acik").notNull().default(false),

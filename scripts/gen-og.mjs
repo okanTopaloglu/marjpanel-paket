@@ -4,32 +4,42 @@ import { mkdirSync } from "node:fs";
 mkdirSync("public", { recursive: true });
 
 /*
- * Paylaşım kartı (og.png) — 1200x630. MAMA AURA Paket için.
+ * Paylaşım kartı (og.png) — 1200x630. MarjPanel Paket için.
  *
- * Üstte resmi kelime işareti (public/marka/mamaaura.png — gen-marka.mjs
- * üretir, bu betik ondan SONRA koşar), altta uygulamanın ne yaptığı ve
- * pazaryeri rozetleri. Zemin/metin renkleri globals.css'teki "Mürekkep &
- * Nane" token'larıyla birebir aynıdır; alt şerit ise marka kırmızısı — kart
- * kimin olduğunu tek bakışta söylesin.
+ * gen-icons.mjs ile AYNI marka çizimi ve AYNI palet kullanılır; sosyal
+ * paylaşımda çıkan kart ile ana ekran simgesi farklı görünmesin. Renkler
+ * globals.css'teki "Mürekkep & Nane" token'larıyla birebir aynıdır:
  *   --background → #F5F7F6   --foreground → #0F1B2D   --muted-foreground → #5C6878
- *   marka kırmızısı #D81040
+ *   nane #12A874 / mürekkep #0F1B2D
  *
  * Yazı tipi gömülmez: SVG metni sistem yazı tipi yığınıyla çizilir (sharp
- * içindeki librsvg sunucudaki fontu kullanır). Kelime işareti PNG olarak
- * ÜSTÜNE bindirilir (composite) — SVG'ye data URI gömmek librsvg'de her
- * sürümde güvenilir değil.
+ * içindeki librsvg sunucudaki fontu kullanır). Kart tek seferlik üretilip
+ * public/og.png olarak yayınlanır, çalışma anında maliyeti yoktur.
  */
 const G = 1200;
 const Y = 630;
 
-const KIRMIZI = "#D81040";
+// Murekkep & Nane: --background #F5F7F6, --foreground #0F1B2D, --muted-foreground #5C6878
+const NANE = "#12A874";
+const MUREKKEP = "#0F1B2D";
 const ZEMIN = "#F5F7F6";
 const METIN = "#0F1B2D";
 const SOLUK = "#5C6878";
+const BASAMAK = "M104 408 V312 H200 V216 H296 V120 H408 V408 Z";
+
+/** Marka isareti: gen-icons.mjs ve logo.tsx ile ayni yol, ayni iki renk. */
+function isaret(x, y, boyut) {
+  const olcek = boyut / 512;
+  return `
+  <g transform="translate(${x},${y}) scale(${olcek})">
+    <rect width="512" height="512" rx="112" fill="${NANE}"/>
+    <path d="${BASAMAK}" fill="${MUREKKEP}" stroke="${MUREKKEP}" stroke-width="28" stroke-linejoin="round"/>
+  </g>`;
+}
 
 /**
  * Pazaryeri adı rozeti — logo GÖMÜLMEZ, yalnız metin (telif riski yok).
- * Genişlik metin uzunluğundan kestirilir; rozetler 96px kenar boşluklarının
+ * Genişlik metin uzunluğundan kestirilir; yedi rozet 96px kenar boşluklarının
  * içinde kalsın diye ölçüler dar tutulur (bkz. aşağıdaki taşma denetimi).
  */
 const ROZET_YAZI = 17;
@@ -50,8 +60,17 @@ function rozet(x, y, yazi) {
   </g>`;
 }
 
-// Paketleri bu kaynaklardan gelen siparişler için okutuyoruz.
-const pazaryerleri = ["Trendyol", "Hepsiburada", "N11", "Pazarama", "idefix", "Amazon"];
+// DESIGN.md "Pazaryeri kimlikleri" ile aynı sıra: paketleri bu kaynaklardan
+// gelen siparişler için okutuyoruz.
+const pazaryerleri = [
+  "Trendyol",
+  "Hepsiburada",
+  "N11",
+  "Pazarama",
+  "PTT AVM",
+  "idefix",
+  "Amazon",
+];
 const KENAR = 96;
 let rozetX = KENAR;
 const rozetler = pazaryerleri
@@ -71,14 +90,12 @@ if (seritSonu > G - KENAR) {
   );
 }
 
-// Kelime işareti 360px genişlik → 8:1 oran, 45px yükseklik; y=96'da durur.
-const LOGO_G = 360;
-const LOGO_Y = 96;
-
 const svg = `<svg width="${G}" height="${Y}" viewBox="0 0 ${G} ${Y}" xmlns="http://www.w3.org/2000/svg">
   <rect width="${G}" height="${Y}" fill="${ZEMIN}"/>
 
-  <text x="${KENAR + LOGO_G + 22}" y="${LOGO_Y + 34}" font-family="Segoe UI, -apple-system, Helvetica, Arial, sans-serif" font-size="22" font-weight="600" letter-spacing="2" fill="${SOLUK}">PAKET PANELİ</text>
+  ${isaret(96, 84, 96)}
+
+  <text x="212" y="150" font-family="Segoe UI, -apple-system, Helvetica, Arial, sans-serif" font-size="42" font-weight="700" letter-spacing="-1" fill="${METIN}">MarjPanel Paket</text>
 
   <text x="96" y="272" font-family="Segoe UI, -apple-system, Helvetica, Arial, sans-serif" font-size="60" font-weight="700" letter-spacing="-2.4" fill="${METIN}">Depo paket okutma</text>
   <text x="96" y="352" font-family="Segoe UI, -apple-system, Helvetica, Arial, sans-serif" font-size="60" font-weight="700" letter-spacing="-2.4" fill="${METIN}">ve sipariş takibi.</text>
@@ -87,15 +104,8 @@ const svg = `<svg width="${G}" height="${Y}" viewBox="0 0 ${G} ${Y}" xmlns="http
 
   ${rozetler}
 
-  <text x="${G - KENAR}" y="${Y - 30}" font-family="Segoe UI, -apple-system, Helvetica, Arial, sans-serif" font-size="16" font-weight="500" fill="${SOLUK}" text-anchor="end">MarjPanel Paket altyapısı</text>
-
-  <rect x="0" y="${Y - 8}" width="${G}" height="8" fill="${KIRMIZI}"/>
+  <rect x="0" y="${Y - 8}" width="${G}" height="8" fill="${NANE}"/>
 </svg>`;
 
-const logo = await sharp("public/marka/mamaaura.png").resize({ width: LOGO_G }).png().toBuffer();
-
-await sharp(Buffer.from(svg))
-  .composite([{ input: logo, left: KENAR, top: LOGO_Y }])
-  .png()
-  .toFile("public/og.png");
+await sharp(Buffer.from(svg)).png().toFile("public/og.png");
 console.log("✓ public/og.png (1200x630)");

@@ -7,7 +7,11 @@
  *  - İlk şirket (SEED_SIRKET_AD) ve süper yönetici (SEED_ADMIN_TELEFON/PAROLA/AD)
  */
 import "dotenv/config";
+import { readFile } from "node:fs/promises";
+import { extname } from "node:path";
 import { hash } from "@node-rs/argon2";
+import { dosyaKaydet } from "@/lib/depo/dosya";
+import { alanAdiNormalize } from "@/lib/kiraci/kural";
 import { eq, isNull, and } from "drizzle-orm";
 import { db, client } from "./client";
 import { barkodKurallari, kullanicilar, sirketler } from "./schema";
@@ -38,6 +42,50 @@ async function kurallariTohumla() {
   console.log(`Barkod kuralları: ${eklenen} eklendi, ${VARSAYILAN_KURALLAR.length - eklenen} zaten vardı.`);
 }
 
+/**
+ * İlk şirketin kiracı kimliği — yalnız BOŞ alanlar doldurulur (panelden
+ * yapılan değişiklik seed ile ezilmez):
+ *  - SEED_SIRKET_ALAN_ADI   → giriş adresi (mamaaura.marjpanel.com)
+ *  - SEED_SIRKET_MARKA_ADI  → görünen ad
+ *  - SEED_SIRKET_LOGO / SEED_SIRKET_LOGO_KOYU → diskteki PNG'ler görsel
+ *    deposuna kopyalanır (kod hiçbir şirketin logosunu bilmez).
+ */
+async function ilkSirketMarkasiniTohumla(sirketId: string) {
+  const [s] = await db.select().from(sirketler).where(eq(sirketler.id, sirketId)).limit(1);
+  if (!s) return;
+  const set: Partial<typeof sirketler.$inferInsert> = {};
+
+  const alanAdi = alanAdiNormalize(process.env.SEED_SIRKET_ALAN_ADI ?? "");
+  if (!s.alanAdi && alanAdi) set.alanAdi = alanAdi;
+
+  const markaAdi = process.env.SEED_SIRKET_MARKA_ADI?.trim();
+  if (!s.markaAdi && markaAdi) set.markaAdi = markaAdi;
+
+  const logoYukle = async (yol: string | undefined): Promise<string | null> => {
+    if (!yol?.trim()) return null;
+    try {
+      const uzanti = extname(yol).slice(1);
+      return await dosyaKaydet(await readFile(yol.trim()), uzanti);
+    } catch (hata) {
+      console.warn(`Seed logo yüklenemedi (${yol}): ${hata instanceof Error ? hata.message : String(hata)}`);
+      return null;
+    }
+  };
+  if (!s.logoDosya) {
+    const d = await logoYukle(process.env.SEED_SIRKET_LOGO);
+    if (d) set.logoDosya = d;
+  }
+  if (!s.logoKoyuDosya) {
+    const d = await logoYukle(process.env.SEED_SIRKET_LOGO_KOYU);
+    if (d) set.logoKoyuDosya = d;
+  }
+
+  if (Object.keys(set).length) {
+    await db.update(sirketler).set({ ...set, updatedAt: new Date() }).where(eq(sirketler.id, sirketId));
+    console.log(`Şirket markası tohumlandı: ${Object.keys(set).join(", ")}`);
+  }
+}
+
 async function ilkSirketVeYoneticiyiTohumla() {
   const sirketAd = process.env.SEED_SIRKET_AD?.trim();
   const telefonHam = process.env.SEED_ADMIN_TELEFON?.trim();
@@ -63,6 +111,7 @@ async function ilkSirketVeYoneticiyiTohumla() {
     sirket = (await db.insert(sirketler).values({ ad: sirketAd, azamiEntegrasyon: null }).returning())[0]!;
     console.log(`Şirket oluşturuldu: ${sirketAd}`);
   }
+  await ilkSirketMarkasiniTohumla(sirket.id);
 
   const varMi = await db
     .select({ id: kullanicilar.id })

@@ -39,7 +39,7 @@ export default function GlobalError({
             color: "#5C6878",
           }}
         >
-          MAMA AURA Paket
+          MarjPanel Paket
         </div>
         <h1
           style={{

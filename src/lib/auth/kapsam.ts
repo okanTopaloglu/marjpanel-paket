@@ -16,6 +16,11 @@ export interface Kapsam {
   okutmaModu: OkutmaModu | null;
   sirket: {
     ad: string;
+    /** Kiracının giriş adresi (normalize host) ya da null. */
+    alanAdi: string | null;
+    markaAdi: string | null;
+    logoDosya: string | null;
+    logoKoyuDosya: string | null;
     varsayilanOkutmaModu: OkutmaModu;
     ozellikler: SirketOzellikleri;
   };

@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { MamaAuraIsaret, MamaAuraYazi, PanelAltBilgi } from "@/components/marka/mama-aura";
+import { AltyapiNotu, KiraciIsaret, KiraciLogo, PanelAltBilgi } from "@/components/marka/kiraci-markasi";
 import { SidebarNav } from "@/components/panel/sidebar-nav";
 import { PageTransition } from "@/components/panel/page-transition";
 import { MobilMenuSaglayici } from "@/components/panel/mobile-nav";
@@ -59,15 +59,23 @@ export function PanelKabuk({
             {/* Dar menüde yalnız işaret (üçgen), genişte kelime işareti;
                 ikisi birden hem sıkışır hem de markayı iki kez söyler. */}
             {dar ? (
-              <MamaAuraIsaret boyut={28} />
+              <KiraciIsaret boyut={28} />
             ) : (
-              <MamaAuraYazi zemin="koyu" yukseklik={17} altAd="Paket" />
+              <KiraciLogo zemin="koyu" yukseklik={18} altAd="Paket" />
             )}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <SidebarNav kapali={dar} />
           </div>
+
+          {/* Kiracı menüsünün dibinde MarjPanel: "bu panel MarjPanel Paket
+              altyapısıyla çalışır" — küçük ama her sayfada. */}
+          {!dar && (
+            <div className="shrink-0 px-4 pb-2">
+              <AltyapiNotu zemin="koyu" />
+            </div>
+          )}
 
           <div
             className={cn(

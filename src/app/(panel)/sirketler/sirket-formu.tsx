@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { FormGonderButonu } from "@/components/panel/form-buton";
 import { FormKabugu } from "@/components/panel/form-kabugu";
 import type { SirketSayimli } from "@/lib/db/repos/sirketler";
+import { SirketLogoAlani } from "./sirket-logo-alani";
 
 const HataSatiri = ({ id, mesaj }: { id: string; mesaj: string }) => (
   <p
@@ -59,12 +60,33 @@ function SirketFormIcerigi({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="alanAdi">Alan adı</Label>
+        <Label htmlFor="markaAdi">Marka adı</Label>
+        <Input
+          id="markaAdi"
+          name="markaAdi"
+          type="text"
+          placeholder={sirket?.ad ?? "Panelde görünen kısa ad"}
+          defaultValue={sirket?.markaAdi ?? ""}
+          aria-invalid={alan("markaAdi") ? true : undefined}
+          aria-describedby={alan("markaAdi") ? "hata-markaAdi" : "markaAdi-ipucu"}
+        />
+        {alan("markaAdi") ? (
+          <HataSatiri id="hata-markaAdi" mesaj={alan("markaAdi")!} />
+        ) : (
+          <p id="markaAdi-ipucu" className="text-caption text-muted-foreground">
+            Logo yoksa giriş ekranı ve menüde bu ad yazılır. Boşsa şirket adı.
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="alanAdi">Giriş adresi (alan adı)</Label>
         <Input
           id="alanAdi"
           name="alanAdi"
           type="text"
-          placeholder="ornek.com"
+          inputMode="url"
+          placeholder="sirket.marjpanel.com"
           defaultValue={sirket?.alanAdi ?? ""}
           aria-invalid={alan("alanAdi") ? true : undefined}
           aria-describedby={alan("alanAdi") ? "hata-alanAdi" : "alanAdi-ipucu"}
@@ -73,10 +95,22 @@ function SirketFormIcerigi({
           <HataSatiri id="hata-alanAdi" mesaj={alan("alanAdi")!} />
         ) : (
           <p id="alanAdi-ipucu" className="text-caption text-muted-foreground">
-            İsteğe bağlı.
+            Şirket kullanıcıları YALNIZ bu adresten girer ve kendi logosunu görür.
+            Boşsa platform adresinden girerler. *.marjpanel.com altı DNS&apos;te hazır.
           </p>
         )}
       </div>
+
+      {sirket && (
+        <div className="space-y-1.5">
+          <div className="text-footnote font-semibold text-foreground">Logo</div>
+          <SirketLogoAlani
+            sirketId={sirket.id}
+            logoAcik={sirket.logoDosya ? `/g/${sirket.logoDosya}` : null}
+            logoKoyu={sirket.logoKoyuDosya ? `/g/${sirket.logoKoyuDosya}` : null}
+          />
+        </div>
+      )}
 
       <div className="space-y-1.5">
         <Label htmlFor="azamiEntegrasyon">Azami entegrasyon sayısı</Label>
