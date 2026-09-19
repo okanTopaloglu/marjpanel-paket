@@ -120,3 +120,71 @@ export function MamaAuraYazi({
     </span>
   );
 }
+
+/**
+ * FİLİGRAN — boş kalan yüzeylerde markanın sessiz izi.
+ *
+ * Kelime işareti gri tonda ve soluk: boş liste, hata kartı, sayfa altı gibi
+ * yerlerde "burası MAMA AURA'nın" der ama içerikle yarışmaz. Kırmızı burada
+ * BİLEREK yok — DESIGN.md "Müşteri markası": marka rengi üst kimlikte yaşar,
+ * dolgu ve dekorasyona sızmaz. Renkli hâli her boş alanda tekrarlansa
+ * kırmızı bir vurgu rengine dönüşürdü.
+ *
+ * `aria-hidden`: yanında zaten okunur bir başlık vardır; ekran okuyucuya
+ * her boş durumda "MAMA AURA" tekrarlatmak gürültü.
+ */
+export function MamaAuraFiligran({
+  className,
+  yukseklik = 12,
+  etiket,
+}: {
+  className?: string;
+  yukseklik?: number;
+  /** İşaretin yanına düşen tek satırlık not (ör. "Paket paneli"). */
+  etiket?: React.ReactNode;
+}) {
+  const genislik = Math.round((yukseklik * YAZI_G) / YAZI_Y);
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "inline-flex select-none items-center gap-2 text-overline text-muted-foreground/70",
+        className,
+      )}
+    >
+      <Image
+        src="/marka/mamaaura.png"
+        alt=""
+        width={genislik}
+        height={yukseklik}
+        unoptimized
+        draggable={false}
+        className="block h-auto shrink-0 opacity-40 grayscale"
+        style={{ width: genislik, height: yukseklik }}
+      />
+      {etiket && <span className="truncate">{etiket}</span>}
+    </span>
+  );
+}
+
+/**
+ * Panel sayfa altı — her sayfanın son satırı.
+ *
+ * Kabuk (`panel-kabuk.tsx`) bunu içeriğin ALTINA, `mt-auto` ile koyar: kısa
+ * sayfalarda (boş liste, ayarlar) içerikle alt kenar arasındaki boşluk
+ * markayla kapanır; uzun sayfalarda kaydırmanın sonunda görünür. MarjPanel
+ * altyapı notu buradadır — giriş alt bilgisiyle aynı cümle.
+ */
+export function PanelAltBilgi({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-border pt-4",
+        className,
+      )}
+    >
+      <MamaAuraFiligran yukseklik={11} etiket="Paket paneli" />
+      <span className="text-overline text-muted-foreground/70">MarjPanel Paket altyapısı</span>
+    </div>
+  );
+}

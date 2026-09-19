@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MamaAuraFiligran } from "@/components/marka/mama-aura";
 
 export default function PanelError({
   error,
@@ -33,6 +34,7 @@ export default function PanelError({
         <RotateCcw className="h-4 w-4" aria-hidden="true" />
         Tekrar dene
       </Button>
+      <MamaAuraFiligran className="mt-8" etiket="Paket paneli" />
     </div>
   );
 }

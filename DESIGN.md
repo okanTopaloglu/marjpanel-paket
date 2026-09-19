@@ -93,6 +93,7 @@ okunmalı. Kimlik `src/components/marka/mama-aura.tsx` içinde toplanır:
 | Kelime işareti (açık) | Giriş kartı üstü, mobil üst çubuk, çevrimdışı sayfa, OG kartı | `public/marka/mamaaura.png` - resmi logo, kırpılmış |
 | Kelime işareti (koyu) | Mürekkep menü, mobil çekmece | `mamaaura-koyu.png` - harfler `#EAF0F6`, kırmızı aynı |
 | İşaret (ters üçgen) | Dar menü, "ana ekrana ekle", uygulama simgesi, favicon | Satır içi SVG; `scripts/gen-icons.mjs` aynı yolu kullanır |
+| Filigran | Her panel sayfasının altı (`PanelAltBilgi`), boş durumlar, panel hata kartı | Kelime işareti gri tonda %40 — kırmızı yok, içerikle yarışmaz |
 
 Marka kırmızısı `#D81040` **yalnız işaretin ve kelime işaretinin içinde**
 yaşar; "Paket" hapı onun soluk tonunu alır. Buton, seçili satır, odak halkası,

@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { MamaAuraIsaret, MamaAuraYazi } from "@/components/marka/mama-aura";
+import { MamaAuraIsaret, MamaAuraYazi, PanelAltBilgi } from "@/components/marka/mama-aura";
 import { SidebarNav } from "@/components/panel/sidebar-nav";
 import { PageTransition } from "@/components/panel/page-transition";
 import { MobilMenuSaglayici } from "@/components/panel/mobile-nav";
@@ -110,10 +110,14 @@ export function PanelKabuk({
           )}
         >
           {topbar}
-          <main className="flex-1 overflow-x-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] pt-5 sm:px-6 md:pb-10 lg:px-8">
+          <main className="flex flex-1 flex-col overflow-x-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] pt-5 sm:px-6 md:pb-10 lg:px-8">
             <PageTransition>
               <div className="mx-auto w-full max-w-[90rem]">{children}</div>
             </PageTransition>
+            {/* Sayfa geçişinin DIŞINDA: alt bilgi her sayfada aynı, geçişle
+                birlikte kayıp yeniden belirmesin. `mt-auto` kısa sayfalarda
+                alta yaslar. */}
+            <PanelAltBilgi className="mx-auto mt-auto w-full max-w-[90rem] pt-10" />
           </main>
         </div>
 

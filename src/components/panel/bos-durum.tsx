@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { MamaAuraFiligran } from "@/components/marka/mama-aura";
 import { cn } from "@/lib/utils";
 
 /**
@@ -11,6 +12,9 @@ import { cn } from "@/lib/utils";
  *
  * İkon nane DEĞİL nötr tonda: boş liste bir hata ya da başarı değil, sadece
  * bir durum. Vurgu rengi eylemin (aksiyon düğmesinin) hakkı.
+ *
+ * Altta soluk MAMA AURA filigranı: boş bir yüzey markanın en çok göründüğü
+ * yerdir; içerik gelince satırların arasında kaybolur, yokken alanı sahiplenir.
  */
 export function BosDurum({
   ikon: Ikon,
@@ -49,6 +53,8 @@ export function BosDurum({
       </div>
 
       {aksiyon && <div className="pt-1">{aksiyon}</div>}
+
+      <MamaAuraFiligran className="mt-3" />
     </div>
   );
 }
