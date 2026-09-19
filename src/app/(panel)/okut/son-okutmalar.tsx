@@ -68,10 +68,16 @@ export function SonOkutmalar({
                   </p>
                 </div>
 
+                {/* Dar ekranda yalnız kargo rozeti kalır: iki rozet + saat 390px'te
+                    satırı taşırıp sayfaya yatay kaydırma veriyordu. */}
                 <div className="flex shrink-0 items-center gap-1.5">
-                  {s.kaynak && <Rozet>{s.kaynak}</Rozet>}
+                  {s.kaynak && (
+                    <Rozet className="hidden sm:inline-flex">{s.kaynak}</Rozet>
+                  )}
                   {s.kargoFirmasi && s.kargoFirmasi !== s.kaynak && (
-                    <Rozet ton="bilgi">{s.kargoFirmasi}</Rozet>
+                    <Rozet ton="bilgi" className="max-w-[9rem] truncate">
+                      {s.kargoFirmasi}
+                    </Rozet>
                   )}
                   <span className="tabular w-11 text-right text-caption text-muted-foreground">
                     {saat(s.zaman)}
