@@ -188,7 +188,12 @@ export function hucreMetni(deger: unknown): string {
     };
     if (o.error !== undefined) return "";
     if (Array.isArray(o.richText)) {
-      return o.richText.map((p) => hucreMetni(p?.text)).join("").trim();
+      // Parçalar TEK TEK kırpılmaz: "Mavi " + "Tişört" arasındaki boşluk
+      // kelimeleri ayıran boşluktur, kenar boşluğu değil.
+      return o.richText
+        .map((p) => (typeof p?.text === "string" ? p.text : ""))
+        .join("")
+        .trim();
     }
     // Köprü hücresinde görünen metin boşsa adresin kendisi kullanılır
     // (görsel URL sütunu çoğu dosyada köprü olarak gelir).
