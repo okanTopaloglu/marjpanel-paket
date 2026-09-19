@@ -138,6 +138,21 @@ export function perdeIcerigi(sonuc: OkutmaSonucu): PerdeIcerigi | null {
   }
 }
 
+/**
+ * Sonuç → ton. Hem çalınacak sesi hem satır ikonunun rengini belirler; ikisi
+ * AYNI kaynaktan gelsin diye burada, saf hâlde durur.
+ */
+export function sonucTonu(sonuc: OkutmaSonucu): PerdeTonu {
+  switch (sonuc.sonuc) {
+    case "mukerrer":
+    case "iptal":
+    case "kargolanmis":
+      return "hata";
+    case "kaydedildi":
+      return sonuc.uyari ? "uyari" : "basari";
+  }
+}
+
 /** Kısa satır metni - son okutmalar listesindeki durum etiketi. */
 export function sonucEtiketi(sonuc: OkutmaSonucu): string {
   switch (sonuc.sonuc) {

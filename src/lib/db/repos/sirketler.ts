@@ -1,12 +1,21 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { kullanicilar, sirketler, type Sirket } from "@/lib/db/schema";
+import {
+  entegrasyonlar,
+  kullanicilar,
+  paketOkutmalari,
+  pazaryeriSiparisleri,
+  sirketler,
+  type OkutmaModu,
+  type Sirket,
+} from "@/lib/db/schema";
 
 /**
  * ŞİRKET REPOSU — kiracı kaydı.
  *
- * Diğer CRUD (listele, güncelle, özellik bayrakları, silme) başka bir ajan
- * tarafından eklenecek; burada yalnız kayıt akışının ihtiyacı var.
+ * Üstteki blok kayıt akışının (kendi kendine kayıt) ihtiyacı; alttaki blok
+ * M4 platform yönetimi CRUD'u (yalnız super_admin): listele, tekli getir,
+ * güncelle, sil, özellik bayrakları.
  */
 
 export type CakismaAlani = "sirketAd" | "alanAdi" | "telefon";
@@ -117,4 +126,118 @@ export async function sirketVeYoneticiOlustur(girdi: {
     if (alan) throw new CakismaHatasi(alan);
     throw hata;
   }
+}
+
+/* ==================================================================== */
+/* PLATFORM YÖNETİMİ CRUD'U (M4) — yalnız super_admin                   */
+/* ==================================================================== */
+
+export interface SirketSayimli extends Sirket {
+  kullaniciSayisi: number;
+  okutmaSayisi: number;
+  entegrasyonSayisi: number;
+  siparisSayisi: number;
+}
+
+/**
+ * Platformdaki tüm şirketler + sayımlar (şirketler ekranı). Her sayım
+ * KORELE ALT SORGU: dört ayrı `count` sorgusu yerine tek turda gelir —
+ * şirket sayısı arttıkça N+1'e düşmez.
+ */
+export async function listeleSayimlarla(): Promise<SirketSayimli[]> {
+  return db
+    .select({
+      id: sirketler.id,
+      ad: sirketler.ad,
+      alanAdi: sirketler.alanAdi,
+      azamiEntegrasyon: sirketler.azamiEntegrasyon,
+      faturaPaylasAcik: sirketler.faturaPaylasAcik,
+      faturaKesimAcik: sirketler.faturaKesimAcik,
+      mailAcik: sirketler.mailAcik,
+      varsayilanOkutmaModu: sirketler.varsayilanOkutmaModu,
+      senkronAralikDk: sirketler.senkronAralikDk,
+      createdAt: sirketler.createdAt,
+      updatedAt: sirketler.updatedAt,
+      kullaniciSayisi: sql<number>`(select count(*)::int from ${kullanicilar} where ${kullanicilar.sirketId} = ${sirketler.id})`,
+      okutmaSayisi: sql<number>`(select count(*)::int from ${paketOkutmalari} where ${paketOkutmalari.sirketId} = ${sirketler.id})`,
+      entegrasyonSayisi: sql<number>`(select count(*)::int from ${entegrasyonlar} where ${entegrasyonlar.sirketId} = ${sirketler.id})`,
+      siparisSayisi: sql<number>`(select count(*)::int from ${pazaryeriSiparisleri} where ${pazaryeriSiparisleri.sirketId} = ${sirketler.id})`,
+    })
+    .from(sirketler)
+    .orderBy(sirketler.ad);
+}
+
+export async function getir(id: string): Promise<Sirket | null> {
+  const [satir] = await db.select().from(sirketler).where(eq(sirketler.id, id)).limit(1);
+  return satir ?? null;
+}
+
+export async function guncelle(
+  id: string,
+  girdi: {
+    ad?: string;
+    alanAdi?: string | null;
+    azamiEntegrasyon?: number | null;
+    faturaPaylasAcik?: boolean;
+    faturaKesimAcik?: boolean;
+    mailAcik?: boolean;
+  },
+): Promise<Sirket> {
+  const set: Partial<typeof sirketler.$inferInsert> = { updatedAt: new Date() };
+  if (girdi.ad !== undefined) set.ad = girdi.ad;
+  if (girdi.alanAdi !== undefined) set.alanAdi = girdi.alanAdi;
+  if (girdi.azamiEntegrasyon !== undefined) set.azamiEntegrasyon = girdi.azamiEntegrasyon;
+  if (girdi.faturaPaylasAcik !== undefined) set.faturaPaylasAcik = girdi.faturaPaylasAcik;
+  if (girdi.faturaKesimAcik !== undefined) set.faturaKesimAcik = girdi.faturaKesimAcik;
+  if (girdi.mailAcik !== undefined) set.mailAcik = girdi.mailAcik;
+
+  try {
+    const [satir] = await db
+      .update(sirketler)
+      .set(set)
+      .where(eq(sirketler.id, id))
+      .returning();
+    if (!satir) throw new Error("Şirket bulunamadı.");
+    return satir;
+  } catch (hata) {
+    const ihlal = tekillikIhlali(hata);
+    const alan = ihlal ? kisitAlani(ihlal.kisit) : null;
+    if (alan) throw new CakismaHatasi(alan);
+    throw hata;
+  }
+}
+
+/**
+ * Şirket silme. "Kendi şirketini silme" YASAĞI burada DEĞİL, çağıran server
+ * action'dadır (`sirketSil`) — repo yalnız `id` alır, hangi şirketin
+ * "çağıranın kendi şirketi" olduğunu bilmez (o bilgi `Kapsam`'dadır).
+ * Cascade (`onDelete: cascade`) kullanıcı/okutma/ürün/entegrasyon/sipariş
+ * satırlarını otomatik temizler.
+ */
+export async function sil(id: string): Promise<void> {
+  await db.delete(sirketler).where(eq(sirketler.id, id));
+}
+
+export interface SirketOzellikleriTam {
+  faturaPaylasAcik: boolean;
+  faturaKesimAcik: boolean;
+  mailAcik: boolean;
+  varsayilanOkutmaModu: OkutmaModu;
+  azamiEntegrasyon: number | null;
+}
+
+/** Şirketin özellik bayrakları — entegrasyon/fatura ekranlarının kapı kontrolü için. */
+export async function ozellikler(sirketId: string): Promise<SirketOzellikleriTam | null> {
+  const [satir] = await db
+    .select({
+      faturaPaylasAcik: sirketler.faturaPaylasAcik,
+      faturaKesimAcik: sirketler.faturaKesimAcik,
+      mailAcik: sirketler.mailAcik,
+      varsayilanOkutmaModu: sirketler.varsayilanOkutmaModu,
+      azamiEntegrasyon: sirketler.azamiEntegrasyon,
+    })
+    .from(sirketler)
+    .where(eq(sirketler.id, sirketId))
+    .limit(1);
+  return satir ?? null;
 }

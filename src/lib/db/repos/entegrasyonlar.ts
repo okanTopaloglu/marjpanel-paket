@@ -298,9 +298,16 @@ export async function vadesiGelenler(
     .where(
       and(
         eq(entegrasyonlar.aktif, true),
+        /*
+         * Zaman parametresi ISO METİN olarak geçilir ve `::timestamptz` ile
+         * dönüştürülür. Ham `Date` nesnesi, sütun tipi bilinmeyen bir `sql`
+         * parçasında sürücüye (postgres.js) doğrudan iner ve "string argument
+         * expected, received Date" ile patlar - senkron bu yüzden hiç
+         * başlamıyordu.
+         */
         sql`(
           ${entegrasyonlar.sonSiparisSenkron} is null
-          or ${entegrasyonlar.sonSiparisSenkron} < ${simdi} - (${sirketler.senkronAralikDk} * interval '1 minute')
+          or ${entegrasyonlar.sonSiparisSenkron} < ${simdi.toISOString()}::timestamptz - (${sirketler.senkronAralikDk} * interval '1 minute')
         )`,
       ),
     )

@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
-import { Settings } from "lucide-react";
-import { panelKapsami } from "@/lib/auth/yetki";
+import { panelOturumu } from "@/lib/auth/yetki";
 import { SayfaBasligi } from "@/components/panel/sayfa-basligi";
-import { BosDurum } from "@/components/panel/bos-durum";
+import { ProfilFormu } from "./profil-formu";
+import { ProfilGorseli } from "./profil-gorseli";
 
 export default async function AyarlarSayfasi() {
-  const kapsam = await panelKapsami();
-  if (!kapsam) redirect("/giris");
+  const oturum = await panelOturumu();
+  if (!oturum) redirect("/giris");
+  const { kapsam, profilGorsel } = oturum;
 
   return (
     <>
@@ -14,11 +15,10 @@ export default async function AyarlarSayfasi() {
         baslik="Ayarlar"
         aciklama="Hesap ve okutma tercihlerinizi buradan yönetin."
       />
-      <BosDurum
-        ikon={Settings}
-        baslik="Ayarlar yakında"
-        aciklama="Okutma modu, bildirim ve hesap tercihleri burada açılacak."
-      />
+      <div className="grid gap-5 lg:grid-cols-[240px_1fr] lg:items-start">
+        <ProfilGorseli ad={kapsam.ad} profilGorsel={profilGorsel} />
+        <ProfilFormu ad={kapsam.ad} telefon={kapsam.telefon} />
+      </div>
     </>
   );
 }

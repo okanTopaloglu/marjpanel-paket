@@ -1,24 +1,21 @@
-import { redirect } from "next/navigation";
-import { Building2 } from "lucide-react";
-import { superKapsami } from "@/lib/auth/yetki";
+import { superKapsamiZorunlu } from "@/lib/auth/yetki";
+import { listeleSayimlarla } from "@/lib/db/repos/sirketler";
 import { SayfaBasligi } from "@/components/panel/sayfa-basligi";
-import { BosDurum } from "@/components/panel/bos-durum";
+import { SirketEkleTetikleyici } from "./sirket-formu";
+import { SirketListesi } from "./sirket-listesi";
 
 export default async function SirketlerSayfasi() {
-  const kapsam = await superKapsami();
-  if (!kapsam) redirect("/");
+  const kapsam = await superKapsamiZorunlu();
+  const sirketler = await listeleSayimlarla();
 
   return (
     <>
       <SayfaBasligi
         baslik="Şirketler"
         aciklama="Platformdaki tüm şirketler ve durumları."
+        aksiyonlar={<SirketEkleTetikleyici />}
       />
-      <BosDurum
-        ikon={Building2}
-        baslik="Şirket listesi yakında"
-        aciklama="Platforma kayıtlı tüm şirketler burada listelenecek."
-      />
+      <SirketListesi satirlar={sirketler} kendiSirketId={kapsam.sirketId} />
     </>
   );
 }

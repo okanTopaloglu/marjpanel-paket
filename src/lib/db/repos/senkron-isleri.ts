@@ -92,6 +92,13 @@ export async function bayatlariSerbestBirak(): Promise<number> {
  */
 export async function bekleyenAl(tur: SenkronTuru): Promise<SenkronIsi | null> {
   try {
+    /*
+     * `returning *` YETMEZ: ham SQL sütunları VERİTABANI ADIYLA (snake_case)
+     * döndürür, `SenkronIsi` ise camelCase alanlar bekler. Tip uyuşmuş
+     * görünürken `is.entegrasyonId` çalışma zamanında `undefined` olurdu -
+     * manuel iş açan entegrasyon sessizce kaybolurdu. Sütunlar bu yüzden
+     * TEK TEK takma adlandırılır.
+     */
     const satirlar = await db.execute<SenkronIsi>(sql`
       update senkron_isleri
          set durum = 'calisiyor', baslangic = now()
@@ -102,7 +109,19 @@ export async function bekleyenAl(tur: SenkronTuru): Promise<SenkronIsi | null> {
           limit 1
           for update skip locked
        )
-      returning *
+      returning
+        id,
+        tur,
+        tetik,
+        sirket_id      as "sirketId",
+        entegrasyon_id as "entegrasyonId",
+        durum,
+        baslangic,
+        bitis,
+        ilerleme,
+        mesaj,
+        hatalar,
+        created_at     as "createdAt"
     `);
     return satirlar[0] ?? null;
   } catch (hata) {

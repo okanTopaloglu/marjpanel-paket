@@ -1,4 +1,4 @@
-import { and, asc, count, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, count, eq, isNotNull, isNull, lt, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { pazaryeriSiparisleri } from "@/lib/db/schema";
 import type { Kapsam } from "@/lib/auth/kapsam";
@@ -67,8 +67,10 @@ export async function bayatlariSerbestBirak(sirketId: string): Promise<number> {
     .where(
       and(
         eq(pazaryeriSiparisleri.sirketId, sirketId),
-        sql`${pazaryeriSiparisleri.atananKullaniciId} IS NOT NULL`,
-        sql`${pazaryeriSiparisleri.atamaZamani} < ${esik}`,
+        isNotNull(pazaryeriSiparisleri.atananKullaniciId),
+        // Karşılaştırma drizzle işleciyle yapılır: ham `sql` içine konan bir
+        // Date sürücüye tipsiz gider ve postgres.js onu serileştiremez.
+        lt(pazaryeriSiparisleri.atamaZamani, esik),
         isNull(pazaryeriSiparisleri.hazirZamani),
       ),
     )
@@ -251,7 +253,12 @@ export async function atamalarim(k: Kapsam): Promise<AtamaListesi> {
         isNull(pazaryeriSiparisleri.hazirZamani),
       ),
     )
-    .orderBy(asc(pazaryeriSiparisleri.siparisTarihi));
+    // Sipariş tarihi boş olabilir; ikinci ölçüt sıralamayı KARARLI kılar -
+    // paketleme kuyruğu her yenilemede aynı sırayla gelsin.
+    .orderBy(
+      asc(pazaryeriSiparisleri.siparisTarihi),
+      asc(pazaryeriSiparisleri.kargoTakipNo),
+    );
 
   const hamKalemler = satirlar.map((s) => kalemleriCikar(s.hamVeri));
   const urunHaritasi = await barkodlarlaGetir(
