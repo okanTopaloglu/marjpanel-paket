@@ -54,10 +54,38 @@ const HEPSIBURADA: DurumTablosu = {
   Undelivered: "UnDelivered",
 };
 
+/** idefix sevkiyat durumları — belgeden (docs/pazaryeri/idefix.md). */
+const IDEFIX: DurumTablosu = {
+  created: "Created",
+  shipment_ready: "Created",
+  shipment_picking: "Picking",
+  shipment_split: "Picking",
+  shipment_invoiced: "Invoiced",
+  shipment_in_cargo: "Shipped",
+  shipment_delivered: "Delivered",
+  shipment_approved: "Delivered",
+  shipment_undeliver: "UnDelivered",
+  shipment_cancelled: "Cancelled",
+  shipment_unsupplied: "UnSupplied",
+};
+
+/**
+ * Pazarama: sayısal kodlar KISMEN bilinir (docs/pazaryeri/pazarama.md); metin
+ * durumlar önce `pazarama/esle.durumMetniniCoz` ile kanonik ada çevrilir,
+ * o adlar da burada kendine eşlenir.
+ */
+const PAZARAMA: DurumTablosu = {
+  ...TRENDYOL,
+  "12": "Picking", // Siparişiniz Hazırlanıyor
+  "5": "Shipped", // Siparişiniz Kargoya Verildi
+};
+
 export const DURUM_TABLOLARI: Partial<Record<Platform, DurumTablosu>> = {
   trendyol: TRENDYOL,
   n11: N11,
   hepsiburada: HEPSIBURADA,
+  idefix: IDEFIX,
+  pazarama: PAZARAMA,
 };
 
 const uyarilan = new Set<string>();

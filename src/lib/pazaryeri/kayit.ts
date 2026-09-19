@@ -159,19 +159,27 @@ const PAZARAMA: PazaryeriTanimi = {
   renk: "#1E6FD9",
   hesapKimligiAlani: "clientId",
   alanlar: [
-    { ad: "clientId", etiket: "Client ID", tip: "metin", zorunlu: true },
-    { ad: "clientSecret", etiket: "Client Secret", tip: "gizli", zorunlu: true },
+    {
+      ad: "clientId",
+      etiket: "API Key (Client ID)",
+      tip: "metin",
+      zorunlu: true,
+      ipucu: "İş Ortağım paneli → Hesap Bilgileri → Entegrasyon Bilgileri.",
+    },
+    { ad: "clientSecret", etiket: "API Secret", tip: "gizli", zorunlu: true },
   ],
   yetenekler: {
     urun: true,
     etiket: false,
-    azamiPencereGun: null,
-    sayfaArasiMs: 500,
+    azamiPencereGun: 14,
+    // ~60 istek/dk sınırı (doğrulanmalı); 1 sn nezaket payı.
+    sayfaArasiMs: 1000,
     ilkSenkronGun: 30,
   },
   kaynakEtiketleri: ["Pazarama"],
-  anahtarNereden: "İş Ortağım Paneli → Entegrasyon Bilgileri.",
-  hazir: false,
+  anahtarNereden:
+    "İş Ortağım Paneli → Hesap Bilgileri → Entegrasyon Bilgileri. Sipariş durum kodları kısmen doğrulandı; ilk senkron sonrası kontrol edin.",
+  hazir: true,
 };
 
 const IDEFIX: PazaryeriTanimi = {
@@ -180,22 +188,30 @@ const IDEFIX: PazaryeriTanimi = {
   // Turuncu/amber/mor/mavi/kırmızı/siyah dolu; turkuaz nane vurgusuyla
   // karışmaz. Gerçek marka rengi doğrulanmalı.
   renk: "#0E8C9B",
-  hesapKimligiAlani: "saticiId",
+  hesapKimligiAlani: "vendorId",
   alanlar: [
-    { ad: "saticiId", etiket: "Satıcı ID", tip: "metin", zorunlu: true, sayisal: true },
-    { ad: "apiKey", etiket: "API anahtarı", tip: "gizli", zorunlu: true },
-    { ad: "apiSecret", etiket: "Gizli anahtar", tip: "gizli", zorunlu: true },
+    {
+      ad: "vendorId",
+      etiket: "Vendor ID",
+      tip: "metin",
+      zorunlu: true,
+      sayisal: true,
+      ipucu: "Satıcı paneli → Hesap Ayarları → Entegrasyon Bilgileri.",
+    },
+    { ad: "apiKey", etiket: "API Key", tip: "gizli", zorunlu: true },
+    { ad: "apiSecret", etiket: "API Secret Key", tip: "gizli", zorunlu: true },
   ],
   yetenekler: {
     urun: true,
     etiket: false,
     azamiPencereGun: 14,
-    sayfaArasiMs: 400,
+    sayfaArasiMs: 300,
     ilkSenkronGun: 30,
   },
   kaynakEtiketleri: ["İdefix", "Idefix", "idefix"],
-  anahtarNereden: "idefix Satıcı Paneli → Entegrasyon.",
-  hazir: false,
+  anahtarNereden:
+    "Satıcı Paneli → Hesap Ayarları → Entegrasyon Bilgileri → \"Yeni API oluştur\" (anahtarlar e-postayla gelir).",
+  hazir: true,
 };
 
 const AMAZON: PazaryeriTanimi = {

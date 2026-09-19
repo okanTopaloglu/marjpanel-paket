@@ -19,8 +19,14 @@ describe("kayit", () => {
     }
   });
 
-  it("hazır platformlar: Trendyol, Hepsiburada, N11 (M6-B)", () => {
-    expect(PLATFORMLAR_HAZIR_MI()).toEqual({ trendyol: true, hepsiburada: true, n11: true });
+  it("hazır platformlar: Amazon dışında hepsi (M6-C)", () => {
+    expect(PLATFORMLAR_HAZIR_MI()).toEqual({
+      trendyol: true,
+      hepsiburada: true,
+      n11: true,
+      pazarama: true,
+      idefix: true,
+    });
   });
 
   it("platformMi / pazaryeriAdi", () => {
