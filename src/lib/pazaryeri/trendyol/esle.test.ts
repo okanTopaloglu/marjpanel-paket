@@ -102,7 +102,8 @@ describe("siparisEsle", () => {
   it("ham veri ve entegrasyon adı aynen taşınır", () => {
     const ham = { id: 1, ekstra: { a: 1 } };
     const s = siparisEsle(ham, SECENEK);
-    expect(s?.hamVeri).toBe(ham);
+    expect(s?.hamVeri).toMatchObject(ham);
+    expect(s?.hamVeri._normal).toBeTruthy();
     expect(s?.entegrasyonAdi).toBe("Ana Magaza");
     expect(s?.platform).toBe("trendyol");
   });

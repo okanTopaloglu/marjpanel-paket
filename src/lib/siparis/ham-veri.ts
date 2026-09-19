@@ -9,7 +9,14 @@
  *
  * Saf fonksiyonlar (G/Ç yok, test edilir). PartnerSys `minimalRawData` ve
  * `barcodePrint.getAddress/getProductLines` portudur.
+ *
+ * ÖNCE `_normal` ZARFI: sağlayıcı katmanı (`lib/pazaryeri`) her satıra
+ * müşteri adı/adres/kalemleri normalize ederek yazar. Zarf varsa buradaki
+ * Trendyol alan adları hiç okunmaz; yoksa (bu değişiklikten önce yazılmış
+ * satır) eski sezgisel okuma devam eder. Etiket, okutma ve toplama böylece
+ * platform bilmez.
  */
+import { normalZarf } from "@/lib/pazaryeri/normal-veri";
 
 export interface AsgariKalem {
   barkod: string;
@@ -48,6 +55,8 @@ function kalemDizisi(ham: Record<string, unknown>): Record<string, unknown>[] {
 
 /** Müşteri adı: ad + soyad, yoksa tek alanlık ad, o da yoksa tire. */
 export function musteriAdi(hamVeri: unknown): string {
+  const zarf = normalZarf(hamVeri);
+  if (zarf) return zarf.musteriAd || "-";
   const ham = (hamVeri ?? {}) as Record<string, unknown>;
   const ad = sec(ham, "customerFirstName");
   const soyad = sec(ham, "customerLastName");
@@ -61,6 +70,13 @@ export function musteriAdi(hamVeri: unknown): string {
  * `customerAddress`/`shippingAddress` gelir, en kötü durumda kökte durur.
  */
 export function etiketAdresi(hamVeri: unknown): EtiketAdresi {
+  const zarf = normalZarf(hamVeri);
+  if (zarf) {
+    return {
+      acik: zarf.adres.acik,
+      ilceIl: [zarf.adres.ilce, zarf.adres.il].filter(Boolean).join(" - "),
+    };
+  }
   const ham = (hamVeri ?? {}) as Record<string, unknown>;
   const adres =
     (ham.shipmentAddress as unknown) ??
@@ -83,6 +99,8 @@ export function etiketAdresi(hamVeri: unknown): EtiketAdresi {
 
 /** Etiketteki alıcı telefonu; yoksa boş metin. */
 export function aliciTelefonu(hamVeri: unknown): string {
+  const zarf = normalZarf(hamVeri);
+  if (zarf) return zarf.adres.telefon;
   const ham = (hamVeri ?? {}) as Record<string, unknown>;
   const adres = (ham.shipmentAddress as unknown) ?? ham;
   return sec(adres, "phone", "gsm", "phoneNumber") || sec(ham, "customerPhone");
@@ -90,6 +108,10 @@ export function aliciTelefonu(hamVeri: unknown): string {
 
 /** Sipariş kalemleri: barkod + ürün adı + adet. */
 export function siparisKalemleri(hamVeri: unknown): AsgariKalem[] {
+  const zarf = normalZarf(hamVeri);
+  if (zarf) {
+    return zarf.kalemler.map((k) => ({ barkod: k.barkod, urunAdi: k.urunAdi, adet: k.adet }));
+  }
   const ham = (hamVeri ?? {}) as Record<string, unknown>;
   return kalemDizisi(ham).map((l) => {
     const barkod =

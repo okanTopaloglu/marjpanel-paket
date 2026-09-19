@@ -187,7 +187,7 @@ export function UrunListesi({
           aciklama={
             arama
               ? "Barkodun tamamını değil bir bölümünü aramayı deneyin."
-              : "Ürünleri Excel dosyasından aktarabilir, Trendyol'dan çekebilir ya da tek tek ekleyebilirsiniz. Okutma ekranı ürün adını ve görselini buradan alır."
+              : "Ürünleri Excel dosyasından aktarabilir, pazaryerinden çekebilir ya da tek tek ekleyebilirsiniz. Okutma ekranı ürün adını ve görselini buradan alır."
           }
         />
       ) : (

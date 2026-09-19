@@ -8,13 +8,18 @@ import {
   EntegrasyonCakismasi,
   EntegrasyonLimiti,
   EntegrasyonYok,
+  PlatformGecersiz,
   aralikKaydet as aralikKaydetRepo,
   kaydet,
   kimlikBilgileri,
+  listele,
   sil,
 } from "@/lib/db/repos/entegrasyonlar";
 import { manuelIsEkle } from "@/lib/db/repos/senkron-isleri";
-import { trendyolIstemcisi } from "@/lib/trendyol/istemci";
+import { PAZARYERLERI, platformMi } from "@/lib/pazaryeri/kayit";
+import { kimlikSemasi, type Kimlik } from "@/lib/pazaryeri/kimlik";
+import { SaglayiciYok, saglayiciAl } from "@/lib/pazaryeri/saglayici";
+import type { Platform } from "@/lib/pazaryeri/tipler";
 import type { EylemDurumu } from "./auth";
 
 /**
@@ -23,8 +28,11 @@ import type { EylemDurumu } from "./auth";
  * Her eylem kapıyı KENDİ açar (`adminKapsami`): sayfanın kapısı yeterli
  * değildir, eylem doğrudan çağrılabilir (eski sekme, devtools, betik).
  *
- * API ANAHTARI DÖNÜŞLERDE ASLA GEÇMEZ. Formdan yukarı çıkar, şifrelenip
+ * KİMLİK BİLGİSİ DÖNÜŞLERDE ASLA GEÇMEZ. Formdan yukarı çıkar, şifrelenip
  * veritabanına yazılır; aşağı yalnız maskeli hâli iner (repo maskeler).
+ *
+ * PLATFORM SEÇİMLİDİR: form alanları `lib/pazaryeri/kayit` tanımından
+ * üretilir, doğrulama aynı tanımdan (`kimlikSemasi`) gelir.
  */
 
 const YETKISIZ: EylemDurumu = {
@@ -34,18 +42,12 @@ const YETKISIZ: EylemDurumu = {
 
 const YOL = "/entegrasyonlar";
 
-const semasi = z.object({
+const ortakSema = z.object({
   id: z.string().uuid().optional().or(z.literal("")),
+  platform: z.string().trim(),
   // Ad İSTEĞE BAĞLI: tek mağazası olan kullanıcı ad vermek zorunda değil,
   // boşsa liste platform adına düşer.
   ad: z.string().trim().max(60, "Mağaza adı en fazla 60 karakter olabilir.").optional(),
-  saticiId: z
-    .string()
-    .trim()
-    .min(1, "Satıcı ID gerekli.")
-    .regex(/^\d+$/, "Satıcı ID yalnız rakamlardan oluşur."),
-  apiKey: z.string().trim().max(200).optional(),
-  apiSecret: z.string().trim().max(200).optional(),
 });
 
 function alanHatalari(hata: z.ZodError): Record<string, string> {
@@ -57,12 +59,25 @@ function alanHatalari(hata: z.ZodError): Record<string, string> {
   return cikti;
 }
 
+/** Düzenlemede platform formdan değil KAYITTAN okunur (değiştirilemez). */
+async function platformuCoz(
+  sirketId: string,
+  id: string | undefined,
+  formdaki: string,
+): Promise<Platform | null> {
+  if (id) {
+    const kayit = (await listele(sirketId)).find((e) => e.id === id);
+    return kayit?.platform ?? null;
+  }
+  return platformMi(formdaki) && PAZARYERLERI[formdaki].hazir ? formdaki : null;
+}
+
 /**
  * Ekler ya da günceller.
  *
- * ANAHTARLAR YENİ KAYITTA ZORUNLU, DÜZENLEMEDE İSTEĞE BAĞLIDIR: form anahtarı
- * maskeli gösterir, kullanıcı yalnız adı değiştirmek için kaydettiğinde alan
- * boştur ve boş "değiştirme" demektir (repo eskisini korur).
+ * GİZLİ ALANLAR YENİ KAYITTA ZORUNLU, DÜZENLEMEDE İSTEĞE BAĞLIDIR: form
+ * anahtarı maskeli gösterir, kullanıcı yalnız adı değiştirmek için
+ * kaydettiğinde alan boştur ve boş "değiştirme" demektir (repo eskisini korur).
  */
 export async function entegrasyonKaydet(
   _oncekiDurum: EylemDurumu | undefined,
@@ -71,42 +86,43 @@ export async function entegrasyonKaydet(
   const kapsam = await adminKapsami();
   if (!kapsam) return YETKISIZ;
 
-  const ayristirma = semasi.safeParse({
+  const ortak = ortakSema.safeParse({
     id: formData.get("id") ?? "",
+    platform: formData.get("platform") ?? "",
     ad: formData.get("ad") ?? "",
-    saticiId: formData.get("saticiId") ?? "",
-    apiKey: formData.get("apiKey") ?? "",
-    apiSecret: formData.get("apiSecret") ?? "",
   });
-  if (!ayristirma.success) {
-    return { ok: false, alanlar: alanHatalari(ayristirma.error) };
+  if (!ortak.success) return { ok: false, alanlar: alanHatalari(ortak.error) };
+
+  const id = ortak.data.id || undefined;
+  const platform = await platformuCoz(kapsam.sirketId, id, ortak.data.platform);
+  if (!platform) {
+    return { ok: false, mesaj: "Pazaryeri seçilmedi ya da bu pazaryeri henüz hazır değil." };
   }
 
-  const veri = ayristirma.data;
-  const id = veri.id || undefined;
-  if (!id && (!veri.apiKey || !veri.apiSecret)) {
-    return {
-      ok: false,
-      alanlar: {
-        ...(veri.apiKey ? {} : { apiKey: "API anahtarı gerekli." }),
-        ...(veri.apiSecret ? {} : { apiSecret: "Gizli anahtar gerekli." }),
-      },
-    };
+  const hamKimlik: Record<string, unknown> = {};
+  for (const alan of PAZARYERLERI[platform].alanlar) {
+    hamKimlik[alan.ad] = formData.get(alan.ad) ?? "";
+  }
+  const kimlikAyristirma = kimlikSemasi(platform, !!id).safeParse(hamKimlik);
+  if (!kimlikAyristirma.success) {
+    return { ok: false, alanlar: alanHatalari(kimlikAyristirma.error) };
+  }
+  const kimlik: Kimlik = {};
+  for (const [k, v] of Object.entries(kimlikAyristirma.data)) {
+    if (typeof v === "string") kimlik[k] = v;
   }
 
   try {
-    await kaydet(kapsam, {
-      id,
-      ad: veri.ad ?? null,
-      saticiId: veri.saticiId,
-      apiKey: veri.apiKey,
-      apiSecret: veri.apiSecret,
-    });
+    await kaydet(kapsam, { id, platform, ad: ortak.data.ad ?? null, kimlik });
   } catch (hata) {
     if (hata instanceof EntegrasyonCakismasi) {
-      return { ok: false, alanlar: { saticiId: hata.message } };
+      return { ok: false, alanlar: { [PAZARYERLERI[platform].hesapKimligiAlani]: hata.message } };
     }
-    if (hata instanceof EntegrasyonLimiti || hata instanceof EntegrasyonYok) {
+    if (
+      hata instanceof EntegrasyonLimiti ||
+      hata instanceof EntegrasyonYok ||
+      hata instanceof PlatformGecersiz
+    ) {
       return { ok: false, mesaj: hata.message };
     }
     console.error("[entegrasyon] kaydetme hatası:", hata);
@@ -129,13 +145,11 @@ export async function entegrasyonSil(id: string): Promise<EylemDurumu> {
 }
 
 /**
- * Bağlantı testi: anahtarlar ÇÖZÜLÜR, tek kayıtlık bir istek atılır, sonuç
- * kullanıcıya cümle olarak döner. Çözülmüş anahtar bu fonksiyondan DIŞARI
- * ÇIKMAZ - dönüşte yalnız `{ok, mesaj}` vardır.
+ * Bağlantı testi: kimlik ÇÖZÜLÜR, sağlayıcı tek kayıtlık bir istek atar,
+ * sonuç kullanıcıya cümle olarak döner. Çözülmüş kimlik bu fonksiyondan
+ * DIŞARI ÇIKMAZ - dönüşte yalnız `{ok, mesaj}` vardır.
  */
-export async function baglantiTest(
-  id: string,
-): Promise<{ ok: boolean; mesaj: string }> {
+export async function baglantiTest(id: string): Promise<{ ok: boolean; mesaj: string }> {
   const kapsam = await adminKapsami();
   if (!kapsam) return { ok: false, mesaj: YETKISIZ.mesaj! };
 
@@ -143,16 +157,16 @@ export async function baglantiTest(
   if (!kimlik) {
     return {
       ok: false,
-      mesaj: "Entegrasyon bulunamadı ya da API anahtarı çözülemedi.",
+      mesaj: "Entegrasyon bulunamadı ya da kimlik bilgileri çözülemedi.",
     };
   }
 
-  const istemci = trendyolIstemcisi({
-    saticiId: kimlik.saticiId,
-    apiKey: kimlik.apiKey,
-    apiSecret: kimlik.apiSecret,
-  });
-  return istemci.baglantiTest();
+  try {
+    return await saglayiciAl(kimlik).baglantiTest();
+  } catch (hata) {
+    if (hata instanceof SaglayiciYok) return { ok: false, mesaj: hata.message };
+    return { ok: false, mesaj: hata instanceof Error ? hata.message : String(hata) };
+  }
 }
 
 /**

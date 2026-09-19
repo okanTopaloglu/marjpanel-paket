@@ -23,7 +23,7 @@ export function AralikAyari({ mevcut }: { mevcut: number }) {
     <div className="rounded-[--radius] border border-border bg-card p-4 shadow-soft sm:p-5">
       <h2 className="text-title-3">Otomatik senkron aralığı</h2>
       <p className="mt-1 text-footnote text-muted-foreground">
-        Siparişler bu sıklıkta Trendyol&apos;dan çekilir. Sık çekmek siparişi
+        Siparişler bu sıklıkta pazaryerlerinden çekilir. Sık çekmek siparişi
         erken görmenizi sağlar, çok sık çekmek pazaryerinin hız sınırına takılır.
       </p>
 

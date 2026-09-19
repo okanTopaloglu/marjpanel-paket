@@ -228,17 +228,35 @@ export const entegrasyonlar = pgTable(
     sirketId: uuid("sirket_id")
       .notNull()
       .references(() => sirketler.id, { onDelete: "cascade" }),
-    /** Şimdilik yalnız 'trendyol'. */
+    /** Pazaryeri anahtarı (`lib/pazaryeri/tipler` Platform); doğrulama zod'da, CHECK yok. */
     platform: text("platform").notNull(),
     /** Mağaza etiketi (kullanıcının verdiği ad). */
     ad: text("ad"),
+    /**
+     * Hesap kimliği — platformun "hangi mağaza" alanı (Trendyol satıcı ID,
+     * Hepsiburada merchant ID, Amazon seller ID). Kimlik JSON'undan
+     * kopyalanır; tekillik ve liste görünümü için düz sütun.
+     */
     saticiId: text("satici_id").notNull(),
-    /** AES-256-GCM (lib/guvenlik/sifreleme). Düz metin asla saklanmaz. */
-    apiKeySifreli: text("api_key_sifreli").notNull(),
-    apiSecretSifreli: text("api_secret_sifreli").notNull(),
+    /**
+     * Kimlik bilgileri: AES-256-GCM(JSON) (`lib/pazaryeri/kimlik`). Platform
+     * başına alan kümesi farklı olduğu için tek şifreli JSON sütunu.
+     * Düz metin asla saklanmaz.
+     */
+    kimlikSifreli: text("kimlik_sifreli"),
+    /** ESKİ (yalnız Trendyol): kimlik_sifreli dolduğunda okunmaz; 0003'te düşer. */
+    apiKeySifreli: text("api_key_sifreli"),
+    apiSecretSifreli: text("api_secret_sifreli"),
+    /** Gizli olmayan platform ayarları: saatOfseti, sandbox, marketplaceId… */
+    ayarlar: jsonb("ayarlar").notNull().default(sql`'{}'::jsonb`),
     aktif: boolean("aktif").notNull().default(true),
     sonSiparisSenkron: timestamp("son_siparis_senkron", { withTimezone: true }),
     sonUrunSenkron: timestamp("son_urun_senkron", { withTimezone: true }),
+    /** Son senkron hatası (kimlik/hız sınırı); başarılı turda temizlenir. */
+    sonHata: text("son_hata"),
+    sonHataZamani: timestamp("son_hata_zamani", { withTimezone: true }),
+    /** Bu ana kadar senkron denenmez (429 / 401 sonrası geri çekilme). */
+    ertelemeBitis: timestamp("erteleme_bitis", { withTimezone: true }),
     ...timestamps,
   },
   (t) => [
@@ -248,6 +266,7 @@ export const entegrasyonlar = pgTable(
       t.saticiId,
     ),
     index("entegrasyonlar_aktif_idx").on(t.aktif),
+    index("entegrasyonlar_sirket_platform_idx").on(t.sirketId, t.platform),
   ],
 );
 
@@ -266,8 +285,10 @@ export const pazaryeriSiparisleri = pgTable(
     siparisKimligi: text("siparis_kimligi").notNull(),
     siparisNo: text("siparis_no"),
     kargoTakipNo: text("kargo_takip_no"),
-    /** Pazaryeri ham durumu: Created/Picking/Invoiced/Shipped/Delivered/Cancelled/Returned. */
+    /** KANONİK durum (lib/siparis/sabitler): Created/Picking/Invoiced/Shipped/Delivered/Cancelled/Returned… */
     durum: text("durum").notNull().default("Created"),
+    /** Pazaryerinin verdiği ham durum metni (eşleme sorunlarını izlemek için). */
+    hamDurum: text("ham_durum"),
     siparisTarihi: timestamp("siparis_tarihi", { withTimezone: true }),
     /** Pazaryeri yükünün tamamı; istemciye yalnız asgari alt küme iner. */
     hamVeri: jsonb("ham_veri"),
@@ -295,6 +316,7 @@ export const pazaryeriSiparisleri = pgTable(
       t.siparisKimligi,
     ),
     index("pazaryeri_siparisleri_sirket_durum_idx").on(t.sirketId, t.durum),
+    index("pazaryeri_siparisleri_sirket_platform_idx").on(t.sirketId, t.platform),
     index("pazaryeri_siparisleri_takip_idx").on(t.kargoTakipNo),
     index("pazaryeri_siparisleri_tarih_idx").on(t.siparisTarihi),
     index("pazaryeri_siparisleri_atanan_idx").on(t.atananKullaniciId),
@@ -321,9 +343,17 @@ export const senkronIsleri = pgTable(
     entegrasyonId: uuid("entegrasyon_id").references(() => entegrasyonlar.id, {
       onDelete: "set null",
     }),
+    /** NULL = tüm platformlar. Platform başına paralel kilit (M6-D) için ayrılmıştır. */
+    platform: text("platform"),
     durum: senkronDurumuEnum("durum").notNull().default("bekliyor"),
     baslangic: timestamp("baslangic", { withTimezone: true }),
     bitis: timestamp("bitis", { withTimezone: true }),
+    /**
+     * NABIZ: her ilerleme yazımında güncellenir. Bayat kilit kontrolü
+     * `baslangic`a değil buna bakar; 10 dakikalık meşru ürün işi 6. dakikada
+     * "süreç düştü" diye kesilmez.
+     */
+    sonNabiz: timestamp("son_nabiz", { withTimezone: true }),
     /** { adim, entegrasyon, sayfa, toplamSayfa, apiden, yazilan, tamamlanan: {ad: sayi} } */
     ilerleme: jsonb("ilerleme"),
     mesaj: text("mesaj"),

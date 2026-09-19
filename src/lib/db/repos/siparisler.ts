@@ -14,14 +14,14 @@ import {
   type AsgariHamVeri,
   type AsgariKalem,
 } from "@/lib/siparis/ham-veri";
-import type { EslenenSiparis } from "@/lib/trendyol/esle";
+import type { EslenenSiparis } from "@/lib/pazaryeri/normal-veri";
 
 /**
  * PAZARYERİ SİPARİŞ REPOSU.
  *
  * İKİ KURAL BU DOSYANIN TAMAMINDA GEÇERLİDİR:
  *
- *  1. HAM VERİ İSTEMCİYE İNMEZ. `ham_veri` Trendyol yükünün TAMAMIDIR (TC
+ *  1. HAM VERİ İSTEMCİYE İNMEZ. `ham_veri` pazaryeri yükünün TAMAMIDIR (TC
  *     kimlik, fatura adresi, satır bazlı fiyat/komisyon). Liste ve detay
  *     satırları her zaman `lib/siparis/ham-veri` süzgeçlerinden geçer;
  *     `hamVeri` alanı hiçbir dönüş tipinde yoktur.
@@ -74,6 +74,7 @@ export async function topluUpsert(
         ${s.siparisNo},
         ${s.kargoTakipNo},
         ${s.durum},
+        ${s.hamDurum},
         ${s.siparisTarihi ? s.siparisTarihi.toISOString() : null}::timestamptz,
         ${JSON.stringify(s.hamVeri ?? {})}::jsonb,
         ${s.icerikImzasi},
@@ -85,7 +86,7 @@ export async function topluUpsert(
     const sonuc = await db.execute<{ id: string }>(sql`
       insert into pazaryeri_siparisleri (
         sirket_id, platform, siparis_kimligi, siparis_no, kargo_takip_no,
-        durum, siparis_tarihi, ham_veri, icerik_imzasi, entegrasyon_adi,
+        durum, ham_durum, siparis_tarihi, ham_veri, icerik_imzasi, entegrasyon_adi,
         kargo_firmasi
       )
       values ${sql.join(degerler, sql`, `)}
@@ -93,6 +94,7 @@ export async function topluUpsert(
         siparis_no     = excluded.siparis_no,
         kargo_takip_no = excluded.kargo_takip_no,
         durum          = excluded.durum,
+        ham_durum      = excluded.ham_durum,
         siparis_tarihi = excluded.siparis_tarihi,
         ham_veri       = excluded.ham_veri,
         icerik_imzasi  = excluded.icerik_imzasi,
@@ -332,6 +334,16 @@ export async function entegrasyonAdlari(k: Kapsam): Promise<string[]> {
     )
     .orderBy(pazaryeriSiparisleri.entegrasyonAdi);
   return satirlar.map((s) => s.ad).filter((a): a is string => !!a);
+}
+
+/** Şirketin sipariş tablosunda geçen pazaryeri anahtarları (filtre seçenekleri). */
+export async function platformAdlari(k: Kapsam): Promise<string[]> {
+  const satirlar = await db
+    .selectDistinct({ platform: pazaryeriSiparisleri.platform })
+    .from(pazaryeriSiparisleri)
+    .where(eq(pazaryeriSiparisleri.sirketId, k.sirketId))
+    .orderBy(pazaryeriSiparisleri.platform);
+  return satirlar.map((s) => s.platform);
 }
 
 export interface DetayKalemi extends AsgariKalem {

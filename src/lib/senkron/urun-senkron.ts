@@ -1,11 +1,8 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import {
-  trendyolIstemcisi,
-  SAYFA_BOYUTU,
-  TrendyolHizSiniri,
-} from "@/lib/trendyol/istemci";
-import { urunEsle, type EslenenUrun } from "@/lib/trendyol/esle";
+import { saglayiciAl } from "@/lib/pazaryeri/saglayici";
+import { hataMetni } from "@/lib/pazaryeri/hatalar";
+import type { NormalUrun } from "@/lib/pazaryeri/tipler";
 import {
   sonUrunSenkronGuncelle,
   urunSenkronuVadesiGelenler,
@@ -14,9 +11,10 @@ import {
 } from "@/lib/db/repos/entegrasyonlar";
 import { bitir, ilerlemeYaz } from "@/lib/db/repos/senkron-isleri";
 import type { SenkronIsi } from "@/lib/db/schema";
+import { hatayiIsle } from "./siparis-senkron";
 
 /**
- * ÜRÜN SENKRONU — barkod → ürün adı/görsel kataloğunu tazeler.
+ * ÜRÜN SENKRONU — barkod → ürün adı/görsel kataloğunu tazeler. PLATFORM BİLMEZ.
  *
  * Okutma ekranı barkodu bu tablodan isimlendirir; katalog bozulursa depo
  * "hangi ürün bu" diye soramaz. Bu yüzden yazma kuralı ŞUDUR: YALNIZ DOLU VE
@@ -26,28 +24,24 @@ import type { SenkronIsi } from "@/lib/db/schema";
  * (PartnerSys aynı korumayı uygulamada, kayıt kayıt karşılaştırarak yapıyordu:
  * 5000 ürünlü katalogda binlerce fazladan sorgu. Burada tek ifade.)
  *
- * Sayfalar arasında 400 ms beklenir: ürün ucu sipariş ucundan daha sıkı hız
- * sınırlıdır, ardışık istek 429 yer.
+ * Sayfalar arası bekleme SAĞLAYICIDAN gelir (`yetenekler.sayfaArasiMs`):
+ * ürün uçları sipariş uçlarından daha sıkı hız sınırlıdır.
  */
 
 /** İş başına azami süre (katalog büyük olabilir). */
 export const URUN_IS_ZAMAN_ASIMI_MS = 10 * 60 * 1000;
 
-/** Sayfalar arası bekleme. */
-export const SAYFA_ARASI_MS = 400;
-
 const AZAMI_SAYFA = 200;
 
-function hataMetni(hata: unknown): string {
-  return hata instanceof Error ? hata.message : String(hata);
-}
-
 const bekle = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Geriye uyumlu ad: `EslenenUrun` artık `NormalUrun`. */
+export type EslenenUrun = NormalUrun;
 
 /** Ürün satırlarını yazar; dolu ve değişmiş alan kuralı SQL'de uygulanır. */
 export async function urunleriYaz(
   sirketId: string,
-  urunSatirlari: EslenenUrun[],
+  urunSatirlari: NormalUrun[],
 ): Promise<number> {
   if (urunSatirlari.length === 0) return 0;
 
@@ -98,41 +92,39 @@ async function birEntegrasyon(
   sonAn: number,
   tamamlanan: Record<string, number>,
 ): Promise<number> {
-  const istemci = trendyolIstemcisi({
-    saticiId: e.saticiId,
-    apiKey: e.apiKey,
-    apiSecret: e.apiSecret,
-  });
+  const saglayici = saglayiciAl(e);
+  if (!saglayici.yetenekler.urun || !saglayici.urunler) {
+    throw new Error("Bu pazaryeri ürün kataloğu vermiyor.");
+  }
+  const { sayfaArasiMs } = saglayici.yetenekler;
 
   let yazilanToplam = 0;
   let apidenToplam = 0;
+  let imlec: string | null = null;
 
   for (let sayfaNo = 0; sayfaNo < AZAMI_SAYFA; sayfaNo++) {
     if (Date.now() > sonAn) break;
 
-    const yanit = await istemci.urunler({ sayfa: sayfaNo });
-    apidenToplam += yanit.content.length;
+    const yanit = await saglayici.urunler({ imlec });
+    apidenToplam += yanit.kayitlar.length;
 
-    const eslenen = yanit.content
-      .map(urunEsle)
-      .filter((u): u is EslenenUrun => u !== null);
-    if (eslenen.length) {
-      yazilanToplam += await urunleriYaz(e.sirketId, eslenen);
+    if (yanit.kayitlar.length) {
+      yazilanToplam += await urunleriYaz(e.sirketId, yanit.kayitlar);
     }
 
     await ilerlemeYaz(is.id, {
       adim: "urun",
       entegrasyon: e.ad,
-      sayfa: sayfaNo,
-      toplamSayfa: yanit.totalPages ?? null,
+      sayfa: yanit.sayfaNo ?? sayfaNo,
+      toplamSayfa: yanit.toplamSayfa ?? null,
       apiden: apidenToplam,
       yazilan: yazilanToplam,
       tamamlanan: { ...tamamlanan, [e.ad]: yazilanToplam },
     });
 
-    if (yanit.content.length < SAYFA_BOYUTU) break;
-    if (yanit.totalPages != null && sayfaNo + 1 >= yanit.totalPages) break;
-    await bekle(SAYFA_ARASI_MS);
+    imlec = yanit.sonrakiImlec;
+    if (imlec === null) break;
+    if (sayfaArasiMs > 0) await bekle(sayfaArasiMs);
   }
 
   console.log(
@@ -174,7 +166,7 @@ export async function urunSenkronunuYurut(is: SenkronIsi): Promise<{
         toplam += yazilan;
         await sonUrunSenkronGuncelle(e.id);
       } catch (hata) {
-        const onek = hata instanceof TrendyolHizSiniri ? "hız sınırı" : "hata";
+        const onek = await hatayiIsle(e, hata);
         const mesaj = `${e.ad}: ${hataMetni(hata)}`;
         console.warn(`[senkron] ürün ${onek} - ${mesaj}`);
         hatalar.push(mesaj);

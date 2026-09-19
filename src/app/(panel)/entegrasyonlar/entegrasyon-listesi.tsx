@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CheckCircle2, Pencil, Plug, RefreshCw, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Pencil, Plug, RefreshCw, Trash2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Rozet, PazaryeriRozeti } from "@/components/ui/rozet";
 import { BosDurum } from "@/components/panel/bos-durum";
@@ -13,6 +13,7 @@ import {
   senkronBaslat,
 } from "@/server/actions/entegrasyonlar";
 import type { EntegrasyonOzeti } from "@/lib/db/repos/entegrasyonlar";
+import { PAZARYERLERI } from "@/lib/pazaryeri/kayit";
 import { EntegrasyonFormu } from "./entegrasyon-formu";
 
 /**
@@ -38,7 +39,7 @@ export function EntegrasyonListesi({ kayitlar }: { kayitlar: EntegrasyonOzeti[] 
       <BosDurum
         ikon={Plug}
         baslik="Henüz bağlı mağaza yok"
-        aciklama="Trendyol satıcı panelinizden aldığınız API anahtarı, gizli anahtar ve satıcı ID ile mağazanızı bağlayın; siparişler birkaç dakika içinde listeye düşer."
+        aciklama="Pazaryeri satıcı panelinizden aldığınız API bilgileriyle mağazanızı bağlayın; siparişler birkaç dakika içinde listeye düşer."
       />
     );
   }
@@ -67,6 +68,8 @@ export function EntegrasyonListesi({ kayitlar }: { kayitlar: EntegrasyonOzeti[] 
         {kayitlar.map((e) => {
           const cevap = sonuc[e.id];
           const mesgul = bekleyen === e.id && gecis;
+          const tanim = PAZARYERLERI[e.platform];
+          const erteli = e.ertelemeBitis && e.ertelemeBitis.getTime() > Date.now();
 
           return (
             <div
@@ -77,7 +80,7 @@ export function EntegrasyonListesi({ kayitlar }: { kayitlar: EntegrasyonOzeti[] 
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="text-title-3 truncate">
-                      {e.ad?.trim() || "Trendyol mağazası"}
+                      {e.ad?.trim() || `${tanim.ad} mağazası`}
                     </h2>
                     <PazaryeriRozeti platform={e.platform} />
                     <Rozet ton={e.aktif ? "basari" : "notr"}>
@@ -85,14 +88,14 @@ export function EntegrasyonListesi({ kayitlar }: { kayitlar: EntegrasyonOzeti[] 
                     </Rozet>
                   </div>
                   <dl className="mt-3 grid gap-x-6 gap-y-1.5 text-footnote sm:grid-cols-2">
-                    <div className="flex gap-2">
-                      <dt className="text-muted-foreground">Satıcı ID</dt>
-                      <dd className="tabular font-semibold">{e.saticiId}</dd>
-                    </div>
-                    <div className="flex gap-2">
-                      <dt className="text-muted-foreground">API anahtarı</dt>
-                      <dd className="tabular font-semibold">{e.apiKeyMaskeli}</dd>
-                    </div>
+                    {tanim.alanlar.map((alan) => (
+                      <div key={alan.ad} className="flex gap-2">
+                        <dt className="text-muted-foreground">{alan.etiket}</dt>
+                        <dd className="tabular truncate font-semibold">
+                          {e.kimlikMaskeli[alan.ad] ?? "-"}
+                        </dd>
+                      </div>
+                    ))}
                     <div className="flex gap-2">
                       <dt className="text-muted-foreground">Son sipariş senkronu</dt>
                       <dd className="font-semibold">
@@ -108,6 +111,22 @@ export function EntegrasyonListesi({ kayitlar }: { kayitlar: EntegrasyonOzeti[] 
                   </dl>
                 </div>
               </div>
+
+              {e.sonHata && (
+                <p
+                  role="status"
+                  className="mt-3 flex items-start gap-1.5 text-footnote text-warning"
+                >
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span>
+                    <span className="font-semibold">
+                      Son senkron hatası{e.sonHataZamani ? ` (${goreliZaman(e.sonHataZamani)})` : ""}
+                      {erteli && e.ertelemeBitis ? ` · ${goreliZaman(e.ertelemeBitis)} tekrar denenecek` : ""}:
+                    </span>{" "}
+                    {e.sonHata}
+                  </span>
+                </p>
+              )}
 
               {cevap && (
                 <p
@@ -171,6 +190,7 @@ export function EntegrasyonListesi({ kayitlar }: { kayitlar: EntegrasyonOzeti[] 
               {duzenlenen === e.id && (
                 <div className="mt-4 border-t border-border pt-4">
                   <EntegrasyonFormu
+                    platform={e.platform}
                     duzenlenen={e}
                     onKapat={() => setDuzenlenen(null)}
                   />
@@ -187,7 +207,7 @@ export function EntegrasyonListesi({ kayitlar }: { kayitlar: EntegrasyonOzeti[] 
         baslik="Entegrasyon silinsin mi?"
         aciklama={
           silinecek
-            ? `${silinecek.ad?.trim() || "Trendyol mağazası"} (${silinecek.saticiId}) bağlantısı silinecek. Gelmiş siparişler listede kalır, yeni sipariş çekilmez.`
+            ? `${silinecek.ad?.trim() || `${PAZARYERLERI[silinecek.platform].ad} mağazası`} (${silinecek.saticiId}) bağlantısı silinecek. Gelmiş siparişler listede kalır, yeni sipariş çekilmez.`
             : undefined
         }
         onaylaMetni="Entegrasyonu sil"

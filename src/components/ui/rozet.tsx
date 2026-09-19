@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { pazaryeriAdi, pazaryeriRengi, platformMi } from "@/lib/pazaryeri/kayit";
 
 /**
  * Rozet - satır içi durum etiketi. DESIGN.md "dolgu yok" kuralı: çerçeve ve
@@ -37,26 +38,19 @@ Rozet.displayName = "Rozet";
 /**
  * Pazaryeri kimlikleri - DESIGN.md "Pazaryeri kimlikleri". Rozet çerçevesi
  * ve metni marka rengini taşır, dolgu yok; renk `style` ile inline verilir
- * çünkü marka renkleri Tailwind paletinde tanımlı değildir (tek seferlik
- * kullanım, token'a değmez).
+ * çünkü marka renkleri Tailwind paletinde tanımlı değildir.
+ *
+ * Ad ve renk `lib/pazaryeri/kayit`ten gelir (tek kaynak); pazaryeri olmayan
+ * ama barkod kurallarında geçen kaynaklar (PTT, WooCommerce) burada ek olarak
+ * tanımlıdır.
  */
-const PAZARYERI_RENK: Record<string, string> = {
-  trendyol: "#E85D2A",
-  hepsiburada: "#E0862F",
-  n11: "#7B3FA0",
-  pazarama: "#1E6FD9",
+const EK_RENK: Record<string, string> = {
   ptt: "#C8102E",
-  amazon: "#1A1A1A",
   woocommerce: "#7F54B3",
 };
 
-const PAZARYERI_AD: Record<string, string> = {
-  trendyol: "Trendyol",
-  hepsiburada: "Hepsiburada",
-  n11: "N11",
-  pazarama: "Pazarama",
+const EK_AD: Record<string, string> = {
   ptt: "PTT",
-  amazon: "Amazon",
   woocommerce: "WooCommerce",
 };
 
@@ -69,8 +63,8 @@ export function PazaryeriRozeti({
   className?: string;
 }) {
   const anahtar = platform.toLowerCase();
-  const renk = PAZARYERI_RENK[anahtar];
-  const ad = PAZARYERI_AD[anahtar] ?? platform;
+  const renk = pazaryeriRengi(anahtar) ?? EK_RENK[anahtar];
+  const ad = platformMi(anahtar) ? pazaryeriAdi(anahtar) : (EK_AD[anahtar] ?? platform);
 
   if (!renk) {
     return (

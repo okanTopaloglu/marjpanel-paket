@@ -1,15 +1,15 @@
+import { normaldenSatir, type EslenenSiparis } from "@/lib/pazaryeri/normal-veri";
+import { senkronBaslangici, tarihPencereleri } from "@/lib/pazaryeri/pencere";
+import { saglayiciAl } from "@/lib/pazaryeri/saglayici";
 import {
-  trendyolIstemcisi,
-  SAYFA_BOYUTU,
-  TrendyolHizSiniri,
-  type SayfaliYanit,
-  type HamSiparis,
-} from "@/lib/trendyol/istemci";
-import { siparisEsle, type EslenenSiparis } from "@/lib/trendyol/esle";
-import { senkronBaslangici, tarihPencereleri } from "@/lib/trendyol/pencere";
+  PazaryeriHizSiniri,
+  PazaryeriKimlikHatasi,
+  hataMetni,
+} from "@/lib/pazaryeri/hatalar";
 import { topluUpsert } from "@/lib/db/repos/siparisler";
 import {
   kimlikBilgileri,
+  sonHataYaz,
   sonSiparisSenkronGuncelle,
   vadesiGelenler,
   type SenkronEntegrasyonu,
@@ -18,22 +18,22 @@ import { bitir, ilerlemeYaz } from "@/lib/db/repos/senkron-isleri";
 import type { SenkronIsi } from "@/lib/db/schema";
 
 /**
- * SİPARİŞ SENKRONU — bir "iş" satırını yürüten motor.
+ * SİPARİŞ SENKRONU — bir "iş" satırını yürüten motor. PLATFORM BİLMEZ.
  *
- * Akış (entegrasyon başına): `senkronBaslangici` → 14 günlük `tarihPencereleri`
- * → her pencerede 200'lük sayfalar → `siparisEsle` → `topluUpsert`.
+ * Akış (entegrasyon başına): `saglayiciAl` → `senkronBaslangici` →
+ * sağlayıcının izin verdiği genişlikte `tarihPencereleri` → her pencerede
+ * imleç `null` olana kadar sayfa → `normaldenSatir` → `topluUpsert`.
  *
  * ÜÇ KARAR PARTNERSYS'TEN AYRILIR:
  *
- *  1. BİR ENTEGRASYONUN HATASI DİĞERLERİNİ DÜŞÜRMEZ. PartnerSys'te tek
- *     `throw` tüm turu bitiriyordu: bir mağazanın anahtarı dolduğunda diğer
- *     mağazaların siparişleri de gelmiyordu. Hata `hatalar` dizisine yazılır,
- *     döngü devam eder.
- *  2. 429 YALNIZ O ENTEGRASYONU DURDURUR. Hız sınırı satıcı bazlıdır; diğer
- *     satıcı kimliğiyle çekim yapmaya devam etmek doğrudur.
+ *  1. BİR ENTEGRASYONUN HATASI DİĞERLERİNİ DÜŞÜRMEZ. Hata `hatalar`
+ *     dizisine ve entegrasyonun `son_hata` sütununa yazılır, döngü devam eder.
+ *  2. 429 YALNIZ O ENTEGRASYONU DURDURUR ve `Retry-After` kadar (en az 60 sn)
+ *     ERTELER. Hız sınırı satıcı bazlıdır; diğer satıcıyla çekim sürer.
+ *     401/403 bir saat erteler: yanlış anahtarla her 2 dakikada bir vurmak
+ *     hesabı kilitletebilir.
  *  3. İŞ BAŞINA 5 DAKİKALIK SERT SINIR. Süre dolduğunda tur kesilir ve iş
- *     "hata" ile kapanır; kilit serbest kalır (kilidi bayat bırakıp
- *     `bayatlariSerbestBirak`ın toparlamasını beklemek 5 dakika daha kaybettirirdi).
+ *     "hata" ile kapanır; kilit serbest kalır.
  */
 
 /** İş başına azami süre. */
@@ -42,14 +42,12 @@ export const IS_ZAMAN_ASIMI_MS = 5 * 60 * 1000;
 /** Bir pencerede okunacak azami sayfa (sonsuz döngü emniyeti). */
 const AZAMI_SAYFA = 100;
 
-function saatOfseti(): number {
-  const n = Number(process.env.TRENDYOL_SIPARIS_SAAT_OFSETI ?? 0);
-  return Number.isFinite(n) ? n : 0;
-}
+/** 429'da asgari erteleme; Retry-After daha uzunsa o kazanır. */
+export const HIZ_SINIRI_ERTELEME_SN = 60;
+/** 401/403'te erteleme. */
+export const KIMLIK_HATASI_ERTELEME_SN = 60 * 60;
 
-function hataMetni(hata: unknown): string {
-  return hata instanceof Error ? hata.message : String(hata);
-}
+const bekle = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export interface SenkronSonucu {
   toplam: number;
@@ -73,36 +71,33 @@ async function birEntegrasyon(
   sonAn: number,
   tamamlanan: Record<string, number>,
 ): Promise<number> {
-  const istemci = trendyolIstemcisi({
-    saticiId: e.saticiId,
-    apiKey: e.apiKey,
-    apiSecret: e.apiSecret,
-  });
+  const saglayici = saglayiciAl(e);
+  const { azamiPencereGun, sayfaArasiMs, ilkSenkronGun } = saglayici.yetenekler;
 
   const simdi = Date.now();
-  const pencereler = tarihPencereleri(senkronBaslangici(e.sonSiparisSenkron), simdi);
+  const pencereler = tarihPencereleri(
+    senkronBaslangici(e.sonSiparisSenkron, new Date(simdi), ilkSenkronGun),
+    simdi,
+    azamiPencereGun,
+  );
   let yazilanToplam = 0;
   let apidenToplam = 0;
 
   for (const [indeks, pencere] of pencereler.entries()) {
+    let imlec: string | null = null;
     for (let sayfaNo = 0; sayfaNo < AZAMI_SAYFA; sayfaNo++) {
       if (Date.now() > sonAn) return yazilanToplam;
 
-      const yanit: SayfaliYanit<HamSiparis> = await istemci.siparisler({
+      const yanit = await saglayici.siparisler({
         baslangic: pencere.baslangic,
         bitis: pencere.bitis,
-        sayfa: sayfaNo,
+        imlec,
       });
-      apidenToplam += yanit.content.length;
+      apidenToplam += yanit.kayitlar.length;
 
-      const eslenen = yanit.content
-        .map((ham) =>
-          siparisEsle(ham, { entegrasyonAdi: e.ad, saatOfseti: saatOfseti() }),
-        )
-        .filter((s): s is EslenenSiparis => s !== null);
-
-      if (eslenen.length) {
-        yazilanToplam += await topluUpsert(e.sirketId, eslenen);
+      const satirlar: EslenenSiparis[] = yanit.kayitlar.map((n) => normaldenSatir(n, e.ad));
+      if (satirlar.length) {
+        yazilanToplam += await topluUpsert(e.sirketId, satirlar);
       }
 
       await ilerlemeYaz(is.id, {
@@ -110,16 +105,16 @@ async function birEntegrasyon(
         entegrasyon: e.ad,
         pencere: indeks + 1,
         toplamPencere: pencereler.length,
-        sayfa: sayfaNo,
-        toplamSayfa: yanit.totalPages ?? null,
+        sayfa: yanit.sayfaNo ?? sayfaNo,
+        toplamSayfa: yanit.toplamSayfa ?? null,
         apiden: apidenToplam,
         yazilan: yazilanToplam,
         tamamlanan: { ...tamamlanan, [e.ad]: yazilanToplam },
       });
 
-      // Son sayfa: dolmamış sayfa ya da API'nin bildirdiği toplam sayfaya varış.
-      if (yanit.content.length < SAYFA_BOYUTU) break;
-      if (yanit.totalPages != null && sayfaNo + 1 >= yanit.totalPages) break;
+      imlec = yanit.sonrakiImlec;
+      if (imlec === null) break;
+      if (sayfaArasiMs > 0) await bekle(sayfaArasiMs);
     }
   }
 
@@ -127,6 +122,22 @@ async function birEntegrasyon(
     `[senkron] ${e.ad}: ${apidenToplam} kayıt okundu, ${yazilanToplam} satır yazıldı.`,
   );
   return yazilanToplam;
+}
+
+/** Hata türüne göre entegrasyona ne yazılacağı. Dönüş: log öneki. */
+export async function hatayiIsle(e: { id: string }, hata: unknown): Promise<string> {
+  const mesaj = hataMetni(hata);
+  if (hata instanceof PazaryeriHizSiniri) {
+    const sn = Math.max(HIZ_SINIRI_ERTELEME_SN, hata.tekrarSaniye ?? 0);
+    await sonHataYaz(e.id, mesaj, sn);
+    return "hız sınırı";
+  }
+  if (hata instanceof PazaryeriKimlikHatasi) {
+    await sonHataYaz(e.id, mesaj, KIMLIK_HATASI_ERTELEME_SN);
+    return "kimlik hatası";
+  }
+  await sonHataYaz(e.id, mesaj);
+  return "hata";
 }
 
 /** İşi yürütür ve `senkron_isleri` satırını kapatır. */
@@ -155,8 +166,7 @@ export async function siparisSenkronunuYurut(is: SenkronIsi): Promise<SenkronSon
         toplam += yazilan;
         await sonSiparisSenkronGuncelle(e.id);
       } catch (hata) {
-        // 429: bu satıcı için çekim bırakılır, diğerlerine devam edilir.
-        const onek = hata instanceof TrendyolHizSiniri ? "hız sınırı" : "hata";
+        const onek = await hatayiIsle(e, hata);
         const mesaj = `${e.ad}: ${hataMetni(hata)}`;
         console.warn(`[senkron] ${onek} - ${mesaj}`);
         hatalar.push(mesaj);

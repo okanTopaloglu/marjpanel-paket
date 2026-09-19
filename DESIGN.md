@@ -81,7 +81,12 @@ Rozet çerçevesi ve metni rengi taşır; **dolgu yok** - dolu renk satırda
 gürültü yapar ve tablo taramasını bozar.
 
 Trendyol `#E85D2A` · Hepsiburada `#E0862F` · N11 `#7B3FA0` ·
-Pazarama `#1E6FD9` · PTT `#C8102E` · Amazon `#1A1A1A` · WooCommerce `#7F54B3`
+Pazarama `#1E6FD9` · idefix `#0E8C9B` · PTT `#C8102E` · Amazon `#1A1A1A` ·
+WooCommerce `#7F54B3`
+
+Pazaryeri adı ve rengi tek kaynaktan gelir: `src/lib/pazaryeri/kayit.ts`
+(`PazaryeriRozeti` oradan okur). idefix turkuazı öneridir; gerçek marka
+rengi doğrulanmalı.
 
 ### Müşteri markası: MAMA AURA
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { pazaryeriAdi } from "@/lib/pazaryeri/kayit";
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Printer, ShoppingCart } from "lucide-react";
@@ -99,7 +100,7 @@ export function SiparisListesi({
         tip: "tekli",
         deger: secili.platform,
         onChange: (d) => guncelle({ platform: d }),
-        secenekler: platformlar.map((p) => ({ deger: p, etiket: p })),
+        secenekler: platformlar.map((p) => ({ deger: p, etiket: pazaryeriAdi(p) })),
       });
     }
     if (kargolar.length > 0) {

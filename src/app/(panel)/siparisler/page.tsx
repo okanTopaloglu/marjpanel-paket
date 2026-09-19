@@ -4,6 +4,7 @@ import { adminKapsami } from "@/lib/auth/yetki";
 import { SayfaBasligi } from "@/components/panel/sayfa-basligi";
 import {
   entegrasyonAdlari,
+  platformAdlari,
   kargoAdlari,
   sayfa as siparisSayfasi,
   sekmeSayilari,
@@ -16,9 +17,6 @@ export const metadata: Metadata = { title: "Siparişler" };
 
 /** Liste her istekte tazedir: senkron dakikalar içinde satır ekler. */
 export const dynamic = "force-dynamic";
-
-/** Şimdilik tek pazaryeri; liste büyüdüğünde repodan okunacak. */
-const PLATFORMLAR = ["trendyol"];
 
 type Parametreler = {
   sekme?: string;
@@ -53,7 +51,7 @@ export default async function SiparislerSayfasi({
   const entegrasyon = p.entegrasyon?.trim() ?? "";
   const sayfaNo = Math.max(0, Number(p.sayfa ?? 0) || 0);
 
-  const [sonuc, sayilar, kargolar, magazalar] = await Promise.all([
+  const [sonuc, sayilar, kargolar, magazalar, platformlar] = await Promise.all([
     siparisSayfasi(kapsam, {
       sekme,
       platform,
@@ -65,6 +63,7 @@ export default async function SiparislerSayfasi({
     sekmeSayilari(kapsam),
     kargoAdlari(kapsam),
     entegrasyonAdlari(kapsam),
+    platformAdlari(kapsam),
   ]);
 
   return (
@@ -80,7 +79,7 @@ export default async function SiparislerSayfasi({
           sayilar={sayilar}
           kargolar={kargolar}
           entegrasyonlar={magazalar}
-          platformlar={PLATFORMLAR}
+          platformlar={platformlar}
           secili={{ sekme, platform, arama, kargo, entegrasyon }}
         />
         <EskiSil />

@@ -24,7 +24,14 @@ import type { Kapsam } from "@/lib/auth/kapsam";
  * kuyruk kalıcı olarak kilitlenirdi.
  */
 
-/** 'calisiyor' satırı bu süreden eskiyse sahibi öldü sayılır. */
+/**
+ * 'calisiyor' satırının NABZI bu süreden eskiyse sahibi öldü sayılır.
+ *
+ * Nabız `ilerlemeYaz` ile her sayfada atılır (`son_nabiz`). Kontrol
+ * `baslangic`a bakıyorken 10 dakikalık meşru ürün işi 6. dakikada "süreç
+ * düştü" diye kesiliyordu; tek süreçte `tikCalisiyor` bayrağı bunu gizliyor,
+ * dış cron ya da ikinci konteyner ise işi gerçekten öldürüyordu.
+ */
 export const BAYAT_DK = 5;
 
 /** İlerleme jsonb'sinin şekli (arayüz ilerleme çubuğunu bundan çizer). */
@@ -73,7 +80,7 @@ export async function bayatlariSerbestBirak(): Promise<number> {
     .where(
       and(
         eq(senkronIsleri.durum, "calisiyor"),
-        sql`coalesce(${senkronIsleri.baslangic}, ${senkronIsleri.createdAt}) < now() - interval '${sql.raw(String(BAYAT_DK))} minutes'`,
+        sql`coalesce(${senkronIsleri.sonNabiz}, ${senkronIsleri.baslangic}, ${senkronIsleri.createdAt}) < now() - interval '${sql.raw(String(BAYAT_DK))} minutes'`,
       ),
     )
     .returning({ id: senkronIsleri.id });
@@ -101,7 +108,7 @@ export async function bekleyenAl(tur: SenkronTuru): Promise<SenkronIsi | null> {
      */
     const satirlar = await db.execute<SenkronIsi>(sql`
       update senkron_isleri
-         set durum = 'calisiyor', baslangic = now()
+         set durum = 'calisiyor', baslangic = now(), son_nabiz = now()
        where id = (
          select id from senkron_isleri
           where durum = 'bekliyor' and tur = ${tur}
@@ -115,9 +122,11 @@ export async function bekleyenAl(tur: SenkronTuru): Promise<SenkronIsi | null> {
         tetik,
         sirket_id      as "sirketId",
         entegrasyon_id as "entegrasyonId",
+        platform,
         durum,
         baslangic,
         bitis,
+        son_nabiz      as "sonNabiz",
         ilerleme,
         mesaj,
         hatalar,
@@ -139,11 +148,13 @@ export async function bekleyenAl(tur: SenkronTuru): Promise<SenkronIsi | null> {
 export async function otoIsAc(
   tur: SenkronTuru,
   tetik: SenkronTetik = "oto",
+  platform: string | null = null,
 ): Promise<SenkronIsi | null> {
   try {
+    const simdi = new Date();
     const [satir] = await db
       .insert(senkronIsleri)
-      .values({ tur, tetik, durum: "calisiyor", baslangic: new Date() })
+      .values({ tur, tetik, platform, durum: "calisiyor", baslangic: simdi, sonNabiz: simdi })
       .returning();
     return satir ?? null;
   } catch (hata) {
@@ -158,7 +169,7 @@ export async function ilerlemeYaz(
 ): Promise<void> {
   await db
     .update(senkronIsleri)
-    .set({ ilerleme })
+    .set({ ilerleme, sonNabiz: new Date() })
     .where(eq(senkronIsleri.id, id));
 }
 

@@ -10,9 +10,10 @@ import { Rozet } from "@/components/ui/rozet";
 import { Select } from "@/components/ui/select";
 import type { EntegrasyonOzeti } from "@/lib/db/repos/entegrasyonlar";
 import type { SenkronDurumOzeti } from "@/lib/db/repos/senkron-isleri";
+import { PAZARYERLERI, pazaryeriAdi } from "@/lib/pazaryeri/kayit";
 
 /**
- * ÜRÜN SENKRONU KARTI - "Trendyol'dan ürünleri çek".
+ * ÜRÜN SENKRONU KARTI - "<Pazaryeri>'ndan ürünleri çek".
  *
  * İLK DURUM SUNUCUDAN GELİR (`baslangicOzeti`): kart açılır açılmaz doğru
  * bilgiyi gösterir, ilk yoklamayı beklemez. Yoklama yalnız BİR ÜRÜN İŞİ
@@ -43,7 +44,8 @@ export function UrunSenkron({
   baslangicOzeti: SenkronDurumOzeti;
 }) {
   const router = useRouter();
-  const aktifler = entegrasyonlar.filter((e) => e.aktif);
+  // Ürün kataloğu vermeyen pazaryeri (Amazon v1) listede görünmez.
+  const aktifler = entegrasyonlar.filter((e) => e.aktif && PAZARYERLERI[e.platform].yetenekler.urun);
   const [secili, setSecili] = useState(aktifler[0]?.id ?? "");
   const [ozet, setOzet] = useState<SenkronDurumOzeti>(baslangicOzeti);
   const [izle, setIzle] = useState(() => urunIsiCalisiyorMu(baslangicOzeti));
@@ -164,7 +166,7 @@ export function UrunSenkron({
               >
                 {aktifler.map((e) => (
                   <option key={e.id} value={e.id}>
-                    {e.ad?.trim() || e.platform} ({e.saticiId})
+                    {e.ad?.trim() || pazaryeriAdi(e.platform)} ({e.saticiId})
                   </option>
                 ))}
               </Select>
@@ -175,7 +177,7 @@ export function UrunSenkron({
               ) : (
                 <RefreshCw className="h-4 w-4" aria-hidden="true" />
               )}
-              Trendyol&apos;dan ürünleri çek
+              {seciliKayit ? `${pazaryeriAdi(seciliKayit.platform)}’dan ürünleri çek` : "Ürünleri çek"}
             </Button>
           </div>
 

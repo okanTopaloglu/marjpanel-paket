@@ -13,7 +13,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { db, client } from "../../src/lib/db/client";
 import { entegrasyonlar, senkronIsleri, sirketler } from "../../src/lib/db/schema";
-import { sifrele } from "../../src/lib/guvenlik/sifreleme";
+import { kimlikSifrele } from "../../src/lib/pazaryeri/kimlik";
 import { tik } from "../../src/lib/senkron/zamanlayici";
 
 const SAHTE_SATICI = "999999999";
@@ -44,8 +44,11 @@ async function main(): Promise<void> {
       platform: "trendyol",
       ad: "Deneme mağazası",
       saticiId: SAHTE_SATICI,
-      apiKeySifreli: sifrele("deneme-api-anahtari"),
-      apiSecretSifreli: sifrele("deneme-gizli-anahtar"),
+      kimlikSifreli: kimlikSifrele({
+        saticiId: SAHTE_SATICI,
+        apiKey: "deneme-api-anahtari",
+        apiSecret: "deneme-gizli-anahtar",
+      }),
     })
     .returning();
   if (!sahte) throw new Error("Sahte entegrasyon eklenemedi.");

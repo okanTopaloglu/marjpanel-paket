@@ -5,13 +5,23 @@
  * Upsert anında hesaplanıp `icerik_imzasi` sütununa yazılır (jsonb alt
  * sorgusu yerine indeksli sütun).
  */
+import { normalZarf } from "@/lib/pazaryeri/normal-veri";
+
 export interface SiparisKalemi {
   barkod: string;
   urunAdi: string;
   adet: number;
 }
 
+/**
+ * Kalemler: ÖNCE sağlayıcının yazdığı `_normal` zarfı, yoksa Trendyol alan
+ * adları (eski satırlar). Zarf tanımı `lib/pazaryeri/normal-veri`.
+ */
 export function kalemleriCikar(hamVeri: unknown): SiparisKalemi[] {
+  const zarf = normalZarf(hamVeri);
+  if (zarf) {
+    return zarf.kalemler.map((k) => ({ barkod: k.barkod, urunAdi: k.urunAdi, adet: k.adet }));
+  }
   const ham = (hamVeri ?? {}) as Record<string, unknown>;
   const satirlar = Array.isArray(ham.lines)
     ? (ham.lines as Record<string, unknown>[])

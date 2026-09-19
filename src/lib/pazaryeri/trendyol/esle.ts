@@ -1,5 +1,5 @@
 /**
- * Trendyol ham yükü → veritabanı satırı. SAF fonksiyonlar (G/Ç yok, test edilir).
+ * Trendyol ham yükü → normal sipariş/ürün. SAF fonksiyonlar (G/Ç yok, test edilir).
  *
  * PartnerSys `mapTrendyolOrder` / `mapTrendyolProduct` portu. İki yerde
  * bilerek AYRILIR:
@@ -12,31 +12,26 @@
  *     `orderNumber`.
  *  2. DURUM: `shipmentPackageStatus` varsa o kazanır; paketin durumu
  *     siparişin durumundan ayrılabilir (bir paket kargoda, diğeri hazırlanıyor).
+ *
+ * Müşteri adı, adres ve kalemler `lib/siparis/ham-veri`nin Trendyol
+ * okuyucularıyla doldurulur (birebir eski davranış) ve normal zarfa yazılır.
  */
-import { durumNormalize, type SiparisDurumu } from "@/lib/siparis/sabitler";
-import { hamVeridenImza } from "@/lib/siparis/icerik-imzasi";
+import {
+  aliciTelefonu,
+  etiketAdresi,
+  musteriAdi,
+  siparisKalemleri,
+} from "@/lib/siparis/ham-veri";
+import { kanonikDurum } from "../durum";
+import { normaldenSatir, type EslenenSiparis } from "../normal-veri";
+import type { NormalSiparis, NormalUrun } from "../tipler";
 
 export interface EsleSecenekleri {
-  /** Kaydın hangi entegrasyondan geldiği (mağaza etiketi). */
-  entegrasyonAdi: string;
   /**
    * Saat ofseti (saat). YALNIZ saat dilimi BELİRTİLMEYEN metin tarihlerde
    * uygulanır — bkz. `tarihCoz` gövde notu.
    */
   saatOfseti?: number;
-}
-
-export interface EslenenSiparis {
-  platform: "trendyol";
-  siparisKimligi: string;
-  siparisNo: string | null;
-  kargoTakipNo: string | null;
-  durum: SiparisDurumu;
-  siparisTarihi: Date | null;
-  hamVeri: Record<string, unknown>;
-  icerikImzasi: string | null;
-  entegrasyonAdi: string;
-  kargoFirmasi: string | null;
 }
 
 function metin(v: unknown): string | null {
@@ -63,7 +58,7 @@ const SAAT_DILIMI_ISARETI = /(?:Z|[+-]\d{2}:?\d{2})$/i;
  * değer gerçek ana taşınır. Epoch sayıları ve işaretli ISO metinleri ASLA
  * kaydırılmaz.
  */
-function tarihCoz(deger: unknown, saatOfseti: number): Date | null {
+export function tarihCoz(deger: unknown, saatOfseti: number): Date | null {
   if (deger === null || deger === undefined || deger === "") return null;
 
   if (typeof deger === "number") {
@@ -87,22 +82,23 @@ function tarihCoz(deger: unknown, saatOfseti: number): Date | null {
 }
 
 /**
- * Tek bir Trendyol paketini satıra çevirir. Kimlik üretilemiyorsa `null` —
- * kimliksiz satır upsert anahtarını bozar, sessizce atlanır.
+ * Tek bir Trendyol paketini normal siparişe çevirir. Kimlik üretilemiyorsa
+ * `null` — kimliksiz satır upsert anahtarını bozar, sessizce atlanır.
  */
-export function siparisEsle(
+export function siparisNormalle(
   ham: unknown,
-  { entegrasyonAdi, saatOfseti = 0 }: EsleSecenekleri,
-): EslenenSiparis | null {
+  { saatOfseti = 0 }: EsleSecenekleri = {},
+): NormalSiparis | null {
   const o = (ham ?? {}) as Record<string, unknown>;
-  const satirlar = Array.isArray(o.lines)
-    ? (o.lines as Record<string, unknown>[])
-    : [];
+  const satirlar = Array.isArray(o.lines) ? (o.lines as Record<string, unknown>[]) : [];
   const ilk = satirlar[0] ?? {};
 
-  const siparisKimligi =
-    metin(o.shipmentPackageId) ?? metin(o.id) ?? metin(o.orderNumber);
+  const siparisKimligi = metin(o.shipmentPackageId) ?? metin(o.id) ?? metin(o.orderNumber);
   if (!siparisKimligi) return null;
+
+  const hamDurum = metin(o.shipmentPackageStatus) ?? metin(o.status);
+  const adres = etiketAdresi(o);
+  const [ilce = "", il = ""] = adres.ilceIl.split(" - ");
 
   return {
     platform: "trendyol",
@@ -111,24 +107,29 @@ export function siparisEsle(
     // Takip no ÖNCE satırdan: paket bazlı takip numarası satırda taşınır,
     // sipariş kökündeki alan birden çok pakette boş kalabiliyor.
     kargoTakipNo: metin(ilk.cargoTrackingNumber) ?? metin(o.cargoTrackingNumber),
-    durum: durumNormalize(
-      metin(o.shipmentPackageStatus) ?? metin(o.status) ?? undefined,
-    ),
-    siparisTarihi: tarihCoz(o.orderDate ?? o.createdDate, saatOfseti),
-    hamVeri: o,
-    icerikImzasi: hamVeridenImza(o),
-    entegrasyonAdi,
     kargoFirmasi: metin(o.cargoProviderName) ?? metin(ilk.cargoProviderName),
+    hamDurum,
+    durum: kanonikDurum("trendyol", hamDurum),
+    siparisTarihi: tarihCoz(o.orderDate ?? o.createdDate, saatOfseti),
+    musteriAd: musteriAdi(o),
+    adres: { acik: adres.acik, ilce, il, telefon: aliciTelefonu(o) },
+    kalemler: siparisKalemleri(o).map((k) => ({
+      barkod: k.barkod,
+      urunAdi: k.urunAdi,
+      adet: k.adet,
+      sku: metin((satirlar.find((l) => metin(l.barcode) === k.barkod) ?? {}).merchantSku),
+    })),
+    ham: o,
   };
 }
 
-export interface EslenenUrun {
-  barkod: string;
-  urunAdi: string | null;
-  gorselUrl: string | null;
-  marka: string | null;
-  kategori: string | null;
-  stokKodu: string | null;
+/** Geriye uyumlu kısayol: ham → veritabanı satırı (testler ve deneme betiği). */
+export function siparisEsle(
+  ham: unknown,
+  { entegrasyonAdi, saatOfseti = 0 }: EsleSecenekleri & { entegrasyonAdi: string },
+): EslenenSiparis | null {
+  const n = siparisNormalle(ham, { saatOfseti });
+  return n ? normaldenSatir(n, entegrasyonAdi) : null;
 }
 
 /**
@@ -136,15 +137,13 @@ export interface EslenenUrun {
  * döner: barkod ürün tablosunun tekillik anahtarıdır, arşivlenmiş ürün ise
  * depoda artık aranmaz (eski adı/görseli taze kaydın üstüne yazmasın).
  */
-export function urunEsle(ham: unknown): EslenenUrun | null {
+export function urunEsle(ham: unknown): NormalUrun | null {
   const p = (ham ?? {}) as Record<string, unknown>;
   const barkod = metin(p.barcode);
   if (!barkod) return null;
   if (p.archived === true) return null;
 
-  const gorseller = Array.isArray(p.images)
-    ? (p.images as Record<string, unknown>[])
-    : [];
+  const gorseller = Array.isArray(p.images) ? (p.images as Record<string, unknown>[]) : [];
 
   return {
     barkod,

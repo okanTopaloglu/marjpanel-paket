@@ -62,8 +62,18 @@ repo katmanını gerçek veritabanına karşı dener.
   kayıt ve "hazır" damgası tek server action'da (`actions/okut.ts`).
 - **Toplama ataması**: `FOR UPDATE SKIP LOCKED` ile yarış güvenli; içerik imzası
   (`barkod:adet|...`) upsert anında hesaplanır.
+- **Pazaryeri soyutlaması** (`lib/pazaryeri`): motor platform bilmez. Her
+  pazaryeri `PazaryeriSaglayici` sözleşmesini uygular (bağlantı testi, opak
+  imleçli sipariş/ürün sayfaları, kanonik durum); kimlik alanları, rozet
+  rengi ve yetenekler `kayit.ts` kayıt defterinde (`hazir:false` olanlar
+  arayüzde "Yakında"). Kimlik tek şifreli JSON sütununda
+  (`entegrasyonlar.kimlik_sifreli`). Sağlayıcının normalize ettiği müşteri/
+  adres/kalemler `ham_veri._normal` zarfında; etiket ve okutma oradan okur.
+  Şu an hazır: Trendyol. Sırada: Hepsiburada, N11, Pazarama, idefix, Amazon.
 - **Senkron**: `senkron_isleri` tablosu kuyruk + kilit (kısmi tekil indeks) +
-  ilerleme + geçmiş. `/api/cron/senkron` (`Authorization: Bearer CRON_SECRET`)
+  nabız (`son_nabiz`; 5 dk nabızsız iş bayat sayılır) + ilerleme + geçmiş.
+  429 alan entegrasyon `Retry-After` kadar, 401 alan bir saat ertelenir;
+  hata kartta görünür, entegrasyon pasife alınmaz. `/api/cron/senkron` (`Authorization: Bearer CRON_SECRET`)
   dış tetik; gizli anahtar boşsa 401.
 - **Trendyol anahtarları** AES-256-GCM ile şifreli (`APP_ENCRYPTION_KEY`),
   arayüze yalnız maskeli iner.

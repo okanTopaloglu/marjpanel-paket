@@ -1,4 +1,5 @@
 import { and, count, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
+import { kaynaktanPlatform } from "@/lib/pazaryeri/kayit";
 import { db } from "@/lib/db/client";
 import { kullanicilar, paketOkutmalari } from "@/lib/db/schema";
 import { adminMi, type Kapsam } from "@/lib/auth/kapsam";
@@ -196,15 +197,15 @@ export async function okutmaKaydet(
       await hazirIsaretle(tx, sirketId, barkod);
 
       /* Uyarı kararı: kargo çözülemediyse her şeyin önünde o söylenir.
-         Trendyol barkodu olup siparişi bulunamayan paket, aktif entegrasyon
+         Pazaryeri barkodu olup siparişi bulunamayan paket, o pazaryeri bağlıysa
          varsa "senkron gecikmiş olabilir" uyarısı alır - ama kaydedilir. */
       let uyari: OkutmaUyarisi | undefined;
       if (bilgi.bilinmiyor) {
         uyari = "bilinmeyen_kargo";
       } else if (
         !siparis &&
-        bilgi.kaynak.startsWith("Trendyol") &&
-        (await aktifEntegrasyonVarMi(sirketId))
+        kaynaktanPlatform(bilgi.kaynak) !== null &&
+        (await aktifEntegrasyonVarMi(sirketId, kaynaktanPlatform(bilgi.kaynak)))
       ) {
         uyari = "siparis_yok";
       }

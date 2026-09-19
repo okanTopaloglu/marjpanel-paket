@@ -5,26 +5,36 @@ import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PazaryeriRozeti, Rozet } from "@/components/ui/rozet";
 import { FormGonderButonu } from "@/components/panel/form-buton";
 import { entegrasyonKaydet } from "@/server/actions/entegrasyonlar";
+import { PAZARYERI_SIRASI, PAZARYERLERI } from "@/lib/pazaryeri/kayit";
+import type { Platform } from "@/lib/pazaryeri/tipler";
 import type { EntegrasyonOzeti } from "@/lib/db/repos/entegrasyonlar";
 import type { EylemDurumu } from "@/server/actions/auth";
+import { cn } from "@/lib/utils";
 
 /**
- * Entegrasyon formu — ekleme ve düzenleme AYNI form.
+ * Entegrasyon formu — ekleme ve düzenleme AYNI form, alanlar PLATFORMDAN.
  *
- * ANAHTAR ALANLARI DÜZENLEMEDE BOŞ AÇILIR ve boş bırakılırsa eskisi korunur.
+ * Alan listesi `lib/pazaryeri/kayit` tanımından çizilir: Trendyol üç alan,
+ * Amazon iki. Doğrulama sunucuda aynı tanımdan üretilir (`kimlikSemasi`);
+ * form ve kural ayrı düşemez.
+ *
+ * GİZLİ ALANLAR DÜZENLEMEDE BOŞ AÇILIR ve boş bırakılırsa eskisi korunur.
  * Maskeli değeri alana yazmak (`abc****xyz`) kullanıcıya "anahtar burada"
  * dedirtir, kaydettiğinde de maskeyi gerçek anahtar sanıp kaydederdi.
- * Bu yüzden alan boştur ve altındaki not ne olacağını söyler.
+ * Metin alanlar (satıcı ID gibi) açık görünür ve dolu gelir.
  *
- * Platform ŞİMDİLİK SABİT (Trendyol): seçim kutusu tek seçenekle kullanıcıya
- * olmayan bir karar sordurur. Yeni pazaryeri eklendiğinde burası seçime döner.
+ * Platform DÜZENLEMEDE DEĞİŞMEZ: siparişler platform anahtarıyla yazıldı.
  */
 export function EntegrasyonFormu({
+  platform,
   duzenlenen,
   onKapat,
 }: {
+  /** Yeni kayıtta seçilen pazaryeri; düzenlemede kayıttan gelir. */
+  platform: Platform;
   /** Dolu ise düzenleme kipi. */
   duzenlenen?: EntegrasyonOzeti | null;
   onKapat?: () => void;
@@ -39,10 +49,12 @@ export function EntegrasyonFormu({
   }, [durum?.ok, durum, onKapat]);
 
   const hata = (alan: string) => durum?.alanlar?.[alan];
+  const tanim = PAZARYERLERI[platform];
 
   return (
     <form action={eylem} className="space-y-4">
       <input type="hidden" name="id" value={duzenlenen?.id ?? ""} />
+      <input type="hidden" name="platform" value={platform} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
@@ -55,70 +67,39 @@ export function EntegrasyonFormu({
             autoComplete="off"
           />
           <p className="text-caption text-muted-foreground">
-            Boş bırakılırsa listede platform adı görünür.
+            Boş bırakılırsa listede {tanim.ad} adı görünür.
           </p>
           {hata("ad") && <p className="text-caption text-destructive">{hata("ad")}</p>}
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="ent-satici">Satıcı ID</Label>
-          <Input
-            id="ent-satici"
-            name="saticiId"
-            defaultValue={duzenlenen?.saticiId ?? ""}
-            inputMode="numeric"
-            placeholder="123456"
-            autoComplete="off"
-            required
-            className="tabular"
-          />
-          <p className="text-caption text-muted-foreground">
-            Trendyol satıcı panelindeki mağaza numarası.
-          </p>
-          {hata("saticiId") && (
-            <p className="text-caption text-destructive">{hata("saticiId")}</p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="ent-key">API anahtarı</Label>
-          <Input
-            id="ent-key"
-            name="apiKey"
-            type="password"
-            autoComplete="new-password"
-            placeholder={duzenlenen ? "Değiştirmek için yazın" : ""}
-            required={!duzenlenen}
-          />
-          {duzenlenen && (
-            <p className="text-caption text-muted-foreground">
-              Boş bırakırsanız kayıtlı anahtar korunur.
-            </p>
-          )}
-          {hata("apiKey") && (
-            <p className="text-caption text-destructive">{hata("apiKey")}</p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="ent-secret">Gizli anahtar</Label>
-          <Input
-            id="ent-secret"
-            name="apiSecret"
-            type="password"
-            autoComplete="new-password"
-            placeholder={duzenlenen ? "Değiştirmek için yazın" : ""}
-            required={!duzenlenen}
-          />
-          {duzenlenen && (
-            <p className="text-caption text-muted-foreground">
-              Boş bırakırsanız kayıtlı anahtar korunur.
-            </p>
-          )}
-          {hata("apiSecret") && (
-            <p className="text-caption text-destructive">{hata("apiSecret")}</p>
-          )}
-        </div>
+        {tanim.alanlar.map((alan) => {
+          const gizli = alan.tip === "gizli";
+          const id = `ent-${alan.ad}`;
+          return (
+            <div key={alan.ad} className="space-y-1.5">
+              <Label htmlFor={id}>{alan.etiket}</Label>
+              <Input
+                id={id}
+                name={alan.ad}
+                type={gizli ? "password" : "text"}
+                inputMode={alan.sayisal ? "numeric" : undefined}
+                autoComplete={gizli ? "new-password" : "off"}
+                defaultValue={gizli ? "" : (duzenlenen?.kimlikMaskeli[alan.ad] ?? "")}
+                placeholder={gizli && duzenlenen ? "Değiştirmek için yazın" : (alan.ornek ?? "")}
+                required={alan.zorunlu && !(gizli && duzenlenen)}
+                className={alan.sayisal ? "tabular" : undefined}
+              />
+              {gizli && duzenlenen ? (
+                <p className="text-caption text-muted-foreground">
+                  Boş bırakırsanız kayıtlı anahtar korunur.
+                </p>
+              ) : (
+                alan.ipucu && <p className="text-caption text-muted-foreground">{alan.ipucu}</p>
+              )}
+              {hata(alan.ad) && <p className="text-caption text-destructive">{hata(alan.ad)}</p>}
+            </div>
+          );
+        })}
       </div>
 
       {durum?.mesaj && !durum.ok && (
@@ -144,9 +125,50 @@ export function EntegrasyonFormu({
   );
 }
 
+/**
+ * Pazaryeri seçimi — kartlar. Hazır olmayanlar "Yakında" ile görünür ama
+ * seçilemez: yol haritası ekranda, yarım bağlantı kayıtta değil.
+ */
+function PlatformSec({ onSec }: { onSec: (p: Platform) => void }) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      {PAZARYERI_SIRASI.map((p) => {
+        const t = PAZARYERLERI[p];
+        return (
+          <button
+            key={p}
+            type="button"
+            disabled={!t.hazir}
+            onClick={() => onSec(p)}
+            className={cn(
+              "press flex min-h-touch flex-col items-start gap-1.5 rounded-[--radius-kontrol] border border-border bg-card p-3 text-left",
+              "transition-[border-color,background-color] duration-dokunma ease-out",
+              t.hazir
+                ? "[@media(hover:hover)and(pointer:fine)]:hover:border-[hsl(var(--vurgu-parlak))] [@media(hover:hover)and(pointer:fine)]:hover:bg-accent"
+                : "cursor-not-allowed opacity-60",
+            )}
+          >
+            <span className="flex w-full items-center justify-between gap-2">
+              <PazaryeriRozeti platform={p} />
+              {!t.hazir && <Rozet ton="notr">Yakında</Rozet>}
+            </span>
+            <span className="text-caption text-muted-foreground">{t.anahtarNereden}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /** Form kartını açıp kapatan kabuk (liste üstündeki "Entegrasyon ekle"). */
 export function EntegrasyonEkleKarti() {
   const [acik, setAcik] = useState(false);
+  const [platform, setPlatform] = useState<Platform | null>(null);
+
+  function kapat() {
+    setAcik(false);
+    setPlatform(null);
+  }
 
   if (!acik) {
     return (
@@ -161,22 +183,33 @@ export function EntegrasyonEkleKarti() {
     <div className="rounded-[--radius] border border-border bg-card p-4 shadow-soft sm:p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-title-3">Yeni Trendyol entegrasyonu</h2>
+          <h2 className="text-title-3">
+            {platform ? `Yeni ${PAZARYERLERI[platform].ad} entegrasyonu` : "Pazaryeri seçin"}
+          </h2>
           <p className="text-footnote text-muted-foreground">
-            Satıcı paneldeki API bilgileriyle mağazanızı bağlayın.
+            {platform
+              ? PAZARYERLERI[platform].anahtarNereden
+              : "Siparişleri hangi pazaryerinden çekeceğinizi seçin; alanlar ona göre gelir."}
           </p>
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label="Formu kapat"
-          onClick={() => setAcik(false)}
-        >
+        <Button type="button" variant="ghost" size="icon" aria-label="Formu kapat" onClick={kapat}>
           <X aria-hidden="true" />
         </Button>
       </div>
-      <EntegrasyonFormu onKapat={() => setAcik(false)} />
+      {platform ? (
+        <>
+          <EntegrasyonFormu platform={platform} onKapat={kapat} />
+          <button
+            type="button"
+            onClick={() => setPlatform(null)}
+            className="mt-3 text-footnote font-medium text-muted-foreground underline-offset-2 [@media(hover:hover)and(pointer:fine)]:hover:underline"
+          >
+            Başka pazaryeri seç
+          </button>
+        </>
+      ) : (
+        <PlatformSec onSec={setPlatform} />
+      )}
     </div>
   );
 }

@@ -167,12 +167,20 @@ export async function bekleyenSayilari(
 }
 
 /** Şirketin aktif pazaryeri bağlantısı var mı (uyarı kararları buna bakar). */
-export async function aktifEntegrasyonVarMi(sirketId: string): Promise<boolean> {
+/** `platform` verilirse yalnız o pazaryerinin aktif bağlantısı sayılır. */
+export async function aktifEntegrasyonVarMi(
+  sirketId: string,
+  platform: string | null = null,
+): Promise<boolean> {
   const [satir] = await db
     .select({ adet: count() })
     .from(entegrasyonlar)
     .where(
-      and(eq(entegrasyonlar.sirketId, sirketId), eq(entegrasyonlar.aktif, true)),
+      and(
+        eq(entegrasyonlar.sirketId, sirketId),
+        eq(entegrasyonlar.aktif, true),
+        ...(platform ? [eq(entegrasyonlar.platform, platform)] : []),
+      ),
     );
   return (satir?.adet ?? 0) > 0;
 }
