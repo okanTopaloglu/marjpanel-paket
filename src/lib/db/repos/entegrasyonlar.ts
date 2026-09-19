@@ -93,6 +93,7 @@ export interface SenkronEntegrasyonu {
   ayarlar: Record<string, unknown>;
   sonSiparisSenkron: Date | null;
   sonUrunSenkron: Date | null;
+  sonGenisTarama: Date | null;
 }
 
 function tekillikIhlaliMi(hata: unknown): boolean {
@@ -148,6 +149,7 @@ function motorKaydi(satir: Entegrasyon): SenkronEntegrasyonu | null {
       ayarlar: ayarlariOku(satir),
       sonSiparisSenkron: satir.sonSiparisSenkron,
       sonUrunSenkron: satir.sonUrunSenkron,
+      sonGenisTarama: satir.sonGenisTarama,
     };
   } catch {
     console.warn(
@@ -420,6 +422,10 @@ export async function sonUrunSenkronGuncelle(id: string, tarih: Date = new Date(
   await db.update(entegrasyonlar).set({ sonUrunSenkron: tarih }).where(eq(entegrasyonlar.id, id));
 }
 
+export async function sonGenisTaramaGuncelle(id: string, tarih: Date = new Date()): Promise<void> {
+  await db.update(entegrasyonlar).set({ sonGenisTarama: tarih }).where(eq(entegrasyonlar.id, id));
+}
+
 /**
  * Hata kaydı + isteğe bağlı erteleme. Entegrasyon PASİFE ALINMAZ: kullanıcı
  * kartta hatayı görür ve anahtarı düzeltir; otomatik pasifleştirme "neden
@@ -441,7 +447,7 @@ export async function sonHataYaz(id: string, mesaj: string, ertelemeSaniye = 0):
 /* Senkron aralığı (şirket ayarı)                                      */
 /* ------------------------------------------------------------------ */
 
-export const ARALIK_ASGARI = 2;
+export const ARALIK_ASGARI = 0.5;
 export const ARALIK_AZAMI = 60;
 
 export async function aralikOku(sirketId: string): Promise<number> {
@@ -454,9 +460,9 @@ export async function aralikOku(sirketId: string): Promise<number> {
   return Number.isFinite(n) ? n : ARALIK_ASGARI;
 }
 
-/** 2..60 dakika; şemadaki CHECK ile aynı sınır (hata kullanıcıya inmesin). */
+/** 0.5..60 dakika, yarım dakika adımlı; şemadaki CHECK ile aynı sınır. */
 export async function aralikKaydet(k: Kapsam, dk: number): Promise<number> {
-  const deger = Math.min(ARALIK_AZAMI, Math.max(ARALIK_ASGARI, Math.round(dk)));
+  const deger = Math.min(ARALIK_AZAMI, Math.max(ARALIK_ASGARI, Math.round(dk * 2) / 2));
   await db
     .update(sirketler)
     .set({ senkronAralikDk: String(deger), updatedAt: new Date() })

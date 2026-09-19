@@ -99,17 +99,24 @@ export const sirketler = pgTable(
     varsayilanOkutmaModu: okutmaModuEnum("varsayilan_okutma_modu")
       .notNull()
       .default("hizli"),
-    /** Otomatik sipariş senkron aralığı (dakika), 2..60. */
+    /** Otomatik sipariş senkron aralığı (dakika), 0.5..60 (0.5 = 30 sn). */
     senkronAralikDk: numeric("senkron_aralik_dk", { precision: 5, scale: 1 })
       .notNull()
-      .default("2"),
+      .default("0.5"),
+    /**
+     * Sevk kesim saati (İstanbul, 0..23): bu saate kadar gelen sipariş AYNI
+     * GÜN kargoya verilmelidir. "Kargoya verilmesi gereken" sayacı ve
+     * siparişlerdeki "sevk gecikmiş" sekmesi bu eşiğe bakar.
+     */
+    sevkKesimSaati: integer("sevk_kesim_saati").notNull().default(17),
     ...timestamps,
   },
   (t) => [
     check(
       "sirketler_senkron_aralik_chk",
-      sql`${t.senkronAralikDk} >= 2 AND ${t.senkronAralikDk} <= 60`,
+      sql`${t.senkronAralikDk} >= 0.5 AND ${t.senkronAralikDk} <= 60`,
     ),
+    check("sirketler_sevk_kesim_chk", sql`${t.sevkKesimSaati} >= 0 AND ${t.sevkKesimSaati} <= 23`),
   ],
 );
 
@@ -264,6 +271,12 @@ export const entegrasyonlar = pgTable(
     aktif: boolean("aktif").notNull().default(true),
     sonSiparisSenkron: timestamp("son_siparis_senkron", { withTimezone: true }),
     sonUrunSenkron: timestamp("son_urun_senkron", { withTimezone: true }),
+    /**
+     * Son GENİŞ tarama: pazaryerlerinin çoğu tarih filtresini oluşturma
+     * tarihine uygular; eski siparişin durum değişikliği dar pencereye
+     * düşmez. 15 dakikada bir son 7 gün yeniden taranır (lib/senkron).
+     */
+    sonGenisTarama: timestamp("son_genis_tarama", { withTimezone: true }),
     /** Son senkron hatası (kimlik/hız sınırı); başarılı turda temizlenir. */
     sonHata: text("son_hata"),
     sonHataZamani: timestamp("son_hata_zamani", { withTimezone: true }),

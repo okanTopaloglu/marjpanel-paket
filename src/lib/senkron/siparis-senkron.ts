@@ -1,5 +1,5 @@
 import { normaldenSatir, type EslenenSiparis } from "@/lib/pazaryeri/normal-veri";
-import { senkronBaslangici, tarihPencereleri } from "@/lib/pazaryeri/pencere";
+import { genisTaramaGerekliMi, taramaBaslangici, tarihPencereleri } from "@/lib/pazaryeri/pencere";
 import { saglayiciAl } from "@/lib/pazaryeri/saglayici";
 import {
   PazaryeriHizSiniri,
@@ -9,6 +9,7 @@ import {
 import { topluUpsert } from "@/lib/db/repos/siparisler";
 import {
   kimlikBilgileri,
+  sonGenisTaramaGuncelle,
   sonHataYaz,
   sonSiparisSenkronGuncelle,
   vadesiGelenler,
@@ -70,13 +71,15 @@ async function birEntegrasyon(
   e: SenkronEntegrasyonu,
   sonAn: number,
   tamamlanan: Record<string, number>,
-): Promise<number> {
+): Promise<{ yazilan: number; genis: boolean }> {
   const saglayici = saglayiciAl(e);
   const { azamiPencereGun, sayfaArasiMs, ilkSenkronGun } = saglayici.yetenekler;
 
   const simdi = Date.now();
+  // Geniş tarama: eski siparişlerin durumu da güncellensin (bkz. pencere.ts).
+  const genis = genisTaramaGerekliMi(e.sonGenisTarama, new Date(simdi));
   const pencereler = tarihPencereleri(
-    senkronBaslangici(e.sonSiparisSenkron, new Date(simdi), ilkSenkronGun),
+    taramaBaslangici(e.sonSiparisSenkron, genis, new Date(simdi), ilkSenkronGun),
     simdi,
     azamiPencereGun,
   );
@@ -86,7 +89,7 @@ async function birEntegrasyon(
   for (const [indeks, pencere] of pencereler.entries()) {
     let imlec: string | null = null;
     for (let sayfaNo = 0; sayfaNo < AZAMI_SAYFA; sayfaNo++) {
-      if (Date.now() > sonAn) return yazilanToplam;
+      if (Date.now() > sonAn) return { yazilan: yazilanToplam, genis: false };
 
       const yanit = await saglayici.siparisler({
         baslangic: pencere.baslangic,
@@ -119,9 +122,9 @@ async function birEntegrasyon(
   }
 
   console.log(
-    `[senkron] ${e.ad}: ${apidenToplam} kayıt okundu, ${yazilanToplam} satır yazıldı.`,
+    `[senkron] ${e.ad}: ${apidenToplam} kayıt okundu, ${yazilanToplam} satır yazıldı${genis ? " (geniş tarama)" : ""}.`,
   );
-  return yazilanToplam;
+  return { yazilan: yazilanToplam, genis };
 }
 
 /** Hata türüne göre entegrasyona ne yazılacağı. Dönüş: log öneki. */
@@ -161,10 +164,11 @@ export async function siparisSenkronunuYurut(is: SenkronIsi): Promise<SenkronSon
         break;
       }
       try {
-        const yazilan = await birEntegrasyon(is, e, sonAn, tamamlanan);
+        const { yazilan, genis } = await birEntegrasyon(is, e, sonAn, tamamlanan);
         tamamlanan[e.ad] = yazilan;
         toplam += yazilan;
         await sonSiparisSenkronGuncelle(e.id);
+        if (genis) await sonGenisTaramaGuncelle(e.id);
       } catch (hata) {
         const onek = await hatayiIsle(e, hata);
         const mesaj = `${e.ad}: ${hataMetni(hata)}`;

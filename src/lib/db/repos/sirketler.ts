@@ -186,6 +186,7 @@ export async function listeleSayimlarla(): Promise<SirketSayimli[]> {
       mailAcik: sirketler.mailAcik,
       varsayilanOkutmaModu: sirketler.varsayilanOkutmaModu,
       senkronAralikDk: sirketler.senkronAralikDk,
+      sevkKesimSaati: sirketler.sevkKesimSaati,
       createdAt: sirketler.createdAt,
       updatedAt: sirketler.updatedAt,
       kullaniciSayisi: sql<number>`(select count(*)::int from ${kullanicilar} where ${kullanicilar.sirketId} = ${sirketler.id})`,
@@ -272,4 +273,14 @@ export async function ozellikler(sirketId: string): Promise<SirketOzellikleriTam
     .where(eq(sirketler.id, sirketId))
     .limit(1);
   return satir ?? null;
+}
+
+/** Sevk kesim saati (0..23); şemadaki CHECK ile aynı sınır. */
+export async function sevkKesimSaatiAyarla(sirketId: string, saat: number): Promise<number> {
+  const deger = Math.min(23, Math.max(0, Math.trunc(saat)));
+  await db
+    .update(sirketler)
+    .set({ sevkKesimSaati: deger, updatedAt: new Date() })
+    .where(eq(sirketler.id, sirketId));
+  return deger;
 }

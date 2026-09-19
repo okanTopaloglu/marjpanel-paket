@@ -141,7 +141,7 @@ function PlatformSec({ onSec }: { onSec: (p: Platform) => void }) {
             disabled={!t.hazir}
             onClick={() => onSec(p)}
             className={cn(
-              "press flex min-h-touch flex-col items-start gap-1.5 rounded-[--radius-kontrol] border border-border bg-card p-3 text-left",
+              "press flex min-h-touch min-w-0 flex-col items-start gap-1.5 rounded-[--radius-kontrol] border border-border bg-card p-3 text-left",
               "transition-[border-color,background-color] duration-dokunma ease-out",
               t.hazir
                 ? "[@media(hover:hover)and(pointer:fine)]:hover:border-[hsl(var(--vurgu-parlak))] [@media(hover:hover)and(pointer:fine)]:hover:bg-accent"
@@ -152,7 +152,7 @@ function PlatformSec({ onSec }: { onSec: (p: Platform) => void }) {
               <PazaryeriRozeti platform={p} />
               {!t.hazir && <Rozet ton="notr">Yakında</Rozet>}
             </span>
-            <span className="text-caption text-muted-foreground">{t.anahtarNereden}</span>
+            <span className="w-full break-words text-caption text-muted-foreground">{t.anahtarNereden}</span>
           </button>
         );
       })}
@@ -172,15 +172,17 @@ export function EntegrasyonEkleKarti() {
 
   if (!acik) {
     return (
-      <Button type="button" size="lg" onClick={() => setAcik(true)}>
-        <Plus aria-hidden="true" />
-        Entegrasyon ekle
-      </Button>
+      <div className="flex justify-end">
+        <Button type="button" size="lg" onClick={() => setAcik(true)}>
+          <Plus aria-hidden="true" />
+          Entegrasyon ekle
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className="rounded-[--radius] border border-border bg-card p-4 shadow-soft sm:p-5">
+    <div className="min-w-0 rounded-[--radius] border border-border bg-card p-4 shadow-soft sm:p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-title-3">

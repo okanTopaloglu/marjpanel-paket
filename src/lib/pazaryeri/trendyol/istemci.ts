@@ -88,7 +88,9 @@ export function trendyolIstemcisi(
       const url =
         `${taban}/integration/order/sellers/${saticiId}/orders` +
         `?startDate=${baslangic}&endDate=${bitis}&size=${SAYFA_BOYUTU}&page=${sayfa}` +
-        `&orderByField=CreatedDate&orderByDirection=DESC`;
+        // PackageLastModifiedDate: tarih filtresi SON DEĞİŞİKLİĞE uygulanır;
+        // eski paketin durum değişikliği (Shipped/Cancelled) dar pencereye düşer.
+        `&orderByField=PackageLastModifiedDate&orderByDirection=DESC`;
       return zarf<HamSiparis>(await http.jsonAl(url));
     },
 

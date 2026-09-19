@@ -1,6 +1,5 @@
 import {
   Clock,
-  Inbox,
   Package,
   TrendingDown,
   TrendingUp,
@@ -76,15 +75,12 @@ function KirilimKarti({
 export function PanoIstatistik({
   ozet,
   gelismisOzet,
-  bekleyen,
   aralikEtiketi,
   gelismisGun,
   calisanMi,
 }: {
   ozet: AralikOzeti;
   gelismisOzet: GelismisOzet;
-  /** Bekleyen sipariş sayısı; yönetici değilse ya da entegrasyon yoksa null. */
-  bekleyen: number | null;
   /** "Bugün", "01.09.2026 - 16.09.2026" gibi tek satır aralık metni. */
   aralikEtiketi: string;
   gelismisGun: number;
@@ -95,22 +91,13 @@ export function PanoIstatistik({
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatKarti
           etiket="Okutulan paket"
           deger={tr.format(ozet.toplam)}
           dipnot={aralikEtiketi}
           ikon={Package}
         />
-
-        {bekleyen !== null && (
-          <StatKarti
-            etiket="Bekleyen sipariş"
-            deger={tr.format(bekleyen)}
-            dipnot="Takip numarası gelmiş, henüz hazırlanmamış"
-            ikon={Inbox}
-          />
-        )}
 
         <StatKarti
           etiket="Günlük ortalama"

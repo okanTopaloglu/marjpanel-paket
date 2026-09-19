@@ -4,8 +4,12 @@ import { useState, useTransition } from "react";
 import { Select } from "@/components/ui/select";
 import { aralikKaydet } from "@/server/actions/entegrasyonlar";
 
-/** Seçenekler dakika cinsinden; şemadaki 2..60 sınırı içinde kalır. */
-const SECENEKLER = [2, 5, 10, 15, 30, 60] as const;
+/** Seçenekler dakika cinsinden; şemadaki 0.5..60 sınırı içinde kalır. */
+const SECENEKLER = [0.5, 1, 2, 5, 10, 15, 30, 60] as const;
+
+function etiket(dk: number): string {
+  return dk < 1 ? `${Math.round(dk * 60)} saniye` : `${dk} dakika`;
+}
 
 /**
  * Otomatik senkron aralığı.
@@ -23,8 +27,9 @@ export function AralikAyari({ mevcut }: { mevcut: number }) {
     <div className="rounded-[--radius] border border-border bg-card p-4 shadow-soft sm:p-5">
       <h2 className="text-title-3">Otomatik senkron aralığı</h2>
       <p className="mt-1 text-footnote text-muted-foreground">
-        Siparişler bu sıklıkta pazaryerlerinden çekilir. Sık çekmek siparişi
-        erken görmenizi sağlar, çok sık çekmek pazaryerinin hız sınırına takılır.
+        Yeni siparişler bu sıklıkta pazaryerlerinden çekilir (en sık 30 saniye).
+        Eski siparişlerin durumu ayrıca 15 dakikada bir son 7 gün taranarak
+        güncellenir. Çok sık çekmek pazaryerinin hız sınırına takılabilir.
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -45,7 +50,7 @@ export function AralikAyari({ mevcut }: { mevcut: number }) {
           >
             {SECENEKLER.map((d) => (
               <option key={d} value={d}>
-                {d} dakika
+                {etiket(d)}
               </option>
             ))}
           </Select>

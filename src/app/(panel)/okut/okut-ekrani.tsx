@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useRef, useState, useTransition } from "react";
-import { Camera, Volume2, VolumeX } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Camera, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMasaustu } from "@/lib/hooks/medya";
 import { useSes } from "@/lib/hooks/ses";
@@ -49,12 +50,18 @@ export function OkutEkrani({
   baslangicSatirlar,
   baslangicBugun,
   baslangicBekleyen,
+  baslangicEntegrasyon,
+  geriHref,
 }: {
   mod: OkutmaModu;
   entegrasyonlar: EntegrasyonSecenegi[];
   baslangicSatirlar: PaketSatiri[];
   baslangicBugun: BugunOzeti;
   baslangicBekleyen: BekleyenSayilari;
+  /** Mağaza seçim adımında seçilen mağaza adı; "" = Manuel. */
+  baslangicEntegrasyon: string;
+  /** Bir önceki adımın adresi (mağaza/mod seçimi). */
+  geriHref: string;
 }) {
   const ses = useSes();
 
@@ -70,6 +77,8 @@ export function OkutEkrani({
       baslangicSatirlar={baslangicSatirlar}
       baslangicBugun={baslangicBugun}
       baslangicBekleyen={baslangicBekleyen}
+      baslangicEntegrasyon={baslangicEntegrasyon}
+      geriHref={geriHref}
     />
   );
 }
@@ -81,6 +90,8 @@ function HizliEkran({
   baslangicSatirlar,
   baslangicBugun,
   baslangicBekleyen,
+  baslangicEntegrasyon,
+  geriHref,
 }: {
   mod: OkutmaModu;
   ses: ReturnType<typeof useSes>;
@@ -88,6 +99,8 @@ function HizliEkran({
   baslangicSatirlar: PaketSatiri[];
   baslangicBugun: BugunOzeti;
   baslangicBekleyen: BekleyenSayilari;
+  baslangicEntegrasyon: string;
+  geriHref: string;
 }) {
   const [deger, setDeger] = useState("");
   const [satirlar, setSatirlar] = useState(() =>
@@ -98,7 +111,7 @@ function HizliEkran({
     siparisNo: string | null;
     kalemler: OkutmaKalemi[];
   } | null>(null);
-  const [entegrasyon, setEntegrasyon] = useState(MANUEL);
+  const [entegrasyon, setEntegrasyon] = useState(baslangicEntegrasyon || MANUEL);
   const [hata, setHata] = useState<string | null>(null);
   const [bekleyen, setBekleyen] = useState(0);
   const [kameraAcik, setKameraAcik] = useState(false);
@@ -156,11 +169,21 @@ function HizliEkran({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <EntegrasyonSec
-          secenekler={entegrasyonlar}
-          deger={entegrasyon}
-          onDeger={setEntegrasyon}
-        />
+        <div className="flex flex-wrap items-end gap-3">
+          <EntegrasyonSec
+            secenekler={entegrasyonlar}
+            deger={entegrasyon}
+            onDeger={setEntegrasyon}
+          />
+          <Link
+            href={geriHref}
+            data-odak-serbest
+            className="inline-flex min-h-touch items-center gap-1 text-footnote font-medium text-muted-foreground underline-offset-2 hover:underline"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            Mağaza değiştir
+          </Link>
+        </div>
 
         <div data-odak-serbest className="flex items-center gap-2">
           <Button

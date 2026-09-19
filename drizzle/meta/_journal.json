@@ -43,6 +43,13 @@
       "when": 1789839459567,
       "tag": "0005_sarf",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789841093821,
+      "tag": "0006_sevk_kesim_genis_tarama",
+      "breakpoints": true
     }
   ]
 }

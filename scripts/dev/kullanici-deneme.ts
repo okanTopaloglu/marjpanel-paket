@@ -56,6 +56,7 @@ async function main() {
       logoDosya: null,
       logoKoyuDosya: null,
       varsayilanOkutmaModu: "hizli",
+      sevkKesimSaati: 17,
       ozellikler: { faturaPaylas: false, faturaKesim: false, mail: false },
     },
   };

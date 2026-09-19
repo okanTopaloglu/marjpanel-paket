@@ -122,6 +122,7 @@ export async function kapsamIcinGetir(
       sirketLogoDosya: sirketler.logoDosya,
       sirketLogoKoyuDosya: sirketler.logoKoyuDosya,
       varsayilanOkutmaModu: sirketler.varsayilanOkutmaModu,
+      sevkKesimSaati: sirketler.sevkKesimSaati,
       faturaPaylas: sirketler.faturaPaylasAcik,
       faturaKesim: sirketler.faturaKesimAcik,
       mail: sirketler.mailAcik,
@@ -150,6 +151,7 @@ export async function kapsamIcinGetir(
         logoDosya: satir.sirketLogoDosya,
         logoKoyuDosya: satir.sirketLogoKoyuDosya,
         varsayilanOkutmaModu: satir.varsayilanOkutmaModu,
+        sevkKesimSaati: satir.sevkKesimSaati,
         ozellikler: {
           faturaPaylas: satir.faturaPaylas,
           faturaKesim: satir.faturaKesim,

@@ -8,10 +8,9 @@ import {
   gunlukSeri,
   saatlikIsiHaritasi,
 } from "@/lib/db/repos/istatistik";
-import {
-  aktifEntegrasyonVarMi,
-  bekleyenSayilari,
-} from "@/lib/db/repos/okut-siparis";
+import { aktifEntegrasyonVarMi } from "@/lib/db/repos/okut-siparis";
+import { siparisAkisi } from "@/lib/db/repos/siparis-akisi";
+import { SiparisAkisiKartlari } from "./siparis-akisi";
 import { ON_AYAR_ETIKETLERI, aktifOnAyar, araligiCoz } from "@/lib/pano/aralik";
 import { gunAnahtari, tarih } from "@/lib/format/tarih";
 import { GunlukGrafik } from "./gunluk-grafik";
@@ -67,19 +66,22 @@ export default async function OzetSayfasi({
   const aralik = araligiCoz(basHam, bitHam, bugun);
   const yoneticiMi = adminMi(kapsam.rol);
 
-  const [ozet, gelismisOzet, seri, isi, bekleyen] = await Promise.all([
+  const [ozet, gelismisOzet, seri, isi, akis] = await Promise.all([
     aralikOzeti(kapsam, aralik.baslangic, aralik.bitis),
     gelismis(kapsam, PENCERE_GUN),
     gunlukSeri(kapsam, SERI_GUN),
     saatlikIsiHaritasi(kapsam, PENCERE_GUN),
-    // Bekleyen sipariş YALNIZ yöneticiye ve yalnız pazaryeri bağlıysa: bağlantı
-    // yokken "0 bekleyen" yazmak, çalışan bir şey olduğunu ima ederdi.
+    // Sipariş akışı YALNIZ yöneticiye ve yalnız pazaryeri bağlıysa: bağlantı
+    // yokken "0 gelen" yazmak, çalışan bir şey olduğunu ima ederdi.
     yoneticiMi
       ? aktifEntegrasyonVarMi(kapsam.sirketId).then((var_) =>
-          var_ ? bekleyenSayilari(kapsam.sirketId).then((b) => b.toplam) : null,
+          var_
+            ? siparisAkisi(kapsam.sirketId, aralik.baslangic, aralik.bitis, kapsam.sirket.sevkKesimSaati)
+            : null,
         )
       : Promise.resolve(null),
   ]);
+  const etiket = aralikEtiketi(aralik.baslangic, aralik.bitis, bugun);
 
   return (
     <>
@@ -95,11 +97,12 @@ export default async function OzetSayfasi({
       <div className="space-y-6">
         <PanoFiltre aralik={aralik} bugun={bugun} />
 
+        {akis && <SiparisAkisiKartlari akis={akis} aralikEtiketi={etiket} />}
+
         <PanoIstatistik
           ozet={ozet}
           gelismisOzet={gelismisOzet}
-          bekleyen={bekleyen}
-          aralikEtiketi={aralikEtiketi(aralik.baslangic, aralik.bitis, bugun)}
+          aralikEtiketi={etiket}
           gelismisGun={PENCERE_GUN}
           calisanMi={kapsam.rol === "calisan"}
         />

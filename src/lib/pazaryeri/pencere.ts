@@ -69,3 +69,41 @@ export function senkronBaslangici(
   }
   return simdi.getTime() - ilkGun * GUN_MS;
 }
+
+/** Geniş taramalar arası süre. */
+export const GENIS_TARAMA_ARALIGI_MS = 15 * 60 * 1000;
+
+/** Geniş taramada geriye gidilen gün: açık siparişlerin yaşayabileceği süre. */
+export const GENIS_TARAMA_GUN = 7;
+
+/**
+ * Bu turda GENİŞ tarama yapılsın mı? Dar pencere (son senkron − 5 dk) yalnız
+ * yeni siparişleri yakalar; çoğu pazaryeri tarih filtresini OLUŞTURMA
+ * tarihine uygular, dolayısıyla eski bir siparişin "kargoya verildi"ye
+ * dönmesi dar pencereye hiç düşmez. 15 dakikada bir son 7 gün baştan
+ * taranır; upsert nihai durumu korur, gerisini günceller.
+ */
+export function genisTaramaGerekliMi(
+  sonGenisTarama: Date | null,
+  simdi: Date = new Date(),
+  aralikMs: number = GENIS_TARAMA_ARALIGI_MS,
+): boolean {
+  if (!sonGenisTarama || Number.isNaN(sonGenisTarama.getTime())) return true;
+  return simdi.getTime() - sonGenisTarama.getTime() >= aralikMs;
+}
+
+/**
+ * Senkron başlangıcı, geniş tarama gerekiyorsa en az `genisGun` gün geriye
+ * çekilir. İlk senkron (30 gün) zaten daha geridedir; o durumda dokunulmaz.
+ */
+export function taramaBaslangici(
+  sonSenkron: Date | null,
+  genis: boolean,
+  simdi: Date = new Date(),
+  ilkGun: number = ILK_SENKRON_GUN,
+  genisGun: number = GENIS_TARAMA_GUN,
+): number {
+  const dar = senkronBaslangici(sonSenkron, simdi, ilkGun);
+  if (!genis) return dar;
+  return Math.min(dar, simdi.getTime() - genisGun * GUN_MS);
+}

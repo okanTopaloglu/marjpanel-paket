@@ -160,10 +160,10 @@ export const VARSAYILAN_LIMIT = 50;
 const AZAMI_LIMIT = 200;
 
 /** Ortak filtre zinciri; sayım ve sayfa sorgusu AYNI koşulları kullanır. */
-function kosullar(sirketId: string, f: SayfaFiltresi): SQL[] {
+function kosullar(sirketId: string, f: SayfaFiltresi, kesimSaati?: number): SQL[] {
   const liste: SQL[] = [
     eq(pazaryeriSiparisleri.sirketId, sirketId),
-    sql`(${sql.raw(sekmeKosulu(f.sekme))})`,
+    sql`(${sql.raw(sekmeKosulu(f.sekme, kesimSaati))})`,
   ];
 
   const platform = f.platform?.trim();
@@ -280,7 +280,7 @@ export type SekmeSayilari = Record<Sekme, number>;
  */
 export async function sekmeSayilari(k: Kapsam): Promise<SekmeSayilari> {
   const say = (s: Sekme) =>
-    sql<number>`count(*) filter (where ${sql.raw(sekmeKosulu(s))})::int`;
+    sql<number>`count(*) filter (where ${sql.raw(sekmeKosulu(s, k.sirket.sevkKesimSaati))})::int`;
 
   const [satir] = await db
     .select({

@@ -22,6 +22,8 @@ export interface Kapsam {
     logoDosya: string | null;
     logoKoyuDosya: string | null;
     varsayilanOkutmaModu: OkutmaModu;
+    /** Sevk kesim saati (İstanbul, 0..23). */
+    sevkKesimSaati: number;
     ozellikler: SirketOzellikleri;
   };
 }

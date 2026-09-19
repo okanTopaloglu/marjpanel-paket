@@ -31,7 +31,7 @@ import { urunSenkronunuYurut } from "./urun-senkron";
 /** İlk tik, uygulama açılışının yoğunluğuna karışmasın diye 5 sn gecikir. */
 export const ILK_GECIKME_MS = 5_000;
 
-/** Turlar arası bekleme. */
+/** Turlar arası bekleme: şirket aralığı en az 30 sn olduğundan tur da 30 sn. */
 export const TUR_ARALIGI_MS = 30_000;
 
 /** Ürün senkronu vadesi bu sıklıkta kontrol edilir (çekimin kendisi 12 saatlik). */

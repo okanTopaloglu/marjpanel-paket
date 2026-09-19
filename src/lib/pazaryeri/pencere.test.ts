@@ -59,3 +59,19 @@ describe("senkronBaslangici", () => {
     );
   });
 });
+
+describe("geniş tarama", () => {
+  const simdi = new Date("2026-09-19T12:00:00Z");
+  it("hiç yapılmadıysa ya da 15 dk geçtiyse gerekir", async () => {
+    const { genisTaramaGerekliMi, taramaBaslangici, GENIS_TARAMA_GUN } = await import("./pencere");
+    expect(genisTaramaGerekliMi(null, simdi)).toBe(true);
+    expect(genisTaramaGerekliMi(new Date(simdi.getTime() - 14 * 60_000), simdi)).toBe(false);
+    expect(genisTaramaGerekliMi(new Date(simdi.getTime() - 16 * 60_000), simdi)).toBe(true);
+    // Geniş: son senkron 1 dk önce olsa da 7 gün geri.
+    const sonSenkron = new Date(simdi.getTime() - 60_000);
+    expect(taramaBaslangici(sonSenkron, true, simdi)).toBe(simdi.getTime() - GENIS_TARAMA_GUN * 86_400_000);
+    expect(taramaBaslangici(sonSenkron, false, simdi)).toBe(sonSenkron.getTime() - 5 * 60_000);
+    // İlk senkron (30 gün) zaten daha geride: dokunulmaz.
+    expect(taramaBaslangici(null, true, simdi)).toBe(simdi.getTime() - 30 * 86_400_000);
+  });
+});

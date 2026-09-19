@@ -32,10 +32,12 @@ export default async function EntegrasyonlarSayfasi() {
       <SayfaBasligi
         baslik="Entegrasyonlar"
         aciklama="Pazaryeri mağazalarınızı bağlayın; siparişler otomatik olarak buraya akar."
-        aksiyonlar={<EntegrasyonEkleKarti />}
       />
 
       <div className="space-y-6">
+        {/* Kart başlık satırında DEĞİL gövdede: altı pazaryeri kartı başlığın
+            aksiyon hücresine sığmıyor, sağdan taşıyordu. */}
+        <EntegrasyonEkleKarti />
         <SenkronDurumu />
         <EntegrasyonListesi kayitlar={kayitlar} />
         <AralikAyari mevcut={aralik} />

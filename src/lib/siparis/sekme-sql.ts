@@ -35,13 +35,21 @@ const HAVUZ_ICI = ["Created", "Picking", "Invoiced"] as const;
  * kesim saati eklenir ve ikinci `at time zone` ile yeniden mutlak ana
  * dönülür. Yaz saati geçişlerinde de doğru çalışan tek yol budur.
  */
-export const KESIM_ANI_SQL = `((date_trunc('day', now() at time zone '${ISTANBUL_TZ}') + interval '${SEVK_KESIM_SAATI} hours') at time zone '${ISTANBUL_TZ}')`;
+export function kesimAniSql(saat: number = SEVK_KESIM_SAATI): string {
+  // Saat TAM SAYI ve 0..23'e kırpılır: SQL'e giren tek "değişken" budur.
+  const s = Math.min(23, Math.max(0, Math.trunc(Number.isFinite(saat) ? saat : SEVK_KESIM_SAATI)));
+  return `((date_trunc('day', now() at time zone '${ISTANBUL_TZ}') + interval '${s} hours') at time zone '${ISTANBUL_TZ}')`;
+}
+
+/** Varsayılan (17:00) kesim anı; şirket saati bilinmeyen yerler için. */
+export const KESIM_ANI_SQL = kesimAniSql(SEVK_KESIM_SAATI);
 
 /**
  * Sekmenin SQL koşulu. `tumu` için `true` döner - çağıran özel durum
- * yazmasın, koşul her zaman `and` zincirine eklenebilsin.
+ * yazmasın, koşul her zaman `and` zincirine eklenebilsin. `kesimSaati`
+ * şirketin sevk kesim saatidir (sirketler.sevk_kesim_saati).
  */
-export function sekmeKosulu(sekme: Sekme): string {
+export function sekmeKosulu(sekme: Sekme, kesimSaati: number = SEVK_KESIM_SAATI): string {
   switch (sekme) {
     case "tumu":
       return "true";
@@ -67,6 +75,6 @@ export function sekmeKosulu(sekme: Sekme): string {
     // olan her şey: dünün kalanları da bu kesitte görünür (PartnerSys'teki
     // iki dallı OR ile aynı sonuç, tek karşılaştırmayla).
     case "sevk_gecikmis":
-      return `durum not in (${liste(NIHAI_DURUMLAR)}) and siparis_tarihi is not null and siparis_tarihi < ${KESIM_ANI_SQL}`;
+      return `durum not in (${liste(NIHAI_DURUMLAR)}) and siparis_tarihi is not null and siparis_tarihi < ${kesimAniSql(kesimSaati)}`;
   }
 }
