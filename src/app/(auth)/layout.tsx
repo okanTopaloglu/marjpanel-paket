@@ -1,4 +1,5 @@
-import { MarkaKilit } from "@/components/marka/logo";
+import { Marka } from "@/components/marka/logo";
+import { MamaAuraYazi } from "@/components/marka/mama-aura";
 
 /**
  * GİRİŞ / KAYIT KABUĞU.
@@ -6,6 +7,10 @@ import { MarkaKilit } from "@/components/marka/logo";
  * ORTALANMIŞ TEK KART. Kimliğini doğrulamaya gelen kullanıcının önünde tek bir
  * iş vardır; yan sütunda tanıtım, demo bağlantısı ya da iletişim kutusu yoktur.
  * Telefonda ve masaüstünde AYNI sayfa görünür.
+ *
+ * KİMLİK: Kartın üstünde MAMA AURA kelime işareti — kullanıcı "doğru yerdeyim"
+ * demeli. MarjPanel yalnız alt bilgide, altyapı notu olarak durur; iki marka
+ * aynı ağırlıkta yan yana konursa ikisi de okunmaz.
  *
  * Zemin düz `--background`; gradyan, cam efekti, parlama yok. Kabuk bir SUNUCU
  * bileşenidir — istemci JavaScript'i yalnız form yapraklarında yaşar.
@@ -19,15 +24,19 @@ export default function AuthLayout({
         {/* Mobilde tam genişlik (yalnız kabuğun kenar boşluğu kadar içeride),
             masaüstünde sabit ve ortalı. */}
         <div className="animate-in w-full max-w-[24rem]">
-          <div className="mb-7 flex justify-center">
-            <MarkaKilit boyut={36} yaziClass="text-title-2 text-foreground" altAd="Paket" />
+          <div className="mb-7 flex flex-col items-center gap-2.5">
+            <MamaAuraYazi yukseklik={30} oncelik />
+            <span className="text-overline font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              Paket paneli
+            </span>
           </div>
           {children}
         </div>
       </main>
 
-      <footer className="px-4 pb-6 text-center text-caption text-muted-foreground sm:px-6">
-        MarjPanel Paket - kargo paketi okutma ve sipariş takip paneli
+      <footer className="flex items-center justify-center gap-1.5 px-4 pb-6 text-center text-caption text-muted-foreground sm:px-6">
+        <Marka boyut={14} className="opacity-80" />
+        <span>MarjPanel Paket altyapısı · kargo paketi okutma ve sipariş takibi</span>
       </footer>
     </div>
   );

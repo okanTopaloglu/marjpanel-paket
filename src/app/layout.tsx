@@ -5,18 +5,18 @@ import { SwRegister } from "@/components/pwa/sw-register";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 
 export const metadata: Metadata = {
-  applicationName: "MarjPanel Paket",
+  applicationName: "MAMA AURA Paket",
   title: {
-    default: "MarjPanel Paket",
-    template: "%s | MarjPanel Paket",
+    default: "MAMA AURA Paket",
+    template: "%s | MAMA AURA Paket",
   },
-  description: "Depo paket okutma ve pazaryeri sipariş takibi.",
+  description: "MAMA AURA depo paket okutma ve pazaryeri sipariş takibi.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     // Açık temada okunaklı kalması için opak durum çubuğu (theme-color ile aynı).
     statusBarStyle: "default",
-    title: "MarjPanel Paket",
+    title: "MAMA AURA Paket",
   },
   icons: {
     icon: [

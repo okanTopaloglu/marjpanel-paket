@@ -78,3 +78,7 @@ Adım adım: [`docs/DEPLOY-COOLIFY.md`](docs/DEPLOY-COOLIFY.md).
 
 [`DESIGN.md`](DESIGN.md): tek vurgu rengi (nane), mürekkep menü, tabular rakamlar,
 44 px dokunma hedefi, hareket yalnız transform/opacity.
+
+Bu kurulum **MAMA AURA** için markalanmıştır (giriş, menü, simge, OG kartı);
+MarjPanel altyapı notu olarak kalır. Kaynak logo `scripts/marka/`, türevler
+`pnpm ikon:uret` (bkz. DESIGN.md "Müşteri markası").

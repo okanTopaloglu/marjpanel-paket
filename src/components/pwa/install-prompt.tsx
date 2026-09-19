@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Download, X, Share, SquarePlus } from "lucide-react";
-import { Marka } from "@/components/marka/logo";
+import { MamaAuraIsaret } from "@/components/marka/mama-aura";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -128,11 +128,11 @@ export function InstallPrompt() {
       </button>
 
       <div className="flex items-start gap-3.5 p-4 pr-11">
-        <Marka boyut={44} />
+        <MamaAuraIsaret boyut={44} />
 
         <div className="min-w-0 flex-1">
           <div className="text-headline text-foreground">
-            MarjPanel Paket&apos;i ana ekrana ekle
+            MAMA AURA Paket&apos;i ana ekrana ekle
           </div>
 
           {iosGoster ? (

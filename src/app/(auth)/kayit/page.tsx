@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { KayitForm } from "./kayit-form";
 
 export const metadata: Metadata = {
-  title: "Kayıt — MarjPanel Paket",
-  description: "Şirketinizi MarjPanel Paket'e kaydedin.",
+  title: "Kayıt — MAMA AURA Paket",
+  description: "Şirketinizi MAMA AURA paket paneline kaydedin.",
 };
 
 /**

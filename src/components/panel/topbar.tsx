@@ -1,7 +1,7 @@
 import { LogOut } from "lucide-react";
 import { cikisYap } from "@/server/actions/auth";
 import { MobilMenuButonu } from "./mobile-nav";
-import { MarkaYazi } from "@/components/marka/logo";
+import { MamaAuraYazi } from "@/components/marka/mama-aura";
 import { Avatar } from "@/components/panel/avatar";
 import type { OturumOzeti } from "@/lib/auth/kapsam";
 import type { KullaniciRolu } from "@/lib/db/schema";
@@ -28,7 +28,7 @@ export function Topbar({ ozet }: { ozet: OturumOzeti }) {
       <div className="flex h-14 items-center justify-between gap-3 px-4 pt-safe sm:px-6 lg:px-8">
         <div className="flex items-center gap-1.5 md:hidden">
           <MobilMenuButonu />
-          <MarkaYazi className="text-title-3" altAd="Paket" />
+          <MamaAuraYazi yukseklik={15} altAd="Paket" />
         </div>
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">

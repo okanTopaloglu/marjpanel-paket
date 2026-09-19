@@ -12,7 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { Marka, MarkaYazi } from "@/components/marka/logo";
+import { MamaAuraYazi } from "@/components/marka/mama-aura";
 import { SidebarNav } from "./sidebar-nav";
 import {
   HizIzleyici,
@@ -338,9 +338,8 @@ export function MobilMenuSaglayici({ children }: { children: React.ReactNode }) 
               )}
             >
               <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 pb-3 pt-safe">
-                <div className="flex items-center gap-2.5 pt-3">
-                  <Marka boyut={28} />
-                  <MarkaYazi className="text-title-3 text-ink-foreground" altAd="Paket" />
+                <div className="flex items-center pt-3">
+                  <MamaAuraYazi zemin="koyu" yukseklik={17} altAd="Paket" />
                 </div>
                 <button
                   type="button"

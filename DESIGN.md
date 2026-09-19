@@ -83,10 +83,31 @@ gürültü yapar ve tablo taramasını bozar.
 Trendyol `#E85D2A` · Hepsiburada `#E0862F` · N11 `#7B3FA0` ·
 Pazarama `#1E6FD9` · PTT `#C8102E` · Amazon `#1A1A1A` · WooCommerce `#7F54B3`
 
+### Müşteri markası: MAMA AURA
+
+Bu kurulum MAMA AURA'nın depo ekibi için ayakta; panel onların paneli gibi
+okunmalı. Kimlik `src/components/marka/mama-aura.tsx` içinde toplanır:
+
+| Öğe | Nerede | Biçim |
+|---|---|---|
+| Kelime işareti (açık) | Giriş kartı üstü, mobil üst çubuk, çevrimdışı sayfa, OG kartı | `public/marka/mamaaura.png` - resmi logo, kırpılmış |
+| Kelime işareti (koyu) | Mürekkep menü, mobil çekmece | `mamaaura-koyu.png` - harfler `#EAF0F6`, kırmızı aynı |
+| İşaret (ters üçgen) | Dar menü, "ana ekrana ekle", uygulama simgesi, favicon | Satır içi SVG; `scripts/gen-icons.mjs` aynı yolu kullanır |
+
+Marka kırmızısı `#D81040` **yalnız işaretin ve kelime işaretinin içinde**
+yaşar; "Paket" hapı onun soluk tonunu alır. Buton, seçili satır, odak halkası,
+durum rengi nane kalır. Pazaryeri rozetleriyle aynı ilke: kimlik rengi taşır,
+dolgu almaz. MarjPanel altyapı olarak giriş alt bilgisinde ve OG kartının
+köşesinde küçük bir notla anılır; iki marka aynı ağırlıkta yan yana durmaz.
+
+Kaynak logo `scripts/marka/mamaaura-logo.png`; türevler `pnpm ikon:uret` ile
+üretilir (`gen-marka.mjs` → `gen-icons.mjs` → `gen-og.mjs`).
+
 ### Yasaklar
 
 Mor gradyan, cam efekti (`backdrop-blur`), neon glow, gradyan metin, saf
-siyah. Vurgu rengi tektir - ikinci bir marka rengi icat edilmez.
+siyah. Vurgu rengi tektir - ikinci bir marka rengi icat edilmez; müşteri
+markasının kırmızısı vurgu değil kimliktir (yukarı bakın).
 
 ## Geometri
 

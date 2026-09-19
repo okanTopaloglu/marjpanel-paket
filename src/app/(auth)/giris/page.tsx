@@ -4,8 +4,8 @@ import { guvenliGeriYolu } from "@/lib/auth/geri-yolu";
 import { GirisForm } from "./giris-form";
 
 export const metadata: Metadata = {
-  title: "Giriş — MarjPanel Paket",
-  description: "MarjPanel Paket hesabınıza giriş yapın.",
+  title: "Giriş — MAMA AURA Paket",
+  description: "MAMA AURA paket paneline giriş yapın.",
 };
 
 /**

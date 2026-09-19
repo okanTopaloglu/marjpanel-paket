@@ -1,18 +1,26 @@
 {
   "id": "/",
-  "name": "MarjPanel Paket",
-  "short_name": "Paket",
-  "description": "Depo paket okutma ve pazaryeri sipariş takibi.",
+  "name": "MAMA AURA Paket",
+  "short_name": "MAMA AURA",
+  "description": "MAMA AURA depo paket okutma ve pazaryeri sipariş takibi.",
   "start_url": "/?kaynak=pwa",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "background_color": "#F5F7F6",
   "theme_color": "#F5F7F6",
   "orientation": "any",
   "lang": "tr",
   "dir": "ltr",
-  "categories": ["business", "productivity", "logistics"],
+  "categories": [
+    "business",
+    "productivity",
+    "logistics"
+  ],
   "prefer_related_applications": false,
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
@@ -24,19 +32,25 @@
       "name": "Okut",
       "short_name": "Okut",
       "url": "/okut",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192" }
+      ]
     },
     {
       "name": "Paketler",
       "short_name": "Paketler",
       "url": "/paketler",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192" }
+      ]
     },
     {
       "name": "Siparişler",
       "short_name": "Sipariş",
       "url": "/siparisler",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192" }
+      ]
     }
   ]
 }

@@ -3,27 +3,24 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Bağlantı yok - MarjPanel Paket</title>
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FBF7F1" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#15100C" />
+    <title>Bağlantı yok - MAMA AURA Paket</title>
+    <meta name="theme-color" content="#F5F7F6" />
+    <!--
+      Service worker'ın çevrimdışı yedeği. CSS dosyası YOK (ağ yok), stil
+      satır içi. Renkler globals.css "Mürekkep & Nane" token'larıyla elle
+      eşlenir; tek açık tema (DESIGN.md "Tema"). Kelime işareti önbellekte
+      (sw.js ASSETS) — orada olmazsa kırık resim çıkar, bu yüzden listede.
+    -->
     <style>
       :root {
-        --bg: #fbf7f1;
-        --fg: #241a12;
-        --muted: #7a6a5c;
-        --card: #fffdfa;
-        --line: #e8ded1;
-        --accent: #d2690f;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #15100c;
-          --fg: #f2e9dd;
-          --muted: #a99a8c;
-          --card: #1f1813;
-          --line: #3a3129;
-          --accent: #f59331;
-        }
+        --bg: #f5f7f6;
+        --fg: #0f1b2d;
+        --muted: #5c6878;
+        --card: #ffffff;
+        --line: #dfe4e8;
+        --accent: #0f8a5f;
+        --accent-soft: #e4f5ee;
+        --accent-bright: #12a874;
       }
       * { box-sizing: border-box; }
       html, body { height: 100%; margin: 0; }
@@ -33,11 +30,8 @@
         padding: 1.5rem;
         background: var(--bg);
         color: var(--fg);
-        font: 400 0.9375rem/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        font: 500 0.9375rem/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text",
           "Segoe UI", Roboto, system-ui, sans-serif;
-        background-image:
-          radial-gradient(40rem 30rem at 90% -10%, rgba(240, 150, 60, 0.14), transparent 60%),
-          radial-gradient(34rem 26rem at -5% 5%, rgba(215, 105, 70, 0.11), transparent 58%);
       }
       .kart {
         width: 100%;
@@ -46,9 +40,14 @@
         text-align: center;
         background: var(--card);
         border: 1px solid var(--line);
-        border-radius: 1.5rem;
-        box-shadow: 0 2px 4px rgba(40, 25, 12, 0.04),
-          0 20px 44px -16px rgba(40, 25, 12, 0.16);
+        border-radius: 12px;
+        box-shadow: 0 1px 2px rgb(15 27 45 / 0.06), 0 4px 12px -4px rgb(15 27 45 / 0.08);
+      }
+      .marka {
+        display: block;
+        width: 160px;
+        height: 20px;
+        margin: 0 auto 1.5rem;
       }
       .ikon {
         width: 3.25rem;
@@ -56,17 +55,16 @@
         margin: 0 auto 1.25rem;
         display: grid;
         place-items: center;
-        border-radius: 1rem;
-        color: #fff;
-        background: linear-gradient(140deg, #f0912f, #c9541f);
-        box-shadow: 0 6px 18px -6px rgba(201, 84, 31, 0.5);
+        border-radius: 12px;
+        color: var(--accent-bright);
+        background: var(--accent-soft);
       }
       h1 {
         margin: 0 0 0.5rem;
         font-size: 1.3125rem;
         line-height: 1.22;
-        letter-spacing: -0.017em;
-        font-weight: 650;
+        letter-spacing: -0.02em;
+        font-weight: 700;
       }
       p { margin: 0; color: var(--muted); font-size: 0.875rem; }
       button {
@@ -75,19 +73,20 @@
         min-height: 44px;
         padding: 0 1.25rem;
         border: 0;
-        border-radius: 0.875rem;
+        border-radius: 9px;
         background: var(--accent);
         color: #fff;
         font: inherit;
         font-weight: 600;
         cursor: pointer;
-        transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
       }
       button:active { transform: scale(0.97); }
     </style>
   </head>
   <body>
     <main class="kart">
+      <img class="marka" src="/marka/mamaaura.png" alt="MAMA AURA" width="160" height="20" />
       <div class="ikon" aria-hidden="true">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 2l20 20" />
@@ -101,7 +100,7 @@
       </div>
       <h1>Bağlantı yok</h1>
       <p>
-        MarjPanel Paket canlı veriyle çalışır - paket, stok ve sipariş
+        MAMA AURA Paket canlı veriyle çalışır - paket, stok ve sipariş
         bilgileri çevrimdışı gösterilmez. Bağlantı geri geldiğinde kaldığınız
         yerden devam edin.
       </p>

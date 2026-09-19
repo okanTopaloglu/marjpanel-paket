@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { Marka, MarkaYazi } from "@/components/marka/logo";
+import { MamaAuraIsaret, MamaAuraYazi } from "@/components/marka/mama-aura";
 import { SidebarNav } from "@/components/panel/sidebar-nav";
 import { PageTransition } from "@/components/panel/page-transition";
 import { MobilMenuSaglayici } from "@/components/panel/mobile-nav";
@@ -56,9 +56,12 @@ export function PanelKabuk({
               dar ? "justify-center px-2" : "px-4",
             )}
           >
-            <Marka boyut={28} />
-            {!dar && (
-              <MarkaYazi className="text-title-3 text-ink-foreground" altAd="Paket" />
+            {/* Dar menüde yalnız işaret (üçgen), genişte kelime işareti;
+                ikisi birden hem sıkışır hem de markayı iki kez söyler. */}
+            {dar ? (
+              <MamaAuraIsaret boyut={28} />
+            ) : (
+              <MamaAuraYazi zemin="koyu" yukseklik={17} altAd="Paket" />
             )}
           </div>
 
