@@ -3,7 +3,15 @@ import {
   createDecipheriv,
   randomBytes,
   createHash,
-} from "node:crypto";
+} from "crypto";
+
+/*
+ * İthal `"crypto"`, `"node:crypto"` DEĞİL: `node:` şemasını webpack'in edge
+ * derleyicisi çözemez ("Unhandled scheme") ve bu modül yanlışlıkla edge
+ * paketine sürüklendiğinde derleme patlar. Düz ad, Node paketinde aynı modülü
+ * verir; edge tarafında ise çözülemeyen bir şema yerine normal bir modül
+ * hatası olur.
+ */
 
 /**
  * Pazaryeri API kimlik bilgilerini uygulama katmanında AES-256-GCM ile şifreler.
