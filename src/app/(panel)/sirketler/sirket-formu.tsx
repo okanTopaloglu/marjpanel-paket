@@ -96,7 +96,7 @@ function SirketFormIcerigi({
         ) : (
           <p id="alanAdi-ipucu" className="text-caption text-muted-foreground">
             Şirket kullanıcıları YALNIZ bu adresten girer ve kendi logosunu görür.
-            Boşsa platform adresinden girerler. *.marjpanel.com altı DNS&apos;te hazır.
+            Boşsa platform adresinden girerler. *.marjpanel.com altındaki her ad anında çalışır (DNS ve SSL hazır); kaydedince ek işlem gerekmez.
           </p>
         )}
       </div>
