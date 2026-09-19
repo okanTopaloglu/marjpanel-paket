@@ -56,8 +56,10 @@ export function HizliMod({
         Kargo barkodu
       </label>
 
-      <div className="mt-2 flex items-center gap-2">
-        <div className="relative min-w-0 flex-1">
+      {/* Dar ekranda alan tek başına ilk satırı alır; kamera + Okut alta iner.
+          Aynı satıra sığdırmak 390px'te düğmeyi ekran dışına taşırıyordu. */}
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-0 basis-full sm:basis-0 sm:flex-1">
           <ScanBarcode
             className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
@@ -96,7 +98,7 @@ export function HizliMod({
 
         {yan}
 
-        <Button type="submit" size="lg" className="h-14 px-6 text-base">
+        <Button type="submit" size="lg" className="h-14 flex-1 px-6 text-base sm:flex-none">
           Okut
         </Button>
       </div>
