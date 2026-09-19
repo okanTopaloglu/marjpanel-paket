@@ -69,8 +69,12 @@ export const config = {
    * · PWA dosyaları (manifest, sw.js, offline.html, ikonlar) → service worker
    *   bağlamından oturumsuz istenir; muaf olmazsa tarayıcı JSON beklerken
    *   giriş HTML'i alır ve PWA başlatma zinciri kırılır.
+   * · /marka/ ve og.png → marka görselleri. Kelime işareti çevrimdışı sayfada
+   *   ve sw precache'inde oturumsuz çekilir; og.png'yi sosyal ağ botları
+   *   ister. Muaf olmazsa 307 ile giriş sayfasına düşer ve sw "resim" diye
+   *   giriş HTML'ini önbelleğe alır.
    */
   matcher: [
-    "/((?!api/auth|api/cron|g/|_next/static|_next/image|favicon.ico|favicon-32.png|manifest.webmanifest|sw.js|offline.html|apple-touch-icon.png|icons/).*)",
+    "/((?!api/auth|api/cron|g/|marka/|_next/static|_next/image|favicon.ico|favicon-32.png|manifest.webmanifest|sw.js|offline.html|apple-touch-icon.png|og.png|icons/).*)",
   ],
 };

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { KayitForm } from "./kayit-form";
 
 export const metadata: Metadata = {
-  title: "Kayıt — MAMA AURA Paket",
+  // Kök şablon "%s | MAMA AURA Paket" ekler; marka burada tekrar yazılmaz.
+  title: "Kayıt",
   description: "Şirketinizi MAMA AURA paket paneline kaydedin.",
 };
 
