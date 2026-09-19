@@ -32,6 +32,10 @@ RUN pnpm exec esbuild src/lib/db/migrate.ts src/lib/db/seed.ts \
 FROM base AS runtime
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# curl: Coolify'ın ürettiği sağlık sondası önce curl deniyor; alpine imajında
+# yok. Kurulmazsa uygulama sağlıklı ayaktayken bile "unhealthy" sayılıp deploy
+# geri alınır (busybox wget sonda için yeterli değil).
+RUN apk add --no-cache curl
 RUN addgroup -g 1001 nodejs && adduser -u 1001 -G nodejs -S nextjs
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
