@@ -551,6 +551,59 @@ export const odemeler = pgTable(
   (t) => [index("odemeler_sirket_tarih_idx").on(t.sirketId, t.tarih.desc())],
 );
 
+/* ==================================================================== */
+/* SARF MALZEMELERİ (Faz B) — platform düzeyi, şirket yok                */
+/* ==================================================================== */
+
+/**
+ * Sarf malzemesi (koli, patpat, bant, kargo poşeti). TÜKETİM YAZILMAZ,
+ * TÜRETİLİR: `normBaslangic`tan itibaren okutulan paket × `paketBasiNorm`.
+ * Stok = alımlar + sayım düzeltmeleri − türetilen tüketim (repos/sarf).
+ * Böylece günlük iş gerekmez; sayım girildiğinde gerçekle hizalanır.
+ */
+export const sarfMalzemeleri = pgTable("sarf_malzemeleri", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ad: text("ad").notNull().unique(),
+  /** adet, metre, rulo, kg… (yalnız görünüm) */
+  birim: text("birim").notNull().default("adet"),
+  /** Son alım birim maliyeti (TL); gider tahmini için. */
+  birimMaliyet: numeric("birim_maliyet", { precision: 12, scale: 4 }).notNull().default("0"),
+  /** Paket başına tüketim (birim cinsinden, ondalık olabilir: bant 0,3 m). */
+  paketBasiNorm: numeric("paket_basi_norm", { precision: 10, scale: 4 }).notNull().default("0"),
+  /** Norm bu tarihten itibaren okutulan paketlere uygulanır. */
+  normBaslangic: date("norm_baslangic").notNull().defaultNow(),
+  /** Bu seviyenin altı "kritik". */
+  kritikSeviye: numeric("kritik_seviye", { precision: 12, scale: 2 }).notNull().default("0"),
+  aktif: boolean("aktif").notNull().default(true),
+  ...timestamps,
+});
+
+/** alim: + · sayim: stoğu bu değere EŞİTLER (fark yazılır) · duzeltme: ± */
+export const sarfHareketiTuruEnum = pgEnum("sarf_hareketi_turu", ["alim", "sayim", "duzeltme"]);
+
+export const sarfHareketleri = pgTable(
+  "sarf_hareketleri",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sarfId: uuid("sarf_id")
+      .notNull()
+      .references(() => sarfMalzemeleri.id, { onDelete: "cascade" }),
+    tur: sarfHareketiTuruEnum("tur").notNull(),
+    /** Stok etkisi, işaretli. Sayımda: sayılan − o anki hesaplanan stok. */
+    miktar: numeric("miktar", { precision: 12, scale: 2 }).notNull(),
+    /** Alımda toplam tutar (TL); birim maliyet buradan güncellenir. */
+    tutar: numeric("tutar", { precision: 12, scale: 2 }),
+    tarih: date("tarih").notNull(),
+    not: text("not"),
+    kaydedenAd: text("kaydeden_ad").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("sarf_hareketleri_sarf_tarih_idx").on(t.sarfId, t.tarih.desc())],
+);
+
+export type SarfMalzemesi = typeof sarfMalzemeleri.$inferSelect;
+export type SarfHareketi = typeof sarfHareketleri.$inferSelect;
+
 export type Tarife = typeof tarifeler.$inferSelect;
 export type HesapKesimi = typeof hesapKesimleri.$inferSelect;
 export type HesapKesimKalemi = typeof hesapKesimKalemleri.$inferSelect;

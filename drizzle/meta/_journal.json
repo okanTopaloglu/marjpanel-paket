@@ -36,6 +36,13 @@
       "when": 1789838963158,
       "tag": "0004_tarife_hesap",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789839459567,
+      "tag": "0005_sarf",
+      "breakpoints": true
     }
   ]
 }

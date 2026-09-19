@@ -21,7 +21,7 @@ export function acikYolMu(yol: string): boolean {
 }
 
 /** Yalnız platform sahibinin (super_admin) görebildiği alan. */
-const SUPER_ONEKLERI = ["/sirketler", "/mal-kabul", "/hesap-kesimi"];
+const SUPER_ONEKLERI = ["/sirketler", "/mal-kabul", "/hesap-kesimi", "/sarf", "/pano"];
 
 /**
  * Çalışanın giremediği yönetim alanları. Çalışanın işi okutmadır; bu

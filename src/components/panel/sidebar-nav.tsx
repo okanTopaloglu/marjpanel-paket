@@ -16,6 +16,8 @@ import {
   PackagePlus,
   Receipt,
   Wallet,
+  PackageOpen,
+  Gauge,
   Share2,
   FileText,
   Mail,
@@ -87,8 +89,10 @@ function gruplariOlustur(ozet: OturumOzeti): NavGrup[] {
       baslik: "Depo",
       items: super_
         ? [
+            { href: "/pano", label: "Genel Pano", icon: Gauge, match: "/pano" },
             { href: "/mal-kabul", label: "Mal Kabul", icon: PackagePlus, match: "/mal-kabul" },
             { href: "/stok", label: "Stoklar", icon: Boxes, match: "/stok" },
+            { href: "/sarf", label: "Sarf Malzemeleri", icon: PackageOpen, match: "/sarf" },
             { href: "/hesap-kesimi", label: "Hesap Kesimi", icon: Receipt, match: "/hesap-kesimi" },
           ]
         : [
