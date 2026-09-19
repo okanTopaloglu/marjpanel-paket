@@ -7,7 +7,7 @@
  * bildirim gerektirmiyor.
  */
 
-const CACHE = "mamaaura-paket-v2";
+const CACHE = "mamaaura-paket-v3";
 const CEVRIMDISI = "/offline.html";
 const ASSETS = [
   CEVRIMDISI,
@@ -21,12 +21,30 @@ const ASSETS = [
   "/marka/mamaaura.png",
 ];
 
+/**
+ * Precache: her varlık AYRI AYRI ve yalnız temiz 200 ise alınır.
+ *
+ * `cache.add` yönlendirmeyi takip eder: middleware bir görseli /giris'e
+ * 307'lediğinde giriş sayfasının HTML'i "resim" diye önbelleğe giriyor ve
+ * fetch tarafı önbellek-öncelikli olduğu için sunucu düzelse bile tarayıcı
+ * kırık resim gösteriyordu. `redirect: "error"` yönlendirmede fırlatır,
+ * `ok` kontrolü 4xx/5xx'i eler; ikisi de allSettled ile yutulur — tek bir
+ * varlık yüzünden kurulum çökmez, ama yanlış bir şey de saklanmaz.
+ */
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      // Tek bir varlık 404 olsa bile kurulum çökmesin.
-      .then((c) => Promise.allSettled(ASSETS.map((a) => c.add(a))))
+      .then((c) =>
+        Promise.allSettled(
+          ASSETS.map((a) =>
+            fetch(a, { redirect: "error", cache: "no-cache" }).then((r) => {
+              if (!r.ok) throw new Error(`${a}: ${r.status}`);
+              return c.put(a, r);
+            }),
+          ),
+        ),
+      )
       .then(() => self.skipWaiting()),
   );
 });
