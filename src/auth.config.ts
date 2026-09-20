@@ -13,21 +13,34 @@ import type { NextAuthConfig } from "next-auth";
  * tek başına güvenilmez.
  */
 
-/** Oturumsuz erişilebilen yollar. Diğer her şey oturum ister. */
-const ACIK_YOLLAR = new Set(["/giris", "/kayit"]);
+/**
+ * Oturumsuz erişilebilen yollar. Diğer her şey oturum ister.
+ *
+ * "/" BURADADIR ama panelin ana ekranı da "/"dur. Çelişki değil: kök yolda
+ * oturumsuz ziyaretçi TANITIM sayfasını görür (app/page.tsx), girişli
+ * kullanıcı panele yönlendirilir. Kararı sayfanın kendisi verir çünkü kiracı
+ * host'unda (sirket.marjpanel.com) tanıtım HİÇ gösterilmez — bu ayrım DB'ye
+ * bakmayı gerektirir ve Edge middleware'de yapılamaz.
+ */
+const ACIK_YOLLAR = new Set(["/", "/tanitim", "/giris", "/kayit"]);
 
+/** Tanıtım sayfasının alt yolları da oturumsuz açıktır (SSS, gizlilik vb. yok; şimdilik yalnız kök). */
 export function acikYolMu(yol: string): boolean {
   return ACIK_YOLLAR.has(yol);
 }
 
-/** Yalnız platform sahibinin (super_admin) görebildiği alan. */
-const SUPER_ONEKLERI = ["/sirketler", "/mal-kabul", "/hesap-kesimi", "/sarf", "/pano"];
+/**
+ * Yalnız platform sahibinin (super_admin) görebildiği alan.
+ * DIŞA AÇIK: app/robots.ts bu listeden Disallow üretir — yeni bir yönetim
+ * öneki eklenince robots.txt'in unutulmaması için tek kaynak burasıdır.
+ */
+export const SUPER_ONEKLERI = ["/sirketler", "/mal-kabul", "/hesap-kesimi", "/sarf", "/pano"];
 
 /**
  * Çalışanın giremediği yönetim alanları. Çalışanın işi okutmadır; bu
  * ekranlara girerse ana ekrana (okutma) geri gönderilir.
  */
-const YONETIM_ONEKLERI = [
+export const YONETIM_ONEKLERI = [
   "/kullanicilar",
   "/barkod-kurallari",
   "/entegrasyonlar",
@@ -53,9 +66,14 @@ export const authConfig = {
       const rol = auth?.user?.rol;
       const yol = nextUrl.pathname;
 
-      // Açık yollar: girişliyse burada işi yok, panele gönder.
+      /**
+       * Açık yollar. Girişli kullanıcı /giris ve /kayit'ta işi yoksa panele
+       * gönderilir; KÖK YOL İSTİSNADIR çünkü panelin ana ekranı da "/"dur —
+       * buradan "/"a yönlendirmek sonsuz döngü olurdu. Kökte ne gösterileceğine
+       * (tanıtım mı panel mi) sayfanın kendisi karar verir.
+       */
       if (acikYolMu(yol)) {
-        if (girisli) return Response.redirect(new URL("/", nextUrl));
+        if (girisli && yol !== "/") return Response.redirect(new URL("/", nextUrl));
         return true;
       }
 

@@ -1,0 +1,347 @@
+{
+  "proje": "MarjPanel Paket",
+  "tarih": "2026-09-20",
+  "notlar_metodoloji": [
+    "Bu plan ücretli SERP/hacim API'si kullanmadan, WebSearch ile yapılan manuel gözleme dayanır.",
+    "Arama hacmi rakamı verilmemiştir; bunun yerine niyet ve gözlemlenen rekabet yoğunluğu (rakip listesi, içerik türü, marka gücü) üzerinden 'kolay / orta / zor' etiketlemesi yapılmıştır.",
+    "SERP örtüşme matrisi, ücretli araç olmadığı için puanlanmamış; bunun yerine WebSearch sonuçlarında tekrar eden domainler (OPLOG, ikas, Dopigo, Nexsol, FulfillmentTR, İdealDepo, EcomMovers, Nice Lojistik, İDURUM) gözlemsel örtüşme göstergesi olarak not edilmiştir.",
+    "İş modeli iki ayrı niyet kümesine ayrılır: (A) HİZMET/3PL arayan e-ticaret satıcıları, (B) YAZILIM/SaaS panel arayan e-ticaret satıcıları. Bu ikisi aynı hedef kitleye hitap etse de farklı arama davranışı ve farklı rakip seti üretir; bu yüzden mimari iki alt-hub olarak kurgulanmıştır."
+  ],
+  "hedef_kitle": "Türkiye'de Trendyol/Hepsiburada/N11/Pazarama/idefix/Amazon gibi pazaryerlerinde satış yapan KOBİ ölçekli e-ticaret satıcıları",
+
+  "anahtar_kelime_seti": [
+    { "kelime": "fulfillment hizmeti", "niyet": "Bilgi", "grup": "hizmet_temel", "rekabet": "Zor", "rekabet_notu": "OPLOG, ikas, İdealDepo gibi güçlü markalar üst sıralarda; tanım sorgusu, yeni site için düşük öncelik." },
+    { "kelime": "fulfillment nedir", "niyet": "Bilgi", "grup": "hizmet_temel", "rekabet": "Zor", "rekabet_notu": "Aynı domainler (ikas, OPLOG) hakim." },
+    { "kelime": "e-ticaret fulfillment hizmeti nedir", "niyet": "Bilgi", "grup": "hizmet_temel", "rekabet": "Zor" },
+    { "kelime": "3PL nedir", "niyet": "Bilgi", "grup": "hizmet_temel", "rekabet": "Zor", "rekabet_notu": "Shopify TR, Cencora, OPLOG gibi büyük domainler hakim." },
+    { "kelime": "üçüncü parti lojistik nedir", "niyet": "Bilgi", "grup": "hizmet_temel", "rekabet": "Zor" },
+    { "kelime": "e-ticaret deposu nasıl kurulur", "niyet": "Bilgi", "grup": "hizmet_temel", "rekabet": "Orta" },
+    { "kelime": "kendi deponu mu kur yoksa fulfillment mi kullan", "niyet": "Bilgi", "grup": "hizmet_temel", "rekabet": "Kolay", "rekabet_notu": "Karşılaştırma/karar sorgusu, doğrudan rakip içerik az görüldü." },
+
+    { "kelime": "e-ticaret fulfillment firması", "niyet": "Ticari", "grup": "hizmet_saglayici_secimi", "rekabet": "Orta" },
+    { "kelime": "fulfillment firmaları Türkiye", "niyet": "Ticari", "grup": "hizmet_saglayici_secimi", "rekabet": "Orta" },
+    { "kelime": "İstanbul fulfillment hizmeti", "niyet": "Ticari", "grup": "hizmet_saglayici_secimi", "rekabet": "Orta", "rekabet_notu": "EcomMovers, Nice Lojistik gibi orta ölçekli oyuncular hakim; büyük markalar kadar güçlü değil, fırsat alanı." },
+    { "kelime": "fulfillment firması nasıl seçilir", "niyet": "Ticari", "grup": "hizmet_saglayici_secimi", "rekabet": "Kolay", "rekabet_notu": "FulfillmentTR'nin 'nasıl seçilir' yazısı var ama alan genel olarak az işlenmiş." },
+    { "kelime": "depo ve paketleme hizmeti veren firmalar", "niyet": "Ticari", "grup": "hizmet_saglayici_secimi", "rekabet": "Orta" },
+    { "kelime": "e-ticaret için dış kaynak depo hizmeti", "niyet": "Ticari", "grup": "hizmet_saglayici_secimi", "rekabet": "Kolay" },
+    { "kelime": "butik marka fulfillment hizmeti", "niyet": "Ticari", "grup": "hizmet_saglayici_secimi", "rekabet": "Orta", "rekabet_notu": "EcomMovers bu nişi işgal etmiş." },
+
+    { "kelime": "fulfillment fiyatları", "niyet": "Ticari", "grup": "fiyatlandirma", "rekabet": "Orta" },
+    { "kelime": "fulfillment fiyatlandırması nasıl hesaplanır", "niyet": "Bilgi/Ticari", "grup": "fiyatlandirma", "rekabet": "Orta", "rekabet_notu": "OPLOG ve FulfillmentTR genel rehber yazmış; 'paket başı tarife' özelinde boşluk var." },
+    { "kelime": "paket başı ücretlendirme fulfillment", "niyet": "Ticari", "grup": "fiyatlandirma", "rekabet": "Kolay", "rekabet_notu": "Doğrudan bu ifadeyle içerik üreten rakip görülmedi; MarjPanel'in kendi model adı ile net fırsat." },
+    { "kelime": "sipariş başı depo ücreti", "niyet": "Ticari", "grup": "fiyatlandirma", "rekabet": "Kolay" },
+    { "kelime": "e-ticaret depolama fiyatları", "niyet": "Ticari", "grup": "fiyatlandirma", "rekabet": "Orta" },
+    { "kelime": "fulfillment maliyeti hesaplama", "niyet": "Ticari", "grup": "fiyatlandirma", "rekabet": "Orta", "rekabet_notu": "FulfillmentTR 'Fulfillment Maliyetleri 2026' başlığıyla var." },
+    { "kelime": "kademeli fulfillment tarifesi", "niyet": "Ticari", "grup": "fiyatlandirma", "rekabet": "Kolay", "rekabet_notu": "Neredeyse hiç içerik yok; MarjPanel'in tarife yapısını anlatan sayfa için boş alan." },
+
+    { "kelime": "e-ticaret mal kabul süreci", "niyet": "Bilgi", "grup": "operasyon_sureci", "rekabet": "Orta" },
+    { "kelime": "depoya ürün gönderme süreci e-ticaret", "niyet": "Bilgi/Ticari", "grup": "operasyon_sureci", "rekabet": "Kolay" },
+    { "kelime": "sipariş paketleme hizmeti", "niyet": "Ticari", "grup": "operasyon_sureci", "rekabet": "Orta" },
+    { "kelime": "e-ticaret kargoya verme hizmeti", "niyet": "Ticari", "grup": "operasyon_sureci", "rekabet": "Orta" },
+    { "kelime": "iade yönetimi e-ticaret depo", "niyet": "Bilgi/Ticari", "grup": "operasyon_sureci", "rekabet": "Orta" },
+    { "kelime": "hızlı kargo hazırlığı e-ticaret depo hizmeti", "niyet": "Ticari", "grup": "operasyon_sureci", "rekabet": "Kolay" },
+
+    { "kelime": "pazaryeri entegrasyon programı", "niyet": "Ticari", "grup": "yazilim_entegrasyon", "rekabet": "Zor", "rekabet_notu": "Dopigo, Nexsol/NParadox, Tamsoft, Proticaret, İDURUM gibi yerleşik yazılım markaları çok güçlü." },
+    { "kelime": "Trendyol Hepsiburada N11 entegrasyon yazılımı", "niyet": "Ticari", "grup": "yazilim_entegrasyon", "rekabet": "Zor" },
+    { "kelime": "tek panelden çoklu pazaryeri yönetimi", "niyet": "Ticari", "grup": "yazilim_entegrasyon", "rekabet": "Orta" },
+    { "kelime": "pazaryeri entegrasyonu nasıl seçilir", "niyet": "Bilgi/Ticari", "grup": "yazilim_entegrasyon", "rekabet": "Orta", "rekabet_notu": "Sakans'ın rehberi var ama alan genel olarak orta yoğunlukta." },
+    { "kelime": "Pazarama idefix Amazon entegrasyonu tek panel", "niyet": "Ticari", "grup": "yazilim_entegrasyon", "rekabet": "Kolay", "rekabet_notu": "Bu spesifik 6 pazaryeri kombinasyonunu (Pazarama + idefix dahil) birlikte işleyen içerik neredeyse yok; niş fırsat." },
+    { "kelime": "sipariş senkronizasyon süresi pazaryeri entegrasyonu", "niyet": "Bilgi", "grup": "yazilim_entegrasyon", "rekabet": "Kolay" },
+
+    { "kelime": "barkod ile paket doğrulama sistemi", "niyet": "Bilgi/Ticari", "grup": "yazilim_operasyon", "rekabet": "Kolay", "rekabet_notu": "Barkod/WMS firmaları (Trbarkod, Naron, ERD) var ama e-ticaret paket doğrulama + pazaryeri bağlamında az." },
+    { "kelime": "depo yönetim sistemi barkod okutma", "niyet": "Bilgi/Ticari", "grup": "yazilim_operasyon", "rekabet": "Orta" },
+    { "kelime": "yanlış paket gönderimini önleme sistemi", "niyet": "Bilgi", "grup": "yazilim_operasyon", "rekabet": "Kolay" },
+    { "kelime": "çalışan performans takibi depo yazılımı", "niyet": "Bilgi/Ticari", "grup": "yazilim_operasyon", "rekabet": "Kolay", "rekabet_notu": "Neredeyse boş alan; genel WMS içeriklerinde yan konu olarak geçiyor." },
+    { "kelime": "e-ticaret stok takip barkod programı", "niyet": "Ticari", "grup": "yazilim_operasyon", "rekabet": "Orta" },
+
+    { "kelime": "e-ticaret hesap kesimi faturalama otomasyonu", "niyet": "Bilgi/Ticari", "grup": "yazilim_finans", "rekabet": "Kolay" },
+    { "kelime": "pazaryeri sipariş faturalama entegrasyonu", "niyet": "Ticari", "grup": "yazilim_finans", "rekabet": "Orta" },
+    { "kelime": "3PL yazılımı SaaS Türkiye", "niyet": "Ticari", "grup": "yazilim_finans", "rekabet": "Kolay", "rekabet_notu": "Türkçe pazarda 'fulfillment hizmeti + kendi SaaS paneli' birlikte konumlanan marka görülmedi; MarjPanel'in ayırt edici konumu." },
+
+    { "kelime": "MarjPanel Paket", "niyet": "Navigasyonel", "grup": "haric", "rekabet": "N/A", "rekabet_notu": "Kümelemeden çıkarıldı (marka sorgusu)." },
+    { "kelime": "MarjPanel giriş", "niyet": "Navigasyonel", "grup": "haric", "rekabet": "N/A", "rekabet_notu": "Kümelemeden çıkarıldı (marka sorgusu)." }
+  ],
+
+  "cannibalization_kontrol": {
+    "durum": "Temiz",
+    "aciklama": "Her spoke'a benzersiz bir birincil anahtar kelime atanmıştır. 'Fulfillment fiyatları' (genel ticari) ile 'Paket başı ücretlendirme' (spesifik model) ayrı sayfalar olarak tutulmuş, aralarında zorunlu iç link ile ilişkilendirilmiştir; aynı kelimeyi hedeflememektedirler.",
+    "riskli_ciftler_izlenmeli": [
+      "fulfillment fiyatları vs paket başı ücretlendirme fulfillma — farklı search intent derinliği (genel vs spesifik model), izlenmeli",
+      "pazaryeri entegrasyon programı vs Pazarama idefix Amazon entegrasyonu tek panel — ikincisi birincinin alt kümesi, H1/başlık farkı netleştirilmeli"
+    ]
+  },
+
+  "hub_spoke_mimarisi": {
+    "yapi_notu": "İki ayrı ama birbirine bağlı hub önerilir: Ana sayfa (kurumsal/hizmet hub'ı, HİZMET niyetini karşılar) ve /panel veya /yazilim alt-hub'ı (SaaS niyetini karşılar). Bu, farklı arama niyetlerini karıştırmadan tek marka çatısı altında iki net yolculuk sunar.",
+
+    "pillar_1": {
+      "sayfa": "Ana Sayfa (/)",
+      "hedef_kelime": "e-ticaret fulfillment hizmeti (+ 'depo ve paketleme hizmeti')",
+      "rol": "Hizmet hub'ı — 3PL/fulfillment arayan KOBİ'leri karşılar, tüm hizmet spoke'larına ve yazılım alt-hub'ına yönlendirir",
+      "kelime_sayisi_hedefi": "2500-3500",
+      "sablon": "Hizmet/Kurumsal ana sayfa şablonu",
+      "spokes": [
+        "cluster_hizmet_saglayici",
+        "cluster_fiyatlandirma",
+        "cluster_operasyon_sureci"
+      ]
+    },
+
+    "pillar_2": {
+      "sayfa": "/panel veya /yazilim (Panel Ürün Sayfası)",
+      "hedef_kelime": "pazaryeri entegrasyon paneli / e-ticaret depo yönetim yazılımı",
+      "rol": "Yazılım/SaaS hub'ı — panelin kendisini bağımsız ürün olarak arayan kullanıcıları karşılar",
+      "kelime_sayisi_hedefi": "2000-3000",
+      "sablon": "Ürün/Özellik ana sayfa şablonu",
+      "spokes": [
+        "cluster_yazilim_entegrasyon",
+        "cluster_yazilim_operasyon"
+      ],
+      "not": "Ana sayfadan zorunlu link alır ve ana sayfaya zorunlu link verir (çapraz-hub bağlantısı); iki iş modelinin aynı altyapıdan geldiğini anlatan geçiş cümlesi önerilir."
+    },
+
+    "kumeler": [
+      {
+        "id": "cluster_hizmet_saglayici",
+        "baslik": "Fulfillment Sağlayıcı Seçimi",
+        "bagli_pillar": "pillar_1",
+        "spokes": [
+          {
+            "slug": "fulfillment-firmasi-nasil-secilir",
+            "hedef_kelime": "fulfillment firması nasıl seçilir",
+            "niyet": "Ticari",
+            "sablon": "Karşılaştırma/Rehber (listicle + kriter tablosu)",
+            "kelime_sayisi_hedefi": "1400-1800",
+            "rekabet": "Kolay"
+          },
+          {
+            "slug": "istanbul-fulfillment-hizmeti",
+            "hedef_kelime": "İstanbul fulfillment hizmeti",
+            "niyet": "Ticari",
+            "sablon": "Lokal hizmet sayfası",
+            "kelime_sayisi_hedefi": "1200-1600",
+            "rekabet": "Orta"
+          },
+          {
+            "slug": "kendi-depon-mu-fulfillment-mi",
+            "hedef_kelime": "kendi deponu mu kur yoksa fulfillment mi kullan",
+            "niyet": "Bilgi",
+            "sablon": "Karar rehberi (artı/eksi tablosu)",
+            "kelime_sayisi_hedefi": "1500-1800",
+            "rekabet": "Kolay"
+          }
+        ]
+      },
+      {
+        "id": "cluster_fiyatlandirma",
+        "baslik": "Fiyatlandırma ve Maliyet",
+        "bagli_pillar": "pillar_1",
+        "spokes": [
+          {
+            "slug": "paket-basi-ucretlendirme-nasil-calisir",
+            "hedef_kelime": "paket başı ücretlendirme fulfillment",
+            "niyet": "Ticari",
+            "sablon": "Fiyatlandırma açıklama sayfası (kademeli tarife tablosu)",
+            "kelime_sayisi_hedefi": "1400-1800",
+            "rekabet": "Kolay",
+            "oncelik": "Yüksek — en net fırsat"
+          },
+          {
+            "slug": "fulfillment-maliyeti-nasil-hesaplanir",
+            "hedef_kelime": "fulfillment maliyeti hesaplama",
+            "niyet": "Bilgi/Ticari",
+            "sablon": "Hesaplayıcı/rehber (örnek senaryo tablosu)",
+            "kelime_sayisi_hedefi": "1300-1700",
+            "rekabet": "Orta"
+          },
+          {
+            "slug": "e-ticaret-depolama-fiyatlari",
+            "hedef_kelime": "e-ticaret depolama fiyatları",
+            "niyet": "Ticari",
+            "sablon": "Fiyatlandırma bilgi sayfası",
+            "kelime_sayisi_hedefi": "1200-1500",
+            "rekabet": "Orta"
+          }
+        ]
+      },
+      {
+        "id": "cluster_operasyon_sureci",
+        "baslik": "Depo Operasyon Süreçleri",
+        "bagli_pillar": "pillar_1",
+        "spokes": [
+          {
+            "slug": "e-ticaret-mal-kabul-sureci",
+            "hedef_kelime": "e-ticaret mal kabul süreci",
+            "niyet": "Bilgi",
+            "sablon": "Süreç/adım-adım rehber",
+            "kelime_sayisi_hedefi": "1300-1600",
+            "rekabet": "Orta"
+          },
+          {
+            "slug": "siparis-paketleme-hizmeti",
+            "hedef_kelime": "sipariş paketleme hizmeti",
+            "niyet": "Ticari",
+            "sablon": "Hizmet detay sayfası",
+            "kelime_sayisi_hedefi": "1200-1500",
+            "rekabet": "Orta"
+          },
+          {
+            "slug": "e-ticaret-iade-yonetimi-depo-hizmeti",
+            "hedef_kelime": "iade yönetimi e-ticaret depo",
+            "niyet": "Bilgi/Ticari",
+            "sablon": "Hizmet detay + SSS",
+            "kelime_sayisi_hedefi": "1200-1500",
+            "rekabet": "Orta"
+          }
+        ]
+      },
+      {
+        "id": "cluster_yazilim_entegrasyon",
+        "baslik": "Pazaryeri Entegrasyonu ve Senkronizasyon",
+        "bagli_pillar": "pillar_2",
+        "spokes": [
+          {
+            "slug": "6-pazaryeri-tek-panelden-yonetim",
+            "hedef_kelime": "Pazarama idefix Amazon entegrasyonu tek panel",
+            "niyet": "Ticari",
+            "sablon": "Özellik/ürün sayfası",
+            "kelime_sayisi_hedefi": "1400-1800",
+            "rekabet": "Kolay",
+            "oncelik": "Yüksek — niş fırsat, 6 pazaryerini birlikte işleyen rakip içerik yok"
+          },
+          {
+            "slug": "pazaryeri-entegrasyonu-nasil-secilir",
+            "hedef_kelime": "pazaryeri entegrasyonu nasıl seçilir",
+            "niyet": "Bilgi/Ticari",
+            "sablon": "Karşılaştırma rehberi",
+            "kelime_sayisi_hedefi": "1500-1800",
+            "rekabet": "Orta"
+          },
+          {
+            "slug": "siparis-senkronizasyon-suresi-neden-onemli",
+            "hedef_kelime": "sipariş senkronizasyon süresi pazaryeri entegrasyonu",
+            "niyet": "Bilgi",
+            "sablon": "Bilgi/teknik açıklama sayfası",
+            "kelime_sayisi_hedefi": "1200-1500",
+            "rekabet": "Kolay"
+          }
+        ]
+      },
+      {
+        "id": "cluster_yazilim_operasyon",
+        "baslik": "Depo Yazılımı: Barkod, Stok, Performans",
+        "bagli_pillar": "pillar_2",
+        "spokes": [
+          {
+            "slug": "barkod-ile-paket-dogrulama-sistemi",
+            "hedef_kelime": "barkod ile paket doğrulama sistemi",
+            "niyet": "Bilgi/Ticari",
+            "sablon": "Özellik sayfası + nasıl-çalışır",
+            "kelime_sayisi_hedefi": "1300-1700",
+            "rekabet": "Kolay"
+          },
+          {
+            "slug": "calisan-performans-takibi-depo-yazilimi",
+            "hedef_kelime": "çalışan performans takibi depo yazılımı",
+            "niyet": "Bilgi/Ticari",
+            "sablon": "Özellik sayfası",
+            "kelime_sayisi_hedefi": "1200-1500",
+            "rekabet": "Kolay"
+          },
+          {
+            "slug": "pazaryeri-siparis-hesap-kesimi-faturalama",
+            "hedef_kelime": "pazaryeri sipariş faturalama entegrasyonu",
+            "niyet": "Ticari",
+            "sablon": "Özellik sayfası",
+            "kelime_sayisi_hedefi": "1300-1600",
+            "rekabet": "Orta"
+          }
+        ]
+      }
+    ]
+  },
+
+  "ic_link_matrisi": {
+    "zorunlu_spoke_to_pillar": "Her spoke, ait olduğu pillar'a (pillar_1 veya pillar_2) en az 1 link verir.",
+    "zorunlu_pillar_to_spoke": "Her iki pillar da kendi kümelerindeki tüm spoke'lara link verir (hizmet listesi / özellik listesi bölümünde).",
+    "cift_yonlu_pillar_linki": "pillar_1 <-> pillar_2 karşılıklı link (ana sayfadaki 'Panelimizi bağımsız da kullanabilirsiniz' CTA'sı ve panel sayfasındaki 'Depo hizmetimizle birlikte de kullanılabilir' CTA'sı)",
+    "liste": [
+      { "sayfa": "pillar_1 (Ana Sayfa)", "linkler_verir": ["fulfillment-firmasi-nasil-secilir", "istanbul-fulfillment-hizmeti", "kendi-depon-mu-fulfillment-mi", "paket-basi-ucretlendirme-nasil-calisir", "fulfillment-maliyeti-nasil-hesaplanir", "e-ticaret-depolama-fiyatlari", "e-ticaret-mal-kabul-sureci", "siparis-paketleme-hizmeti", "e-ticaret-iade-yonetimi-depo-hizmeti", "pillar_2"] },
+      { "sayfa": "pillar_2 (Panel Sayfası)", "linkler_verir": ["6-pazaryeri-tek-panelden-yonetim", "pazaryeri-entegrasyonu-nasil-secilir", "siparis-senkronizasyon-suresi-neden-onemli", "barkod-ile-paket-dogrulama-sistemi", "calisan-performans-takibi-depo-yazilimi", "pazaryeri-siparis-hesap-kesimi-faturalama", "pillar_1"] },
+
+      { "sayfa": "fulfillment-firmasi-nasil-secilir", "zorunlu": ["pillar_1"], "onerilen": ["istanbul-fulfillment-hizmeti", "kendi-depon-mu-fulfillment-mi"], "opsiyonel": ["paket-basi-ucretlendirme-nasil-calisir"] },
+      { "sayfa": "istanbul-fulfillment-hizmeti", "zorunlu": ["pillar_1"], "onerilen": ["fulfillment-firmasi-nasil-secilir", "e-ticaret-mal-kabul-sureci"], "opsiyonel": ["e-ticaret-depolama-fiyatlari"] },
+      { "sayfa": "kendi-depon-mu-fulfillment-mi", "zorunlu": ["pillar_1"], "onerilen": ["fulfillment-firmasi-nasil-secilir", "fulfillment-maliyeti-nasil-hesaplanir"], "opsiyonel": ["paket-basi-ucretlendirme-nasil-calisir"] },
+
+      { "sayfa": "paket-basi-ucretlendirme-nasil-calisir", "zorunlu": ["pillar_1"], "onerilen": ["fulfillment-maliyeti-nasil-hesaplanir", "e-ticaret-depolama-fiyatlari"], "opsiyonel": ["kendi-depon-mu-fulfillment-mi"] },
+      { "sayfa": "fulfillment-maliyeti-nasil-hesaplanir", "zorunlu": ["pillar_1"], "onerilen": ["paket-basi-ucretlendirme-nasil-calisir", "e-ticaret-depolama-fiyatlari"], "opsiyonel": ["fulfillment-firmasi-nasil-secilir"] },
+      { "sayfa": "e-ticaret-depolama-fiyatlari", "zorunlu": ["pillar_1"], "onerilen": ["paket-basi-ucretlendirme-nasil-calisir", "fulfillment-maliyeti-nasil-hesaplanir"], "opsiyonel": ["istanbul-fulfillment-hizmeti"] },
+
+      { "sayfa": "e-ticaret-mal-kabul-sureci", "zorunlu": ["pillar_1"], "onerilen": ["siparis-paketleme-hizmeti", "e-ticaret-iade-yonetimi-depo-hizmeti"], "opsiyonel": ["istanbul-fulfillment-hizmeti"] },
+      { "sayfa": "siparis-paketleme-hizmeti", "zorunlu": ["pillar_1"], "onerilen": ["e-ticaret-mal-kabul-sureci", "e-ticaret-iade-yonetimi-depo-hizmeti"], "opsiyonel": ["barkod-ile-paket-dogrulama-sistemi"] },
+      { "sayfa": "e-ticaret-iade-yonetimi-depo-hizmeti", "zorunlu": ["pillar_1"], "onerilen": ["e-ticaret-mal-kabul-sureci", "siparis-paketleme-hizmeti"], "opsiyonel": ["fulfillment-maliyeti-nasil-hesaplanir"] },
+
+      { "sayfa": "6-pazaryeri-tek-panelden-yonetim", "zorunlu": ["pillar_2"], "onerilen": ["pazaryeri-entegrasyonu-nasil-secilir", "siparis-senkronizasyon-suresi-neden-onemli"], "opsiyonel": ["barkod-ile-paket-dogrulama-sistemi"] },
+      { "sayfa": "pazaryeri-entegrasyonu-nasil-secilir", "zorunlu": ["pillar_2"], "onerilen": ["6-pazaryeri-tek-panelden-yonetim", "siparis-senkronizasyon-suresi-neden-onemli"], "opsiyonel": ["pazaryeri-siparis-hesap-kesimi-faturalama"] },
+      { "sayfa": "siparis-senkronizasyon-suresi-neden-onemli", "zorunlu": ["pillar_2"], "onerilen": ["6-pazaryeri-tek-panelden-yonetim", "pazaryeri-entegrasyonu-nasil-secilir"], "opsiyonel": [] },
+
+      { "sayfa": "barkod-ile-paket-dogrulama-sistemi", "zorunlu": ["pillar_2"], "onerilen": ["calisan-performans-takibi-depo-yazilimi", "6-pazaryeri-tek-panelden-yonetim"], "opsiyonel": ["siparis-paketleme-hizmeti"] },
+      { "sayfa": "calisan-performans-takibi-depo-yazilimi", "zorunlu": ["pillar_2"], "onerilen": ["barkod-ile-paket-dogrulama-sistemi", "pazaryeri-siparis-hesap-kesimi-faturalama"], "opsiyonel": [] },
+      { "sayfa": "pazaryeri-siparis-hesap-kesimi-faturalama", "zorunlu": ["pillar_2"], "onerilen": ["pazaryeri-entegrasyonu-nasil-secilir", "calisan-performans-takibi-depo-yazilimi"], "opsiyonel": [] }
+    ],
+    "orphan_kontrolu": "Tüm 15 spoke ve 2 pillar en az 3 gelen link alacak şekilde eşleştirilmiştir (pillar linki + 2 onerilen/opsiyonel link)."
+  },
+
+  "anasayfa_onerisi": {
+    "title": "MarjPanel Paket | E-Ticaret Depo ve Paketleme Hizmeti",
+    "title_karakter": 47,
+    "meta_description": "E-ticaret siparişlerinizi biz depolayalım, paketleyelim, kargoya verelim. Kademeli paket başı ücretlendirme, şeffaf fiyatlandırma. Hemen teklif alın.",
+    "meta_description_karakter": 148,
+    "h1": "E-Ticaret Siparişlerinizi Depolayalım, Paketleyelim, Kargoya Verelim",
+    "h2_hiyerarsisi": [
+      "MarjPanel Paket Nasıl Çalışır?",
+      "Paket Başına Kademeli Ücretlendirme",
+      "Mal Kabulden Kargoya: Operasyon Sürecimiz",
+      "Neden MarjPanel Paket?",
+      "Panelimizi Bağımsız Yazılım Olarak da Kullanabilirsiniz",
+      "Sıkça Sorulan Sorular"
+    ],
+    "not": "H1'de 'fulfillment' kelimesi yerine Türkçe 'depola, paketle, kargoya ver' tercih edilmiştir; hem SEO hem netlik için hedef kitlenin gerçek arama diline (daha çok 'depo/paketleme hizmeti' ifadesi kullanılıyor) daha yakındır. 'Fulfillment' terimi H2/gövde metninde destekleyici anahtar kelime olarak geçmelidir çünkü üst düzey rakipler bu terimi kullanıyor."
+  },
+
+  "panel_sayfasi_onerisi": {
+    "title": "MarjPanel | Pazaryeri Entegrasyon ve Depo Yönetim Yazılımı",
+    "title_karakter": 56,
+    "meta_description": "Trendyol, Hepsiburada, N11, Pazarama, idefix ve Amazon'u tek panelden yönetin. Barkodlu paket doğrulama, 30 saniyede sipariş senkronizasyonu.",
+    "meta_description_karakter": 147,
+    "h1": "6 Pazaryerini Tek Panelden Yönetin, Barkodla Paket Doğrulayın",
+    "h2_hiyerarsisi": [
+      "Desteklenen Pazaryerleri",
+      "30 Saniyede Sipariş Senkronizasyonu",
+      "Barkod ile Paket Doğrulama",
+      "Stok ve Çalışan Performans Takibi",
+      "Hesap Kesimi ve Faturalama",
+      "Depo Hizmetimizle Birlikte veya Bağımsız Kullanın"
+    ]
+  },
+
+  "rakip_konumlandirma_ozeti": [
+    { "firma": "OPLOG", "tur": "Fulfillment/3PL", "konum": "Kurumsal, büyük ölçekli, 'kullandığın kadar öde' mesajı, güçlü blog/SEO otoritesi", "kaynak": "oplog.io" },
+    { "firma": "İdealDepo", "tur": "Fulfillment/3PL", "konum": "KOBİ odaklı depo hizmeti, çok sayıda tanım/rehber içeriği ile SEO'da geniş yer kaplıyor", "kaynak": "idealdepo.com.tr" },
+    { "firma": "EcomMovers", "tur": "Fulfillment/3PL", "konum": "Butik markalara özel, şeffaf paket fiyatlandırma vurgusu, minimum sipariş şartı yok mesajı — MarjPanel'in paket başı modeline yakın bir konumlandırma", "kaynak": "ecommovers.com" },
+    { "firma": "FulfillmentTR", "tur": "Fulfillment/3PL", "konum": "Fiyatlandırma rehberleri ve 'nasıl seçilir' içerikleriyle bilgi niyetli trafiği yakalıyor", "kaynak": "fulfillmenttr.com" },
+    { "firma": "DHL Fulfillment", "tur": "Fulfillment/3PL (kurumsal)", "konum": "Büyük hacimli işletmeler (ayda 1500+ sipariş), KOBİ'nin doğrudan rakibi değil ama marka otoritesi SERP'te üstte", "kaynak": "dhl.com" },
+    { "firma": "Nice Lojistik", "tur": "Fulfillment/3PL", "konum": "Lokal (İstanbul) hizmet sayfaları ile şehir bazlı aramalarda görünür", "kaynak": "nicelojistik.com" },
+    { "firma": "Dopigo", "tur": "Pazaryeri entegrasyon yazılımı (SaaS)", "konum": "Çok kanallı satış paneli, entegrasyon odaklı ürün sayfası", "kaynak": "dopigo.com" },
+    { "firma": "Nexsol / NParadox", "tur": "Pazaryeri entegrasyon yazılımı (SaaS)", "konum": "Kurumsal ERP+entegrasyon hibrit konumlandırma", "kaynak": "nexsol.com.tr" },
+    { "firma": "İDURUM", "tur": "Ön muhasebe + pazaryeri entegrasyonu", "konum": "Muhasebe yazılımına entegrasyon eklenmiş, faturalama güçlü yönü", "kaynak": "idurum.com" },
+    { "firma": "Proticaret / Tamsoft", "tur": "Pazaryeri entegrasyon yazılımı", "konum": "Kargo süreç yönetimi dahil geniş özellik seti vurgusu", "kaynak": "proticaret.org, tamsoft.com.tr" }
+  ],
+
+  "bosluk_analizi_marjpanel_firsati": [
+    "Hiçbir rakip hem fiziksel depo/paketleme hizmetini hem de bağımsız satılabilen SaaS paneli aynı markada net biçimde birleştirmiyor — MarjPanel'in en güçlü konumlandırma çıpası bu ikilik olmalı.",
+    "'Paket başı kademeli ücretlendirme' ifadesiyle doğrudan rakip içerik gözlenmedi — fiyatlandırma sayfası hızlı kazanım fırsatı.",
+    "Pazarama ve idefix'i Trendyol/Hepsiburada/N11/Amazon ile birlikte işleyen 6 pazaryeri içeriği neredeyse yok — niş ama isabetli bir spoke.",
+    "Barkodla paket doğrulama + çalışan performans takibi kombinasyonu genel WMS içeriklerinde yüzeysel geçiyor; e-ticaret bağlamında derinlemesine işlenmemiş."
+  ]
+}

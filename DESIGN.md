@@ -5,10 +5,15 @@ kopyasıdır.
 
 MarjPanel panel arayüzünün tasarım sistemi: **Mürekkep & Nane**.
 
-Bu belge PANELİ tanımlar. MarjPanel Paket'te herkese açık/pazarlama katmanı
-yok; uygulama tek katman olarak bu sistemi kullanır, `globals.css` içinde
-ayrı bir "HERKESE AÇIK YÜZEYLER" bölümü, `--site-*` token'ı ya da Geist yazı
-tipi bulunmaz.
+Bu belge PANELİ tanımlar. Tek bir herkese açık sayfa vardır — platform
+adresinin kökündeki tanıtım sayfası (`app/(site)/tanitim`) — ve o da AYNI
+sistemi kullanır: ayrı bir "site teması", `--site-*` token'ı, ikinci yazı
+tipi ya da `globals.css` içinde ayrı bir "HERKESE AÇIK YÜZEYLER" bölümü
+YOKTUR. Gerekçe: ziyaretçi panele girdiğinde aynı ürüne baktığını anlamalı,
+iki ayrı tasarım dili bakımı da ikiye katlardı.
+
+Tanıtım sayfası kiracı adreslerinde GÖSTERİLMEZ (`sirket.marjpanel.com`
+doğrudan girişe gider); orası bir şirketin kapısıdır, pazarlama yüzeyi değil.
 
 ## Okuma
 

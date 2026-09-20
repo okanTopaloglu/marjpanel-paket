@@ -37,6 +37,24 @@ export default auth((istek) => {
    * API rotaları muaftır: kendi kapılarını kurarlar ve JSON bekleyen istemciye
    * giriş sayfasının HTML'i dönmemelidir.
    */
+  /**
+   * KÖK YOL ÇATALI — oturumsuz ziyaretçi tanıtım sayfasını görür.
+   *
+   * REDIRECT DEĞİL REWRITE: adres çubuğunda ve arama sonucunda kök URL
+   * (https://paket.marjpanel.com/) kalır, içerik /tanitim'dan gelir. 301/302
+   * ile /tanitim'a atsaydık kanonik adres ikiye bölünür, link değeri dağılırdı.
+   *
+   * Kiracı host'unda (sirket.marjpanel.com) tanıtım GÖSTERİLMEZ: orası bir
+   * şirketin giriş kapısıdır, pazarlama yüzeyi değil. Host ayrımı burada
+   * yapılamaz (Edge, DB yok) — /tanitim sayfası kendi içinde kiracı host'unu
+   * /giris'e yollar.
+   */
+  if (!girisli && yol === "/") {
+    const hedef = istek.nextUrl.clone();
+    hedef.pathname = "/tanitim";
+    return basliklariIsle(NextResponse.rewrite(hedef), istek, protokolYedek);
+  }
+
   if (!girisli && !acikYolMu(yol) && !yol.startsWith("/api/")) {
     const hedef = istek.nextUrl.clone();
     hedef.pathname = "/giris";
@@ -69,12 +87,15 @@ export const config = {
    * · PWA dosyaları (manifest, sw.js, offline.html, ikonlar) → service worker
    *   bağlamından oturumsuz istenir; muaf olmazsa tarayıcı JSON beklerken
    *   giriş HTML'i alır ve PWA başlatma zinciri kırılır.
+   * · robots.txt, sitemap.xml, llms.txt → arama motoru ve AI tarayıcı
+   *   dosyaları; TANIMI GEREĞİ oturumsuz istenir. Muaf olmazsa Googlebot
+   *   robots.txt yerine giriş sayfasının HTML'ini alır ve site dizinden düşer.
    * · /marka/ ve og.png → marka görselleri. Kelime işareti çevrimdışı sayfada
    *   ve sw precache'inde oturumsuz çekilir; og.png'yi sosyal ağ botları
    *   ister. Muaf olmazsa 307 ile giriş sayfasına düşer ve sw "resim" diye
    *   giriş HTML'ini önbelleğe alır.
    */
   matcher: [
-    "/((?!api/auth|api/cron|g/|marka/|_next/static|_next/image|favicon.ico|favicon-32.png|manifest.webmanifest|sw.js|offline.html|apple-touch-icon.png|og.png|icons/).*)",
+    "/((?!api/auth|api/cron|g/|marka/|_next/static|_next/image|favicon.ico|favicon-32.png|manifest.webmanifest|sw.js|offline.html|apple-touch-icon.png|og.png|robots.txt|sitemap.xml|llms.txt|icons/).*)",
   ],
 };
