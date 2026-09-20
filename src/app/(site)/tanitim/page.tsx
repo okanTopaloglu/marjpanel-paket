@@ -6,6 +6,7 @@ import {
   Boxes,
   CalendarClock,
   CheckCircle2,
+  GitMerge,
   PackageCheck,
   ScanBarcode,
   ShieldCheck,
@@ -19,6 +20,8 @@ import { istekHostu, platformHostu } from "@/lib/kiraci/coz";
 import { platformHostuMu } from "@/lib/kiraci/kural";
 import {
   ADIMLAR,
+  FARK_BASLIK,
+  FARK_METNI,
   GIRIS_METNI,
   H1,
   HIZMETLER,
@@ -101,7 +104,7 @@ export default async function TanitimSayfasi() {
 
   return (
     <>
-      {/* JSON-LD: Organization, WebSite, Service, SoftwareApplication, FAQPage, HowTo */}
+      {/* JSON-LD: Organization, WebSite, WebPage, Service, SoftwareApplication, FAQPage, ItemList */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: yapilandirilmisVeri() }}
@@ -210,6 +213,21 @@ export default async function TanitimSayfasi() {
                     </ul>
                   </article>
                 ))}
+              </div>
+            </div>
+          </section>
+
+          {/* --------------------------------------------------- FARKLILAŞMA */}
+          <section className="py-14 sm:py-20">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+              <div className="rounded-[--radius] border border-[hsl(var(--vurgu-parlak))] bg-accent/40 p-6 sm:p-8">
+                <div className="max-w-3xl">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <GitMerge className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <h2 className="mt-4 text-title-1 font-bold tracking-[-0.02em]">{FARK_BASLIK}</h2>
+                  <p className="mt-2 text-body text-foreground">{FARK_METNI}</p>
+                </div>
               </div>
             </div>
           </section>

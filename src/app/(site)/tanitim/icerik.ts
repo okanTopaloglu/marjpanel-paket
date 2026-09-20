@@ -19,17 +19,32 @@
 export const SITE_ADI = "MarjPanel Paket";
 export const SITE_URL = "https://paket.marjpanel.com";
 
-/** Arama sonucunda görünen başlık. 60 karakter sınırına uyar. */
-export const META_BASLIK = "E-ticaret Depo ve Paketleme Hizmeti | MarjPanel Paket";
+/**
+ * Arama sonucunda görünen başlık. 60 karakter sınırına uyar.
+ *
+ * "Fulfillment" DEĞİL "depo ve paketleme": hedef kitlenin arama dili Türkçe.
+ * Terimi bilen aramacı için "fulfillment" gövde metninde ve SSS'te geçer.
+ */
+export const META_BASLIK = "E-Ticaret Depo ve Paketleme Hizmeti | MarjPanel Paket";
 
 /** Meta açıklama. 155 karakter sınırına uyar, eylem çağrısıyla biter. */
 export const META_ACIKLAMA =
-  "Pazaryeri siparişlerinizi biz paketleyip kargoya verelim ya da kendi deponuzda barkod okutarak yönetin. Trendyol, Hepsiburada, N11, Amazon entegrasyonu.";
+  "Siparişlerinizi biz depolayıp paketleyelim, kargoya verelim. Ya da paneli kendi deponuzda kullanın: 6 pazaryeri, barkodla paket doğrulama. Teklif alın.";
 
-export const H1 = "Pazaryeri siparişleriniz doğru paketlensin, zamanında çıksın";
+export const H1 = "Siparişlerinizi depolayalım, paketleyelim, kargoya verelim";
 
 export const GIRIS_METNI =
-  "MarjPanel Paket iki şekilde çalışır. Ürünlerinizi depomuza gönderirsiniz, siparişleri biz paketler ve kargoya veririz; paket başına ödersiniz. Ya da paneli kendi deponuzda kullanır, ekibiniz barkod okutarak sipariş hazırlar. Her iki durumda da Trendyol, Hepsiburada, N11, Pazarama, idefix ve Amazon siparişleri tek ekranda toplanır.";
+  "MarjPanel Paket iki şekilde çalışır. Ürünlerinizi depomuza gönderirsiniz, siparişleri biz paketler ve kargoya veririz; paket başına ödersiniz, depo kirası ve personel maaşı ödemezsiniz. Ya da aynı paneli kendi deponuzda kullanırsınız, ekibiniz barkod okutarak sipariş hazırlar. Her iki durumda da Trendyol, Hepsiburada, N11, Pazarama, idefix ve Amazon siparişleri tek ekranda toplanır.";
+
+/**
+ * FARKLILAŞMA — araştırmanın en net bulgusu: incelenen rakiplerin hiçbiri
+ * (fulfillment firmaları ve pazaryeri entegrasyon yazılımları) aynı markada
+ * hem fiziksel depo hizmetini hem bağımsız kullanılabilen paneli sunmuyor.
+ * Sayfanın en değerli cümlesi bu; ayrı bir bölüm olarak durur.
+ */
+export const FARK_BASLIK = "Hizmeti de yazılımı da aynı yerden alırsınız";
+export const FARK_METNI =
+  "Fulfillment firmaları size depo hizmeti verir ama yazılımlarını dışarıya açmaz. Entegrasyon yazılımları panel satar ama paketlemenizi yapmaz. MarjPanel Paket ikisini aynı sistemde sunar: bugün hizmetle başlayıp yarın kendi deponuza geçerseniz veriniz, geçmişiniz ve alışkanlıklarınız yerinde kalır.";
 
 export interface Hizmet {
   baslik: string;
@@ -152,6 +167,11 @@ export const SSS_LISTESI: readonly SSS[] = [
     soru: "Depo hizmeti ile panel arasındaki fark nedir?",
     cevap:
       "Depo hizmetinde ürünlerinizi bize gönderirsiniz, paketlemeyi ve kargoya vermeyi biz yaparız, paket başına ödersiniz. Panelde ise işi kendi deponuzda kendi ekibinizle yaparsınız, biz yalnız yazılımı veririz.",
+  },
+  {
+    soru: "Fulfillment hizmeti mi veriyorsunuz?",
+    cevap:
+      "Evet. Fulfillment, ürünlerin depolanması, siparişlerin paketlenmesi ve kargoya verilmesi işinin bir firmaya devredilmesidir. MarjPanel Paket bu hizmeti verir ve farklı olarak aynı işi kendi deponuzda yapmak isterseniz kullandığımız paneli size de açar.",
   },
   {
     soru: "Hangi pazaryerleri destekleniyor?",
