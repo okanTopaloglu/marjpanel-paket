@@ -26,6 +26,25 @@ export const SITE_URL = "https://paket.marjpanel.com";
  */
 export const ILETISIM_EPOSTA = "paket@marjpanel.com";
 
+export interface Telefon {
+  /** Ekranda okunan biçim. */
+  gorunen: string;
+  /** `tel:` bağlantısı ve JSON-LD için E.164 (uluslararası) biçim. */
+  e164: string;
+}
+
+/**
+ * TELEFONLAR — sayfada `gorunen`, `tel:` ve JSON-LD'de `e164`.
+ *
+ * Schema.org telefonu ULUSLARARASI biçimde ister (+90...): yerel biçim
+ * ("0533...") yurt dışından aranamaz ve arama motoru numarayı ülkeye
+ * bağlayamaz. Ekranda ise Türk kullanıcının alıştığı biçim durur.
+ */
+export const TELEFONLAR: readonly Telefon[] = [
+  { gorunen: "0533 055 60 99", e164: "+905330556099" },
+  { gorunen: "0532 173 29 78", e164: "+905321732978" },
+] as const;
+
 /**
  * Arama sonucunda görünen başlık. 60 karakter sınırına uyar.
  *

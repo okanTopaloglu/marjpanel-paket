@@ -6,6 +6,7 @@ import {
   SITE_ADI,
   SITE_URL,
   SSS_LISTESI,
+  TELEFONLAR,
 } from "./icerik";
 
 /**
@@ -53,13 +54,19 @@ export function yapilandirilmisVeri(): string {
       areaServed: { "@type": "Country", name: "Türkiye" },
       knowsLanguage: "tr-TR",
       email: ILETISIM_EPOSTA,
-      contactPoint: {
+      telephone: TELEFONLAR[0]!.e164,
+      /*
+       * Her numara AYRI ContactPoint: schema.org bir ContactPoint'te tek
+       * telefon bekler, iki numarayı tek alana yazmak (virgülle) geçersizdir.
+       */
+      contactPoint: TELEFONLAR.map((t) => ({
         "@type": "ContactPoint",
         contactType: "sales",
+        telephone: t.e164,
         email: ILETISIM_EPOSTA,
         areaServed: "TR",
         availableLanguage: ["tr"],
-      },
+      })),
     },
     {
       "@type": "WebSite",

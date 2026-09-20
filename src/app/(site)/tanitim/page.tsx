@@ -9,6 +9,7 @@ import {
   GitMerge,
   Mail,
   PackageCheck,
+  Phone,
   ScanBarcode,
   ShieldCheck,
   Smartphone,
@@ -33,6 +34,7 @@ import {
   PAZARYERI_SIRASI_TANITIM,
   SITE_ADI,
   SSS_LISTESI,
+  TELEFONLAR,
 } from "./icerik";
 import { yapilandirilmisVeri } from "./yapilandirilmis-veri";
 
@@ -376,15 +378,26 @@ export default async function TanitimSayfasi() {
                   Teklif isteyin
                 </a>
               </div>
-              <p className="mt-4 text-footnote text-muted-foreground">
-                Sorularınız için{" "}
+              {/* Telefon `tel:` ile: mobilde tek dokunuşla arama açılır. */}
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-footnote">
                 <a
                   href={`mailto:${ILETISIM_EPOSTA}`}
-                  className="font-semibold text-[hsl(var(--vurgu-metin))] underline-offset-4 hover:underline"
+                  className="inline-flex items-center gap-1.5 font-semibold text-[hsl(var(--vurgu-metin))] underline-offset-4 hover:underline"
                 >
+                  <Mail className="h-3.5 w-3.5" aria-hidden="true" />
                   {ILETISIM_EPOSTA}
                 </a>
-              </p>
+                {TELEFONLAR.map((t) => (
+                  <a
+                    key={t.e164}
+                    href={`tel:${t.e164}`}
+                    className="tabular inline-flex items-center gap-1.5 font-semibold text-[hsl(var(--vurgu-metin))] underline-offset-4 hover:underline"
+                  >
+                    <Phone className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t.gorunen}
+                  </a>
+                ))}
+              </div>
             </div>
           </section>
         </main>
@@ -398,12 +411,23 @@ export default async function TanitimSayfasi() {
             <p className="text-caption text-muted-foreground">
               Depo paket okutma ve pazaryeri sipariş takibi
             </p>
-            <a
-              href={`mailto:${ILETISIM_EPOSTA}`}
-              className="text-caption font-semibold text-[hsl(var(--vurgu-metin))] underline-offset-4 hover:underline"
-            >
-              {ILETISIM_EPOSTA}
-            </a>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-caption">
+              <a
+                href={`mailto:${ILETISIM_EPOSTA}`}
+                className="font-semibold text-[hsl(var(--vurgu-metin))] underline-offset-4 hover:underline"
+              >
+                {ILETISIM_EPOSTA}
+              </a>
+              {TELEFONLAR.map((t) => (
+                <a
+                  key={t.e164}
+                  href={`tel:${t.e164}`}
+                  className="tabular font-semibold text-[hsl(var(--vurgu-metin))] underline-offset-4 hover:underline"
+                >
+                  {t.gorunen}
+                </a>
+              ))}
+            </div>
           </div>
         </footer>
       </div>
