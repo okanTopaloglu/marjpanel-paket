@@ -20,6 +20,13 @@ export const SITE_ADI = "MarjPanel Paket";
 export const SITE_URL = "https://paket.marjpanel.com";
 
 /**
+ * İLETİŞİM — sayfada görünür, JSON-LD `Organization.email` ve
+ * `ContactPoint`te de aynısı geçer. Tek kaynak: ikisi çelişirse arama motoru
+ * yapılandırılmış veriyi güvenilmez bulur.
+ */
+export const ILETISIM_EPOSTA = "paket@marjpanel.com";
+
+/**
  * Arama sonucunda görünen başlık. 60 karakter sınırına uyar.
  *
  * "Fulfillment" DEĞİL "depo ve paketleme": hedef kitlenin arama dili Türkçe.

@@ -7,6 +7,7 @@ import {
   CalendarClock,
   CheckCircle2,
   GitMerge,
+  Mail,
   PackageCheck,
   ScanBarcode,
   ShieldCheck,
@@ -25,6 +26,7 @@ import {
   GIRIS_METNI,
   H1,
   HIZMETLER,
+  ILETISIM_EPOSTA,
   META_ACIKLAMA,
   META_BASLIK,
   OZELLIKLER,
@@ -364,13 +366,25 @@ export default async function TanitimSayfasi() {
                   Ücretsiz hesap açın
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
-                <Link
-                  href="/giris"
-                  className="press inline-flex h-11 items-center justify-center rounded-[--radius-kontrol] border border-input bg-card px-6 text-[0.9375rem] font-semibold text-foreground hover:bg-muted"
+                {/* Depo hizmeti teklifi e-postayla alınır; iletişim formu yok,
+                    çünkü gelen kutusuna düşen gerçek bir adres daha hızlı. */}
+                <a
+                  href={`mailto:${ILETISIM_EPOSTA}?subject=${encodeURIComponent("Depo hizmeti teklif talebi")}`}
+                  className="press inline-flex h-11 items-center justify-center gap-2 rounded-[--radius-kontrol] border border-input bg-card px-6 text-[0.9375rem] font-semibold text-foreground hover:bg-muted"
                 >
-                  Panele giriş
-                </Link>
+                  <Mail className="h-4 w-4" aria-hidden="true" />
+                  Teklif isteyin
+                </a>
               </div>
+              <p className="mt-4 text-footnote text-muted-foreground">
+                Sorularınız için{" "}
+                <a
+                  href={`mailto:${ILETISIM_EPOSTA}`}
+                  className="font-semibold text-[hsl(var(--vurgu-metin))] underline-offset-4 hover:underline"
+                >
+                  {ILETISIM_EPOSTA}
+                </a>
+              </p>
             </div>
           </section>
         </main>
@@ -384,6 +398,12 @@ export default async function TanitimSayfasi() {
             <p className="text-caption text-muted-foreground">
               Depo paket okutma ve pazaryeri sipariş takibi
             </p>
+            <a
+              href={`mailto:${ILETISIM_EPOSTA}`}
+              className="text-caption font-semibold text-[hsl(var(--vurgu-metin))] underline-offset-4 hover:underline"
+            >
+              {ILETISIM_EPOSTA}
+            </a>
           </div>
         </footer>
       </div>

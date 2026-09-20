@@ -1,6 +1,7 @@
 import {
   ADIMLAR,
   HIZMETLER,
+  ILETISIM_EPOSTA,
   META_ACIKLAMA,
   SITE_ADI,
   SITE_URL,
@@ -51,6 +52,14 @@ export function yapilandirilmisVeri(): string {
       },
       areaServed: { "@type": "Country", name: "Türkiye" },
       knowsLanguage: "tr-TR",
+      email: ILETISIM_EPOSTA,
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        email: ILETISIM_EPOSTA,
+        areaServed: "TR",
+        availableLanguage: ["tr"],
+      },
     },
     {
       "@type": "WebSite",
