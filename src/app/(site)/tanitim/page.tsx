@@ -60,7 +60,13 @@ export async function generateMetadata(): Promise<Metadata> {
    */
   const kok = `https://${platformHostu()}/`;
   return {
-    title: META_BASLIK,
+    /*
+     * `absolute`: kök layout'ta `title.template` = "%s | MarjPanel Paket"
+     * tanımlı (app/layout.tsx). Düz metin versek başlık "... | MarjPanel
+     * Paket | MarjPanel Paket" diye iki kez damgalanırdı - marka adı zaten
+     * META_BASLIK'ın içinde.
+     */
+    title: { absolute: META_BASLIK },
     description: META_ACIKLAMA,
     alternates: { canonical: kok },
     robots: { index: true, follow: true },
