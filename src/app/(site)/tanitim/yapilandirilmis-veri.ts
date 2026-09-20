@@ -1,5 +1,6 @@
 import {
   ADIMLAR,
+  ADRES,
   HIZMETLER,
   ILETISIM_EPOSTA,
   META_ACIKLAMA,
@@ -19,23 +20,30 @@ import {
  * okunur. Yapılandırılmış veri ile görünen metin çelişirse Google
  * yapılandırılmış veriyi yok sayar, hatta manuel işlem uygular.
  *
- * UYDURMA ALAN YOK: fiyat, puan (aggregateRating), yorum sayısı ve fiziksel
- * adres BİLEREK boştur. Gerçek olmayan `AggregateRating` yapısal veri
- * ihlalidir; `priceRange` uydurmak da müşteriyi yanıltır. Adres netleşince
- * `LOCAL_BUSINESS_TODO` notundaki alanlar doldurulup graph'a eklenecek.
+ * UYDURMA ALAN YOK: fiyat, puan (aggregateRating) ve yorum sayısı BİLEREK
+ * boştur. Gerçek olmayan `AggregateRating` yapısal veri ihlalidir;
+ * `priceRange` uydurmak da müşteriyi yanıltır. Adres gerçektir (Esenyurt
+ * deposu); koordinat (`geo`) yoktur çünkü kesin değer elimizde değil.
  */
 
 const ORG_ID = `${SITE_URL}/#kurulus`;
 const SITE_ID = `${SITE_URL}/#website`;
 const SAYFA_ID = `${SITE_URL}/#anasayfa`;
 
+const DEPO_ID = `${SITE_URL}/#depo`;
+
 /**
- * TODO (deponun açık adresi netleşince): buraya `LocalBusiness` düğümü eklenip
- * `@graph`e katılacak. Gereken alanlar: streetAddress, addressLocality,
- * addressRegion, postalCode, telephone, openingHoursSpecification, geo.
- * Adres olmadan LocalBusiness eklemek zorlama olur ve rich result almaz.
+ * Adres — `Organization` ve depo `Place` düğümünde AYNI nesne kullanılır.
+ * İki yere elle yazılsaydı biri güncellenip diğeri unutulurdu.
  */
-export const LOCAL_BUSINESS_TODO = true;
+const postaAdresi = {
+  "@type": "PostalAddress",
+  streetAddress: ADRES.sokak,
+  addressLocality: ADRES.ilce,
+  addressRegion: ADRES.il,
+  postalCode: ADRES.postaKodu,
+  addressCountry: ADRES.ulke,
+} as const;
 
 export function yapilandirilmisVeri(): string {
   const graph: Record<string, unknown>[] = [
@@ -67,6 +75,27 @@ export function yapilandirilmisVeri(): string {
         areaServed: "TR",
         availableLanguage: ["tr"],
       })),
+      address: postaAdresi,
+      location: { "@id": DEPO_ID },
+    },
+    /*
+     * DEPO — ayrı bir `Place`, Organization'ın ANA TİPİ DEĞİL.
+     *
+     * MarjPanel Paket bir SaaS + lojistik hizmetidir, mahalle esnafı değil;
+     * anasayfanın kendisini `LocalBusiness` ilan etmek işletme türü
+     * uyuşmazlığı olur. Fiziksel tesis `Place` olarak modellenip
+     * `Organization.location` ile bağlanır - hem doğru hem de adres/harita
+     * sinyali kaybolmaz.
+     *
+     * `geo` (enlem/boylam) BİLEREK YOK: kesin koordinat elimizde değil,
+     * yaklaşık değer uydurmak haritada yanlış noktaya iğne koydurur.
+     */
+    {
+      "@type": "Place",
+      "@id": DEPO_ID,
+      name: `${SITE_ADI} deposu`,
+      address: postaAdresi,
+      telephone: TELEFONLAR[0]!.e164,
     },
     {
       "@type": "WebSite",

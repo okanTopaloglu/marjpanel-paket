@@ -1,6 +1,6 @@
 import { istekHostu, platformHostu } from "@/lib/kiraci/coz";
 import { platformHostuMu } from "@/lib/kiraci/kural";
-import { HIZMETLER, ILETISIM_EPOSTA, OZELLIKLER, SSS_LISTESI, SITE_ADI, TELEFONLAR } from "@/app/(site)/tanitim/icerik";
+import { ADRES, HIZMETLER, ILETISIM_EPOSTA, OZELLIKLER, SSS_LISTESI, SITE_ADI, TELEFONLAR } from "@/app/(site)/tanitim/icerik";
 
 /**
  * llms.txt — AI asistanları için sayfanın düz metin özeti (llmstxt.org).
@@ -46,6 +46,7 @@ export async function GET(): Promise<Response> {
     `- Panel girişi: ${url}/giris`,
     `- İletişim: ${ILETISIM_EPOSTA}`,
     `- Telefon: ${TELEFONLAR.map((t) => t.gorunen).join(" / ")}`,
+    `- Depo adresi: ${ADRES.tamMetin}`,
     "",
   ].join("\n");
 

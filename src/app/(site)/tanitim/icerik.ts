@@ -46,6 +46,24 @@ export const TELEFONLAR: readonly Telefon[] = [
 ] as const;
 
 /**
+ * DEPO ADRESİ — sayfada görünür, JSON-LD `PostalAddress`inde aynısı geçer.
+ *
+ * NAP TUTARLILIĞI (Name/Address/Phone): bu adres Google İşletme Profili'ne
+ * kaydedilirse oradaki yazımla BİREBİR aynı olmalı. Yerel SEO'da en sık
+ * yapılan hata, sitede "Sk." işletme profilinde "Sokak" yazmaktır; arama
+ * motoru iki kaydı farklı işletme sanır ve ikisinin de güvenini düşürür.
+ */
+export const ADRES = {
+  sokak: "Zafer Mah. 138. Sk.",
+  ilce: "Esenyurt",
+  il: "İstanbul",
+  postaKodu: "34513",
+  ulke: "TR",
+  /** Tek satır gösterim. */
+  tamMetin: "Zafer Mah. 138. Sk., 34513 Esenyurt/İstanbul",
+} as const;
+
+/**
  * Arama sonucunda görünen başlık. 60 karakter sınırına uyar.
  *
  * "Fulfillment" DEĞİL "depo ve paketleme": hedef kitlenin arama dili Türkçe.
@@ -203,6 +221,11 @@ export const SSS_LISTESI: readonly SSS[] = [
     soru: "Hangi pazaryerleri destekleniyor?",
     cevap:
       "Trendyol, Hepsiburada, N11, Pazarama, idefix ve Amazon. Altı pazaryerinin siparişleri aynı ekranda toplanır ve durum kodları ortak bir dile çevrilir.",
+  },
+  {
+    soru: "Deponuz nerede?",
+    cevap:
+      "Depomuz İstanbul Esenyurt'ta. Ürünlerinizi buraya gönderirsiniz, mal kabulü yapılır ve siparişler buradan paketlenip kargoya verilir. Türkiye'nin her yerinden gönderi kabul ediyoruz.",
   },
   {
     soru: "Siparişler ne sıklıkla güncelleniyor?",

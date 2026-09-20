@@ -22,6 +22,7 @@ import { istekHostu, platformHostu } from "@/lib/kiraci/coz";
 import { platformHostuMu } from "@/lib/kiraci/kural";
 import {
   ADIMLAR,
+  ADRES,
   FARK_BASLIK,
   FARK_METNI,
   GIRIS_METNI,
@@ -428,6 +429,11 @@ export default async function TanitimSayfasi() {
                 </a>
               ))}
             </div>
+            {/* Adres HTML'de METİN olarak durur: yerel aramada Google sayfadaki
+                adresi okur, yalnız JSON-LD'ye yazmak yeterli sinyal değildir. */}
+            <address className="not-italic text-caption text-muted-foreground">
+              {ADRES.tamMetin}
+            </address>
           </div>
         </footer>
       </div>
