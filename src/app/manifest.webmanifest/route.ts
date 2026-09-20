@@ -27,7 +27,17 @@ export async function GET(): Promise<Response> {
   const manifest = {
     id: "/",
     name: ad,
-    short_name: kiraci ? marka.ad.slice(0, 12) : "MarjPanel",
+    /*
+     * KISA AD ANA EKRANDA GÖRÜNEN ADDIR. Platformda "MarjPanel" yazıyordu ve
+     * MarjPanel'in diğer uygulamalarıyla karışıyordu; "MarjPanel Paket" tam
+     * adı kullanılır. Android ~12 karakterden sonra kısaltır ama kesilmiş
+     * "MarjPanel P..." bile hangi uygulama olduğunu söyler, "MarjPanel" ise
+     * yanlış uygulamayı işaret eder.
+     *
+     * Kiracıda şirketin kendi adı kalır (kırpma yok: kısaltma kararını
+     * işletim sistemi versin, ortadan kesilmiş bir marka adı üretmeyelim).
+     */
+    short_name: kiraci ? marka.ad : PLATFORM_ADI,
     description: kiraci
       ? `${marka.ad} depo paket okutma — MarjPanel Paket altyapısı.`
       : "Depo paket okutma ve pazaryeri sipariş takibi.",

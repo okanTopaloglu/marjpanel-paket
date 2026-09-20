@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { AlertCircle, Building2 } from "lucide-react";
+import { AlertCircle, Building2, ExternalLink } from "lucide-react";
 import { sirketSil } from "@/server/actions/sirketler";
 import { BosDurum } from "@/components/panel/bos-durum";
 import { IslemlerMenusu, type IslemMaddesi } from "@/components/panel/islemler-menusu";
@@ -87,7 +87,25 @@ export function SirketListesi({
               return (
                 <TableRow key={s.id}>
                   <TableCell className="text-headline text-foreground">{s.ad}</TableCell>
-                  <TableCell className="text-muted-foreground">{s.alanAdi ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {/* Alan adı tanımlıysa süper yönetici tek tıkla o şirketin
+                        paneline geçer; oturum çerezi host'a bağlı olduğu için
+                        orada yeniden giriş ister (bilerek: kiracı adresinde
+                        kimin oturumu olduğu belirsiz kalmasın). */}
+                    {s.alanAdi ? (
+                      <a
+                        href={`https://${s.alanAdi}/`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 font-medium text-[hsl(var(--vurgu-metin))] underline-offset-4 hover:underline"
+                      >
+                        {s.alanAdi}
+                        <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                      </a>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell className="tabular text-right">
                     {sayiFormat.format(s.kullaniciSayisi)}
                   </TableCell>

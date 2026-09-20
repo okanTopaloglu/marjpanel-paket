@@ -37,6 +37,7 @@ import {
   SSS_LISTESI,
   TELEFONLAR,
 } from "./icerik";
+import { OlayIzleyici } from "./olay-izleyici";
 import { yapilandirilmisVeri } from "./yapilandirilmis-veri";
 
 /**
@@ -120,6 +121,8 @@ export default async function TanitimSayfasi() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: yapilandirilmisVeri() }}
       />
+
+      <OlayIzleyici />
 
       <div className="min-h-svh bg-background">
         <header className="border-b border-border bg-card">
@@ -373,6 +376,7 @@ export default async function TanitimSayfasi() {
                     çünkü gelen kutusuna düşen gerçek bir adres daha hızlı. */}
                 <a
                   href={`mailto:${ILETISIM_EPOSTA}?subject=${encodeURIComponent("Depo hizmeti teklif talebi")}`}
+                  data-olay="teklif"
                   className="press inline-flex h-11 items-center justify-center gap-2 rounded-[--radius-kontrol] border border-input bg-card px-6 text-[0.9375rem] font-semibold text-foreground hover:bg-muted"
                 >
                   <Mail className="h-4 w-4" aria-hidden="true" />

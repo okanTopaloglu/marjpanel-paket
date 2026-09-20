@@ -617,6 +617,69 @@ export const sarfHareketleri = pgTable(
 export type SarfMalzemesi = typeof sarfMalzemeleri.$inferSelect;
 export type SarfHareketi = typeof sarfHareketleri.$inferSelect;
 
+/* ==================================================================== */
+/* SİTE OLAYLARI (analitik) — platform düzeyi                            */
+/* ==================================================================== */
+
+/**
+ * Tanıtım sayfasında izlenen olaylar.
+ *
+ * `goruntuleme`  sayfa açıldı
+ * `eposta`       e-posta bağlantısına tıklandı
+ * `telefon`      telefon bağlantısına tıklandı
+ * `teklif`       "Teklif isteyin" düğmesi
+ * `kayit`        "Ücretsiz hesap açın"
+ * `giris`        "Panele giriş"
+ * `sss`          bir SSS sorusu açıldı
+ */
+export const siteOlayiTuruEnum = pgEnum("site_olayi_turu", [
+  "goruntuleme",
+  "eposta",
+  "telefon",
+  "teklif",
+  "kayit",
+  "giris",
+  "sss",
+]);
+export type SiteOlayiTuru = (typeof siteOlayiTuruEnum.enumValues)[number];
+
+/**
+ * SİTE OLAY KAYDI — kendi analitiğimiz, üçüncü taraf yok.
+ *
+ * KİŞİSEL VERİ TUTULMAZ: IP adresi, çerez kimliği ya da parmak izi YOK.
+ * Ziyaretçi kimliği diye bir sütun bilerek yoktur; "kaç kişi" değil "kaç
+ * olay" sayılır. Bu, KVKK/GDPR açısından çerez onayı gerektirmeyen tarafta
+ * kalmamızı sağlar ve panelin kendi verisiyle aynı yerde durur.
+ *
+ * `yonlendiren` yalnız KAYNAK ALAN ADIDIR (google.com), tam URL değil:
+ * tam URL arama sorgusu taşıyabilir ve o kişisel veri sayılabilir.
+ */
+export const siteOlaylari = pgTable(
+  "site_olaylari",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tur: siteOlayiTuruEnum("tur").notNull(),
+    /** Olayın gerçekleştiği yol (/, /tanitim). */
+    yol: text("yol").notNull().default("/"),
+    /** Tıklanan öğenin kısa etiketi (telefon numarası sırası, SSS başlığı). */
+    etiket: text("etiket"),
+    /** Yönlendiren alan adı; doğrudan girişte NULL. */
+    yonlendiren: text("yonlendiren"),
+    /** utm_source / utm_campaign - kampanya ölçümü. */
+    kaynak: text("kaynak"),
+    kampanya: text("kampanya"),
+    /** "mobil" | "masaustu" - user-agent'tan kabaca. Parmak izi DEĞİL. */
+    cihaz: text("cihaz"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("site_olaylari_zaman_idx").on(t.createdAt.desc()),
+    index("site_olaylari_tur_zaman_idx").on(t.tur, t.createdAt.desc()),
+  ],
+);
+
+export type SiteOlayi = typeof siteOlaylari.$inferSelect;
+
 export type Tarife = typeof tarifeler.$inferSelect;
 export type HesapKesimi = typeof hesapKesimleri.$inferSelect;
 export type HesapKesimKalemi = typeof hesapKesimKalemleri.$inferSelect;

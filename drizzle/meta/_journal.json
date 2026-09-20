@@ -50,6 +50,13 @@
       "when": 1789841093821,
       "tag": "0006_sevk_kesim_genis_tarama",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789917736494,
+      "tag": "0007_site_olaylari",
+      "breakpoints": true
     }
   ]
 }

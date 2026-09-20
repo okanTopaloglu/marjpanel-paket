@@ -18,6 +18,7 @@ import {
   Wallet,
   PackageOpen,
   Gauge,
+  Landmark,
   Share2,
   FileText,
   Mail,
@@ -53,16 +54,29 @@ function gruplariOlustur(ozet: OturumOzeti): NavGrup[] {
   const admin = ozet.rol === "admin" || ozet.rol === "super_admin";
   const super_ = ozet.rol === "super_admin";
 
-  const gruplar: NavGrup[] = [
-    {
-      baslik: "Genel",
-      items: [
-        { href: "/", label: "Özet", icon: LayoutDashboard },
-        { href: "/okut", label: "Paket Okut", icon: ScanBarcode },
-        { href: "/paketler", label: "Paketler", icon: Package },
-      ],
-    },
-  ];
+  const gruplar: NavGrup[] = [];
+
+  /*
+   * PLATFORM EN ÜSTTE ve yalnız süper yöneticide. Süper yönetici giriş
+   * yaptığında burada başlar (bkz. (panel)/page.tsx): onun işi bir şirketin
+   * günlük paketleri değil, platformun kendisidir. Şirket ekranlarına
+   * aşağıdaki gruplardan geçer.
+   */
+  if (super_) {
+    gruplar.push({
+      baslik: "Platform",
+      items: [{ href: "/platform", label: "Platform Yönetimi", icon: Landmark, match: "/platform" }],
+    });
+  }
+
+  gruplar.push({
+    baslik: super_ ? "Şirket ekranları" : "Genel",
+    items: [
+      { href: "/", label: "Özet", icon: LayoutDashboard },
+      { href: "/okut", label: "Paket Okut", icon: ScanBarcode },
+      { href: "/paketler", label: "Paketler", icon: Package },
+    ],
+  });
 
   if (admin) {
     gruplar.push({
