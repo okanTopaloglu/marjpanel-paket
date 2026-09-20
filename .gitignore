@@ -56,3 +56,10 @@ mobile/android/local.properties
 mobile/android/keystore.properties
 mobile/android/keystore/
 tsconfig.tsbuildinfo
+
+# graphify bilgi grafiği: yalnız insan/ajan okunur notlar git'te durur.
+# Üretilen büyük çıktılar (graph.json ~4 MB, graph.html ~4 MB, rapor, önbellek)
+# her `--update` ile yeniden üretilir; depoda tutmanın anlamı yok.
+graphify-out/*
+!graphify-out/memory/
+!graphify-out/memory/**
