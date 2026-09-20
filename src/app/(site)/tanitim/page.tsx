@@ -65,7 +65,22 @@ export async function generateMetadata(): Promise<Metadata> {
    * gösterir ve aynı içerik iki adrese bölünürdü.
    */
   const kok = `https://${platformHostu()}/`;
+
+  /*
+   * ARAMA KONSOLU DOĞRULAMASI ortam değişkeninden gelir (bkz.
+   * docs/ARAMA-KONSOLU.md). Tanımsızsa etiket HİÇ BASILMAZ: boş bir
+   * `content` ile etiket basmak doğrulamayı başarısız kılar ve kaynak kodda
+   * anlamsız bir satır bırakır.
+   */
+  const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+  const bing = process.env.BING_SITE_VERIFICATION?.trim();
+  const dogrulama =
+    google || bing
+      ? { verification: { ...(google ? { google } : {}), ...(bing ? { other: { "msvalidate.01": bing } } : {}) } }
+      : {};
+
   return {
+    ...dogrulama,
     /*
      * `absolute`: kök layout'ta `title.template` = "%s | MarjPanel Paket"
      * tanımlı (app/layout.tsx). Düz metin versek başlık "... | MarjPanel

@@ -59,6 +59,13 @@ export async function siteOzeti(gun = 30): Promise<SiteOzeti> {
       .from(siteOlaylari)
       .where(pencere)
       .groupBy(siteOlaylari.tur),
+    /*
+     * GROUP BY / ORDER BY'da SÜTUN SIRASI kullanılır (`group by 1`), ifadenin
+     * kendisi tekrar yazılmaz. Drizzle `sql` parçasını select listesinde ve
+     * group by'da ayrı ayrı derler; ikisi birebir aynı metni üretmediğinde
+     * Postgres "created_at must appear in the GROUP BY clause" der. Sıra
+     * numarası bu ikiliği tamamen ortadan kaldırır.
+     */
     db
       .select({
         gun: sql<string>`${GUN}::text`,
@@ -67,8 +74,8 @@ export async function siteOzeti(gun = 30): Promise<SiteOzeti> {
       })
       .from(siteOlaylari)
       .where(pencere)
-      .groupBy(GUN)
-      .orderBy(GUN),
+      .groupBy(sql`1`)
+      .orderBy(sql`1`),
     db
       .select({ ad: sql<string>`coalesce(${siteOlaylari.yonlendiren}, 'doğrudan')`, adet: sql<number>`count(*)::int` })
       .from(siteOlaylari)
