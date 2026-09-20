@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { panelKapsamiZorunlu } from "@/lib/auth/yetki";
 import { adminMi } from "@/lib/auth/kapsam";
-import { kiraciMarkasi } from "@/lib/kiraci/coz";
 import { SayfaBasligi } from "@/components/panel/sayfa-basligi";
 import {
   aralikOzeti,
@@ -64,16 +62,9 @@ export default async function OzetSayfasi({
   const kapsam = await panelKapsamiZorunlu();
 
   /*
-   * SÜPER YÖNETİCİ PLATFORM YÖNETİMİNE DÜŞER - ama yalnız PLATFORM
-   * adresinde. Bir kiracının adresindeyse (sirket.marjpanel.com) orada
-   * bilerek o şirketin panelini görmek istemiştir; oradan platforma zorla
-   * atmak "şirketi görüntüle" akışını kırardı.
+   * Süper yöneticinin platform yönetimine yönlendirilmesi LAYOUT'TA yapılır
+   * (bkz. (panel)/layout.tsx): buradaki `redirect()` tetiklenmiyordu.
    */
-  if (kapsam.rol === "super_admin") {
-    const marka = await kiraciMarkasi();
-    if (marka.tur === "platform") redirect("/platform");
-  }
-
   const { baslangic: basHam, bitis: bitHam } = await searchParams;
 
   const bugun = gunAnahtari();

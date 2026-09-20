@@ -34,7 +34,7 @@ export function acikYolMu(yol: string): boolean {
  * DIŞA AÇIK: app/robots.ts bu listeden Disallow üretir — yeni bir yönetim
  * öneki eklenince robots.txt'in unutulmaması için tek kaynak burasıdır.
  */
-export const SUPER_ONEKLERI = ["/sirketler", "/mal-kabul", "/hesap-kesimi", "/sarf", "/pano", "/platform", "/api/tani"];
+export const SUPER_ONEKLERI = ["/sirketler", "/mal-kabul", "/hesap-kesimi", "/sarf", "/pano", "/platform"];
 
 /**
  * Çalışanın giremediği yönetim alanları. Çalışanın işi okutmadır; bu
