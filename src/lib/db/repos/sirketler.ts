@@ -1,4 +1,4 @@
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import {
   entegrasyonlar,
@@ -123,6 +123,8 @@ export async function sirketVeYoneticiOlustur(girdi: {
   alanAdi?: string | null;
   ad: string;
   telefon: string;
+  /** Kendi kendine kayıtta zorunlu; süper yönetici elle eklerken olmayabilir. */
+  eposta?: string | null;
   parolaHash: string;
 }): Promise<{ sirketId: string; kullaniciId: string }> {
   try {
@@ -138,6 +140,7 @@ export async function sirketVeYoneticiOlustur(girdi: {
         .values({
           sirketId: sirket.id,
           telefon: girdi.telefon,
+          eposta: girdi.eposta ?? null,
           parolaHash: girdi.parolaHash,
           ad: girdi.ad,
           rol: "admin",
@@ -283,4 +286,44 @@ export async function sevkKesimSaatiAyarla(sirketId: string, saat: number): Prom
     .set({ sevkKesimSaati: deger, updatedAt: new Date() })
     .where(eq(sirketler.id, sirketId));
   return deger;
+}
+
+export interface YeniKayit {
+  kullaniciId: string;
+  sirketId: string;
+  sirketAd: string;
+  alanAdi: string | null;
+  ad: string;
+  telefon: string;
+  eposta: string | null;
+  okutmaSayisi: number;
+  createdAt: Date;
+}
+
+/**
+ * Kendi kendine açılan hesaplar — her şirketin İLK yöneticisi.
+ *
+ * `rol = 'admin'` süzgeci kasıtlı: `/kayit` akışı yalnız admin üretir
+ * (bkz. sirketVeYoneticiOlustur), sonradan eklenen çalışanlar bu listeye
+ * girmez. Süper yöneticinin kendi hesabı da dışarıda kalır.
+ */
+export async function yeniKayitlar(limit = 50): Promise<YeniKayit[]> {
+  const satirlar = await db
+    .select({
+      kullaniciId: kullanicilar.id,
+      sirketId: sirketler.id,
+      sirketAd: sirketler.ad,
+      alanAdi: sirketler.alanAdi,
+      ad: kullanicilar.ad,
+      telefon: kullanicilar.telefon,
+      eposta: kullanicilar.eposta,
+      createdAt: kullanicilar.createdAt,
+      okutmaSayisi: sql<number>`(select count(*)::int from ${paketOkutmalari} where ${paketOkutmalari.sirketId} = ${sirketler.id})`,
+    })
+    .from(kullanicilar)
+    .innerJoin(sirketler, eq(sirketler.id, kullanicilar.sirketId))
+    .where(eq(kullanicilar.rol, "admin"))
+    .orderBy(desc(kullanicilar.createdAt))
+    .limit(limit);
+  return satirlar;
 }

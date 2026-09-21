@@ -83,6 +83,23 @@ export function KayitForm() {
           aria-describedby={alan("telefon") ? "hata-telefon" : undefined}
         />
         {alan("telefon") && <HataSatiri id="hata-telefon" mesaj={alan("telefon")!} />}
+        <p className="text-caption text-muted-foreground">Girişte bu numarayı kullanacaksınız.</p>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="eposta">E-posta</Label>
+        <Input
+          id="eposta"
+          name="eposta"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          placeholder="ornek@firma.com"
+          required
+          aria-invalid={alan("eposta") ? true : undefined}
+          aria-describedby={alan("eposta") ? "hata-eposta" : undefined}
+        />
+        {alan("eposta") && <HataSatiri id="hata-eposta" mesaj={alan("eposta")!} />}
       </div>
 
       <div className="space-y-1.5">

@@ -18,6 +18,7 @@ import {
   Wallet,
   PackageOpen,
   Gauge,
+  Inbox,
   Landmark,
   Share2,
   FileText,
@@ -65,7 +66,10 @@ function gruplariOlustur(ozet: OturumOzeti): NavGrup[] {
   if (super_) {
     gruplar.push({
       baslik: "Platform",
-      items: [{ href: "/platform", label: "Platform Yönetimi", icon: Landmark, match: "/platform" }],
+      items: [
+        { href: "/platform", label: "Platform Yönetimi", icon: Landmark, match: "/platform" },
+        { href: "/talepler", label: "Talepler", icon: Inbox, match: "/talepler" },
+      ],
     });
   }
 

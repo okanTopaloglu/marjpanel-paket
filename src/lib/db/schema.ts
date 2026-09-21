@@ -132,6 +132,16 @@ export const kullanicilar = pgTable(
       .references(() => sirketler.id, { onDelete: "cascade" }),
     /** Kanonik biçim: 5XXXXXXXXX (lib/format/telefon). Girişin tek kimliği. */
     telefon: text("telefon").notNull().unique(),
+    /**
+     * E-posta — İLETİŞİM İÇİN, giriş için değil. Giriş tek kimlikle
+     * (telefon) yapılır; e-postayı ikinci bir giriş yolu yapmak parola
+     * sıfırlama ve hesap sayımı yüzeyini büyütürdü.
+     *
+     * NULL olabilir: mevcut kullanıcılarda yok ve süper yönetici birini elle
+     * eklerken e-posta bilmeyebilir. Kendi kendine kayıtta ZORUNLUDUR.
+     * `unique` DEĞİL: aynı e-postayla iki farklı şirket kaydı olabilir.
+     */
+    eposta: text("eposta"),
     parolaHash: text("parola_hash").notNull(),
     ad: text("ad").notNull(),
     rol: kullaniciRoluEnum("rol").notNull().default("calisan"),
@@ -679,6 +689,61 @@ export const siteOlaylari = pgTable(
 );
 
 export type SiteOlayi = typeof siteOlaylari.$inferSelect;
+
+/* ==================================================================== */
+/* TEKLİF TALEPLERİ (tanıtım sayfası formu)                              */
+/* ==================================================================== */
+
+/** yeni: hiç dokunulmadı · arandi: iletişime geçildi · kazanildi/kaybedildi */
+export const teklifDurumuEnum = pgEnum("teklif_durumu", [
+  "yeni",
+  "arandi",
+  "kazanildi",
+  "kaybedildi",
+]);
+export type TeklifDurumu = (typeof teklifDurumuEnum.enumValues)[number];
+
+/**
+ * TEKLİF TALEBİ — tanıtım sayfasındaki formdan gelir.
+ *
+ * AKIŞ: ziyaretçi önce telefonunu verir, sonra formu doldurur, sonra
+ * WhatsApp'a yönlendirilir. Kayıt WHATSAPP'A GİTMEDEN ÖNCE yazılır: kişi
+ * WhatsApp'ı hiç açmasa bile telefonu ve talebi elimizde kalır. `whatsappAcildi`
+ * yönlendirmenin gerçekleşip gerçekleşmediğini ayırt eder.
+ *
+ * Kişisel veri İÇERİR (ad, telefon, e-posta) — `site_olaylari`nın aksine.
+ * Burada bilerek: kişi bize ulaşmak için kendi isteğiyle bırakıyor.
+ */
+export const teklifTalepleri = pgTable(
+  "teklif_talepleri",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Kanonik 5XXXXXXXXX. İlk adımda alınır, tek zorunlu alan budur. */
+    telefon: text("telefon").notNull(),
+    ad: text("ad"),
+    sirket: text("sirket"),
+    eposta: text("eposta"),
+    /** Aylık tahmini paket adedi - tarife kademesini konuşmak için. */
+    aylikPaket: text("aylik_paket"),
+    /** Hangi pazaryerlerinde satıyor (serbest metin). */
+    pazaryerleri: text("pazaryerleri"),
+    mesaj: text("mesaj"),
+    durum: teklifDurumuEnum("durum").notNull().default("yeni"),
+    /** Formu gönderdikten sonra WhatsApp bağlantısına gerçekten gitti mi. */
+    whatsappAcildi: boolean("whatsapp_acildi").notNull().default(false),
+    /** Süper yöneticinin kendi notu (aramadan sonra). */
+    notlar: text("notlar"),
+    kaynak: text("kaynak"),
+    kampanya: text("kampanya"),
+    ...timestamps,
+  },
+  (t) => [
+    index("teklif_talepleri_zaman_idx").on(t.createdAt.desc()),
+    index("teklif_talepleri_durum_idx").on(t.durum, t.createdAt.desc()),
+  ],
+);
+
+export type TeklifTalebi = typeof teklifTalepleri.$inferSelect;
 
 export type Tarife = typeof tarifeler.$inferSelect;
 export type HesapKesimi = typeof hesapKesimleri.$inferSelect;

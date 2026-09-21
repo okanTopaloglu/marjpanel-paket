@@ -6,6 +6,7 @@ import {
   Boxes,
   CalendarClock,
   CheckCircle2,
+  Gift,
   GitMerge,
   Mail,
   PackageCheck,
@@ -29,6 +30,9 @@ import {
   H1,
   HIZMETLER,
   ILETISIM_EPOSTA,
+  KAMPANYA_AKTIF,
+  KAMPANYA_BASLIK,
+  KAMPANYA_METNI,
   META_ACIKLAMA,
   META_BASLIK,
   OZELLIKLER,
@@ -38,6 +42,7 @@ import {
   TELEFONLAR,
 } from "./icerik";
 import { OlayIzleyici } from "./olay-izleyici";
+import { TeklifFormu } from "./teklif-formu";
 import { yapilandirilmisVeri } from "./yapilandirilmis-veri";
 
 /**
@@ -148,6 +153,12 @@ export default async function TanitimSayfasi() {
             </span>
             <nav className="flex items-center gap-1.5" aria-label="Üst menü">
               <Link
+                href="#teklif"
+                className="hidden min-h-touch items-center rounded-[--radius-kontrol] px-3 text-callout font-medium text-muted-foreground hover:bg-muted hover:text-foreground sm:inline-flex"
+              >
+                Teklif al
+              </Link>
+              <Link
                 href="#sss"
                 className="hidden min-h-touch items-center rounded-[--radius-kontrol] px-3 text-callout font-medium text-muted-foreground hover:bg-muted hover:text-foreground sm:inline-flex"
               >
@@ -175,6 +186,13 @@ export default async function TanitimSayfasi() {
                 {H1}
               </h1>
               <p className="mt-5 max-w-2xl text-body text-muted-foreground">{GIRIS_METNI}</p>
+
+              {KAMPANYA_AKTIF && (
+                <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--vurgu-parlak))] bg-accent px-3 py-1.5 text-footnote font-semibold text-[hsl(var(--vurgu-metin))]">
+                  <Gift className="h-4 w-4" aria-hidden="true" />
+                  {KAMPANYA_BASLIK}
+                </p>
+              )}
 
               <div className="mt-7 flex flex-col gap-2.5 sm:flex-row">
                 <Link
@@ -344,6 +362,32 @@ export default async function TanitimSayfasi() {
             </div>
           </section>
 
+          {/* --------------------------------------------- KAMPANYA + FORM */}
+          <section id="teklif" className="border-t border-border bg-card py-14 sm:py-20">
+            <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:items-start">
+              <div>
+                {KAMPANYA_AKTIF && (
+                  <>
+                    <span className="inline-flex items-center gap-2 rounded-full bg-primary px-3 py-1 text-caption font-bold uppercase tracking-[0.06em] text-primary-foreground">
+                      <Gift className="h-3.5 w-3.5" aria-hidden="true" />
+                      Kampanya
+                    </span>
+                    <h2 className="mt-3 text-title-1 font-bold tracking-[-0.02em]">{KAMPANYA_BASLIK}</h2>
+                    <p className="mt-2 text-body text-muted-foreground">{KAMPANYA_METNI}</p>
+                    <Link
+                      href="/kayit"
+                      className="press mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-[--radius-kontrol] bg-primary px-6 text-[0.9375rem] font-semibold text-primary-foreground hover:bg-primary/90"
+                    >
+                      Ücretsiz hesap açın
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  </>
+                )}
+              </div>
+              <TeklifFormu />
+            </div>
+          </section>
+
           {/* ---------------------------------------------------------- SSS */}
           <section id="sss" className="border-t border-border bg-card py-14 sm:py-20">
             <div className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -389,14 +433,13 @@ export default async function TanitimSayfasi() {
                 </Link>
                 {/* Depo hizmeti teklifi e-postayla alınır; iletişim formu yok,
                     çünkü gelen kutusuna düşen gerçek bir adres daha hızlı. */}
-                <a
-                  href={`mailto:${ILETISIM_EPOSTA}?subject=${encodeURIComponent("Depo hizmeti teklif talebi")}`}
-                  data-olay="teklif"
+                <Link
+                  href="#teklif"
                   className="press inline-flex h-11 items-center justify-center gap-2 rounded-[--radius-kontrol] border border-input bg-card px-6 text-[0.9375rem] font-semibold text-foreground hover:bg-muted"
                 >
                   <Mail className="h-4 w-4" aria-hidden="true" />
                   Teklif isteyin
-                </a>
+                </Link>
               </div>
               {/* Telefon `tel:` ile: mobilde tek dokunuşla arama açılır. */}
               <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-footnote">

@@ -45,6 +45,23 @@ export const TELEFONLAR: readonly Telefon[] = [
   { gorunen: "0532 173 29 78", e164: "+905321732978" },
 ] as const;
 
+/** WhatsApp yönlendirmesi (wa.me biçimi: başında + yok, yalnız rakam). */
+export const WHATSAPP_NUMARASI = "905330556099";
+
+/**
+ * YAZILIM KAMPANYASI — paneli yılbaşına kadar ücretsiz kullanma teklifi.
+ *
+ * TARİH SABİT VE AÇIK YAZILIR. "Yılbaşına kadar" tek başına belirsizdir;
+ * ziyaretçi hangi yılbaşı diye düşünmemeli. Kampanya bitince bu iki sabit
+ * güncellenir ya da `KAMPANYA_AKTIF` false yapılır - metin üç yerde birden
+ * (sayfa, JSON-LD, llms.txt) buradan okunur.
+ */
+export const KAMPANYA_AKTIF = true;
+export const KAMPANYA_BITIS = "31 Aralık 2026";
+export const KAMPANYA_BASLIK = `Panel ${KAMPANYA_BITIS}'ya kadar ücretsiz`;
+export const KAMPANYA_METNI =
+  `Kendi deponuzda kullanacaksanız yazılım ${KAMPANYA_BITIS} tarihine kadar ücretsizdir. Hesabınızı açın, mağazalarınızı bağlayın, ekibinizle okutmaya başlayın. Kart bilgisi istemiyoruz. Depo ve paketleme hizmeti için ayrıca teklif alabilirsiniz.`;
+
 /**
  * DEPO ADRESİ — sayfada görünür, JSON-LD `PostalAddress`inde aynısı geçer.
  *

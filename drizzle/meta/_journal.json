@@ -57,6 +57,13 @@
       "when": 1789917736494,
       "tag": "0007_site_olaylari",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789968055874,
+      "tag": "0008_teklif_ve_eposta",
+      "breakpoints": true
     }
   ]
 }

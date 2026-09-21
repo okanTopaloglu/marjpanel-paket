@@ -31,6 +31,11 @@ const semasi = z
       .min(2, "Ad en az 2 karakter olmalı.")
       .max(60, "Ad en fazla 60 karakter olabilir."),
     telefon: z.string().trim().min(1, "Telefon gerekli."),
+    /*
+     * E-POSTA ZORUNLU (kendi kendine kayıtta): kişiye ulaşmanın ikinci
+     * yolu olmadan hesap açılmamalı. Giriş yine telefonla yapılır.
+     */
+    eposta: z.string().trim().min(1, "E-posta gerekli.").email("Geçerli bir e-posta girin."),
     parola: z.string().min(6, "Parola en az 6 karakter olmalı."),
     parolaTekrar: z.string().min(1, "Parolayı tekrar girin."),
   })
@@ -77,6 +82,7 @@ export async function sirketKaydet(
     sirketAd: formData.get("sirketAd"),
     ad: formData.get("ad"),
     telefon: formData.get("telefon"),
+    eposta: formData.get("eposta"),
     parola: formData.get("parola"),
     parolaTekrar: formData.get("parolaTekrar"),
   });
@@ -107,6 +113,7 @@ export async function sirketKaydet(
       sirketAd: cozum.data.sirketAd,
       ad: cozum.data.ad,
       telefon,
+      eposta: cozum.data.eposta,
       parolaHash,
     });
   } catch (hata) {
