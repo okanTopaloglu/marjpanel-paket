@@ -96,6 +96,6 @@ export const config = {
    *   giriş HTML'ini önbelleğe alır.
    */
   matcher: [
-    "/((?!api/auth|api/cron|api/tani-giris|g/|marka/|_next/static|_next/image|favicon.ico|favicon-32.png|manifest.webmanifest|sw.js|offline.html|apple-touch-icon.png|og.png|robots.txt|sitemap.xml|llms.txt|icons/).*)",
+    "/((?!api/auth|api/cron|g/|marka/|_next/static|_next/image|favicon.ico|favicon-32.png|manifest.webmanifest|sw.js|offline.html|apple-touch-icon.png|og.png|robots.txt|sitemap.xml|llms.txt|icons/).*)",
   ],
 };
